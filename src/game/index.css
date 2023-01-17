@@ -1,0 +1,9 @@
+.hasReady {
+    position: relative;
+    top: -20px;
+}
+
+.noReady {
+    position: unset;
+    top: 0px;
+}

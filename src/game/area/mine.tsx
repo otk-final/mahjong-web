@@ -1,6 +1,7 @@
 import React from "react"
-import { Avatar, Divider, Grid, Stack, Typography } from "@mui/material";
-import { PlayerContext } from "../context";
+import ReactDom from 'react-dom';
+import { Avatar, Button, Divider, Grid, Stack, Typography } from "@mui/material";
+import { Area, PlayerContext } from "../context";
 import { AvatarArea } from "../../component/player";
 import { MjBottomImage, MjImage } from "../../component/tile";
 import { MJRaceFilter } from "../../assets";
@@ -27,27 +28,60 @@ export const RaceArea: React.FC<{ raceCall: any, races: Array<string> }> = ({ ra
         </Grid >)
 }
 
+function resetNoReadyClass(ele: any) {
+    var childs = ele.children
+    for (var i = 0; i < childs.length; i++) {
+        let sub = childs[i]
+        if (sub.className.indexOf('hasReady') === -1) {
+            continue
+        }
+        sub.className = sub.className.replace('hasReady', '')
+    }
+}
 
 export const MineAreaContainer: React.FC<{ playerCtx: PlayerContext, take: number, hands: Array<number>, races: Array<Array<number>> }> = ({ playerCtx, take, hands, races }) => {
 
+    //牌库状态
+    let [mineHands, setMineHands] = React.useState<Array<number>>(hands)
+    let [mineRaces, setRaces] = React.useState<Array<Array<number>>>(races)
+    let [mineTake, setMineTake] = React.useState<number>(take)
+    let handRef = React.createRef<HTMLElement>()
 
     let [readyPuts, setReadyPuts] = React.useState<Array<number>>([])
 
-    // 事件
+    // 出牌就绪事件
     let readyPutCall = (mj: number, ok: boolean) => {
+        let exitReady = readyPuts.slice()
         if (ok) {
-            readyPuts.push(mj)
+            exitReady.push(mj)
         } else {
-            let idx = readyPuts.indexOf(mj)
+            let idx = exitReady.indexOf(mj)
             if (idx !== -1) {
-                readyPuts.splice(idx, 1)
+                exitReady.splice(idx, 1)
             }
         }
-        setReadyPuts(readyPuts)
+        setReadyPuts(exitReady)
     }
 
-    const raceCall = (race: string) => {
+    const raceConfirm = (race: string) => {
 
+        if (readyPuts.length === 0) {
+            return
+        }
+
+        //不管打出任何牌，将最后摸牌添加到手牌中再进行删除重整
+        let currentHands = mineHands.slice()
+        if (take !== -1) {
+            currentHands.push(take)
+        }
+
+        //移除牌
+        readyPuts.forEach(item => {
+            let idx = currentHands.indexOf(item)
+            if (idx !== -1) currentHands.splice(idx, 1)
+        });
+
+        //api
         if (race === 'hu') {
 
         } else if (race === 'peng') {
@@ -56,10 +90,26 @@ export const MineAreaContainer: React.FC<{ playerCtx: PlayerContext, take: numbe
 
         } else if (race === 'chi') {
 
-        } else {
+        } else if (race === 'output') {
 
         }
-        debugger
+
+
+        //重排序
+        currentHands.sort((a, b) => { return a - b })
+
+        //更新页面
+        setMineHands(currentHands)
+
+        //修改css
+        let handElement = ReactDom.findDOMNode(handRef.current)
+        resetNoReadyClass(handElement)
+
+        
+        playerCtx.gameCtx.injectOutput(Area.Top, readyPuts[0])
+
+        //清空就绪牌
+        setReadyPuts([])
     }
 
     let raceOptions = ['peng', 'gang', 'chi', 'hu', 'pass']
@@ -67,7 +117,7 @@ export const MineAreaContainer: React.FC<{ playerCtx: PlayerContext, take: numbe
     return (
         <Grid container direction={'column'} alignItems={'center'} sx={{ height: '100%' }}>
             <Grid item container xs={4} justifyContent={'center'} >
-                <RaceArea raceCall={raceCall} races={raceOptions} />
+                <RaceArea raceCall={raceConfirm} races={raceOptions} />
             </Grid>
             <Grid item container xs justifyContent={'center'} alignItems={'center'} >
                 <Stack
@@ -78,7 +128,7 @@ export const MineAreaContainer: React.FC<{ playerCtx: PlayerContext, take: numbe
                 >
                     <Stack direction={'row'} justifyContent={'center'} alignItems={'center'} spacing={1}>
                         {
-                            Array.from(races).map((raceGroup, idx) => (
+                            Array.from(mineRaces).map((raceGroup, idx) => (
                                 <Stack direction={'row'} justifyContent={'center'} alignItems={'center'} key={idx}>
                                     {
                                         Array.from(raceGroup).map((raceItem, idx) => (
@@ -89,20 +139,28 @@ export const MineAreaContainer: React.FC<{ playerCtx: PlayerContext, take: numbe
                             ))
                         }
                     </Stack>
-                    <Stack direction={'row'} justifyContent={'center'} alignItems={'center'} spacing={0.5}>
+                    <Stack direction={'row'} justifyContent={'center'} alignItems={'center'} spacing={0.5} ref={handRef}>
                         {
-                            Array.from(hands).map((handItem, idx) => (
+                            Array.from(mineHands).map((handItem, idx) => (
                                 <MjBottomImage mj={handItem} key={idx} callPut={readyPutCall} />
                             ))
                         }
                     </Stack>
                     <Stack direction={'row'} justifyContent={'center'} alignItems={'center'}>
-                        <MjBottomImage mj={take} callPut={readyPutCall} />
+                        {mineTake !== -1 && <MjBottomImage mj={mineTake} callPut={readyPutCall} />}
                     </Stack>
                 </Stack>
             </Grid>
             <Grid container item xs={2} justifyContent={'center'} alignItems={'center'}>
-                <AvatarArea user={playerCtx.info} />
+                <Grid item>
+                    <Button variant="contained" color="warning" size="small">我要明牌</Button>
+                </Grid>
+                <Grid item container xs={6} justifyContent={'center'} alignItems={'center'}>
+                    <AvatarArea user={playerCtx.info} />
+                </Grid>
+                <Grid item>
+                    <Button variant="contained" color="primary" size="small">挂机托管</Button>
+                </Grid>
             </Grid>
         </Grid>
     )

@@ -1,6 +1,8 @@
 import * as React from 'react';
+import ReactDom from 'react-dom';
 import { Badge, Box } from "@mui/material"
 import { MJImageFilter } from '../assets';
+// import { removeReadyCss, setReadyCss } from './dom';
 
 export const MjImageHeight = {
     center: '55px',
@@ -20,29 +22,28 @@ export interface MjExtra {
 
 export const MjBottomImage: React.FC<{ mj: number, callPut?: any, extra?: MjExtra }> = ({ mj, callPut, extra }) => {
     // debugger
-    const [readyOutLayout, setReadyOutLayout] = React.useState<{ pos: string, top: string }>({ pos: 'unset', top: '0px' })
+    const [ready, setReady] = React.useState<boolean>(false)
     const readyOutClick = (e: any) => {
         if (!callPut) {
             return
         }
-        if (readyOutLayout.pos === 'unset') {
-            setReadyOutLayout({ pos: 'relative', top: '-20px' })
-        } else {
-            setReadyOutLayout({ pos: 'unset', top: '0px' })
-        }
+        setReady(!ready)
         //回调
-        callPut!(mj, readyOutLayout.pos === 'unset')
+        return callPut!(mj, !ready)
     }
 
     return (
-        <Box onClick={(e) => readyOutClick(e)} sx={{ position: readyOutLayout.pos, top: readyOutLayout.top }}>
+        <Box onClick={(e) => readyOutClick(e)} className={ready ? 'hasReady' : 'noReady'}>
             <MjImage mj={mj} direction={'bottom'} height='75px' extra={extra} />
         </Box >
     )
 }
 
 
-export const MjImage: React.FC<{ mj: number, direction: string, height?: string, lasted?: false, extra?: MjExtra }> = ({ mj, direction, height = '45px', lasted = false, extra }) => {
+
+
+
+export const MjImage: React.FC<{ mj: number, direction: string, height?: string, lasted?: boolean, extra?: MjExtra }> = ({ mj, direction, height = '45px', lasted = false, extra }) => {
 
     let rotate = '', defaultHeight = '35px'
     if (direction === 'left') {
@@ -72,5 +73,6 @@ export const MjImage: React.FC<{ mj: number, direction: string, height?: string,
             </Badge>
         )
     }
-    return (<img src={MJImageFilter(mj)} alt='' style={{ height: defaultHeight, transform: rotate }} />)
+
+    return (<img src={MJImageFilter(mj)} alt='' style={{ height: defaultHeight, transform: rotate, border: lasted ? '3px solid #da5151' : ''}} />)
 }

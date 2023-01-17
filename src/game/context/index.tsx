@@ -112,6 +112,10 @@ export class PlayerContext {
     }
 
 
+    doPut(action: string, tiles: Array<number>) {
+        this.injectPut(tiles)
+    }
+
     removeLastedOutput(tile: number) {
 
     }
@@ -140,26 +144,25 @@ export class PlayerContext {
 
     getHand(): Array<number> {
         if (this.area !== Area.Bottom) {
-            return [0,0,0,0,0]
+            return [0, 0, 0, 0, 0]
         }
-        return [2, 3, 4]
+        return [2, 3, 4, 12, 35, 25]
     }
     getTake(): number {
-        return 23
+        return -1
     }
     getRaces(): Array<Array<number>> {
         if (this.area !== Area.Bottom) {
             return [[1, 2, 3], [11, 12, 13], [21, 22, 23], [17, 18, 19]]
         }
         return []
-
     }
     getDisplay(): boolean {
         return false
     }
 
     getOuts(): Array<number> {
-        return [1,2,3,12,3]
+        return [1, 2, 3, 12, 3]
     }
 }
 

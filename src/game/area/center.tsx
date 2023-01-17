@@ -18,24 +18,15 @@ interface RaceEffect {
     Event: string
 }
 
-interface Output {
-    Left: Array<number>,
-    Right: Array<number>,
-    Top: Array<number>
-    Bottom: Array<number>,
-    Lasted: Area,
-}
-
 export const CenterAreaContainer: React.FC<{ roomCtx: RoomContext, gameCtx: GameContext }> = ({ roomCtx, gameCtx }) => {
 
     //已出牌
-    let [output, setOutput] = useState<Output>({
-        Left: gameCtx.Lefter!.getOuts(),
-        Right: gameCtx.Righter!.getOuts(),
-        Top: gameCtx.Toper!.getOuts(),
-        Bottom: gameCtx.Bottomer!.getOuts(),
-        Lasted: Area.Nil,
-    })
+    let [leftOut, setLeftOut] = useState<Array<number>>(gameCtx.Lefter!.getOuts())
+    let [rightOut, setRightOut] = useState<Array<number>>(gameCtx.Righter!.getOuts())
+    let [topOut, setTopOut] = useState<Array<number>>(gameCtx.Toper!.getOuts())
+    let [bottomOut, setBottomOut] = useState<Array<number>>(gameCtx.Bottomer!.getOuts())
+    let [lastedArea, setLastedArea] = useState<Area | undefined>()
+
 
     //当前回合
     let [turn, setTurn] = useState<string>('')
@@ -54,7 +45,7 @@ export const CenterAreaContainer: React.FC<{ roomCtx: RoomContext, gameCtx: Game
 
     gameCtx.onRaceEffect((newEvent: RaceEffect) => {
         //只有胡牌可以多方渲染显示
-        let notHupai = raceEffects.length === 1 && raceEffects[0].Event !== 'h'
+        let notHupai = raceEffects.length === 1 && raceEffects[0].Event !== 'hu'
         if (notHupai) {
             raceEffects.pop()
         }
@@ -63,20 +54,29 @@ export const CenterAreaContainer: React.FC<{ roomCtx: RoomContext, gameCtx: Game
     })
 
     gameCtx.onOutput((who: Area, tile: number) => {
-        output.Lasted = who
         if (who === Area.Left) {
-            output.Left.push(tile)
+            leftOut.push(tile)
+            setLeftOut(leftOut.slice())
         } else if (who === Area.Right) {
-            output.Right.push(tile)
+            rightOut.push(tile)
+            setRightOut(rightOut.slice())
         } else if (who === Area.Top) {
-            output.Top.push(tile)
+            topOut.push(tile)
+            setTopOut(topOut.slice())
         } else if (who === Area.Bottom) {
-            output.Bottom.push(tile)
+            bottomOut.push(tile)
+            setBottomOut(bottomOut.slice())
         }
-        setOutput(output)
+        setLastedArea(who)
     })
 
 
+    const isLastedOuput = (direction: Area, arr: Array<number>, currIdx: number): boolean => {
+        if (direction !== lastedArea) {
+            return false
+        }
+        return currIdx === arr.length - 1
+    }
 
     return (
         <Stack sx={{ height: '100%', width: '100%', border: '1px dotted black', borderRadius: '20px', position: 'relative' }} justifyContent={'center'} alignItems={'center'}>
@@ -91,9 +91,9 @@ export const CenterAreaContainer: React.FC<{ roomCtx: RoomContext, gameCtx: Game
                     height: minPx
                 }}>
                 {
-                    Array.from(output.Top).map((outItem, idx) => (
+                    Array.from(topOut).map((outItem, idx) => (
                         <Grid item key={idx}>
-                            <MjImage mj={outItem} direction={'top'} height={MjImageHeight.center} />
+                            <MjImage mj={outItem} direction={'top'} height={MjImageHeight.center} lasted={isLastedOuput(Area.Top, topOut, idx)} />
                         </Grid>
                     ))
                 }
@@ -109,9 +109,9 @@ export const CenterAreaContainer: React.FC<{ roomCtx: RoomContext, gameCtx: Game
                     padding: '5px'
                 }}>
                 {
-                    Array.from(output.Left).map((outItem, idx) => (
+                    Array.from(leftOut).map((outItem, idx) => (
                         <Grid item sx={{ height: MjImageHeight.centerRotate }} key={idx} >
-                            <MjImage mj={outItem} direction={'left'} height={MjImageHeight.center} />
+                            <MjImage mj={outItem} direction={'left'} height={MjImageHeight.center} lasted={isLastedOuput(Area.Left, leftOut, idx)} />
                         </Grid>
                     ))
                 }
@@ -126,9 +126,9 @@ export const CenterAreaContainer: React.FC<{ roomCtx: RoomContext, gameCtx: Game
                     height: maxPx
                 }}>
                 {
-                    Array.from(output.Right).map((outItem, idx) => (
+                    Array.from(rightOut).map((outItem, idx) => (
                         <Grid item sx={{ height: MjImageHeight.centerRotate }} key={idx}>
-                            <MjImage mj={outItem} direction={'right'} height={MjImageHeight.center} />
+                            <MjImage mj={outItem} direction={'right'} height={MjImageHeight.center} lasted={isLastedOuput(Area.Right, rightOut, idx)} />
                         </Grid>
                     ))
                 }
@@ -146,9 +146,9 @@ export const CenterAreaContainer: React.FC<{ roomCtx: RoomContext, gameCtx: Game
                 }}>
 
                 {
-                    Array.from(output.Bottom).map((outItem, idx) => (
+                    Array.from(bottomOut).map((outItem, idx) => (
                         <Grid item xs={'auto'} key={idx} >
-                            <MjImage mj={outItem} direction={'bottom'} height={MjImageHeight.center} />
+                            <MjImage mj={outItem} direction={'bottom'} height={MjImageHeight.center} lasted={isLastedOuput(Area.Bottom, bottomOut, idx)} />
                         </Grid>
                     ))
                 }

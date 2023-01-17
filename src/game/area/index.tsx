@@ -38,33 +38,6 @@ const JoinContainer: React.FC<{ roomCtx: RoomContext, gameCtx: GameContext, play
         setTake(tile)
     })
 
-    playerCtx.onPut((tile: number) => {
-        if (take !== -1) {
-            hands.push(take)
-        }
-        //不管打出任何牌，将最后摸牌添加到手牌中再进行删除重整
-        setTake(-1)
-
-        //删除
-        let idx = hands.indexOf(tile)
-        hands.splice(idx, 1)
-
-        //重排序
-        hands.sort((a, b) => { return a - b })
-        setHands(hands)
-    })
-
-    playerCtx.onRace((race: Array<number>, who: number, tile: number) => {
-
-        //组合
-        race.push(tile)
-        race.sort((a, b) => { return a - b })
-
-        races.push(race)
-        let whoCtx = gameCtx.Lefter;
-        whoCtx!.removeLastedOutput(tile)
-    })
-
     if (playerCtx.area === Area.Left) {
         return <LeftPlayer playerCtx={playerCtx} take={take} hands={hands} races={races} />
     }
@@ -102,7 +75,7 @@ const LeftPlayer: React.FC<{ playerCtx: PlayerContext, take: number, hands: Arra
                         </Stack>
                         {/* take */}
                         <Stack>
-                            <MjImage mj={take} direction={'left'} />
+                            {take !== -1 && <MjImage mj={take} direction={'left'} />}
                         </Stack>
                     </Stack>
                 </Grid>
@@ -164,7 +137,7 @@ const RightPlayer: React.FC<{ playerCtx: PlayerContext, take: number, hands: Arr
                     >
                         {/* take */}
                         <Stack justifyContent={'center'} alignItems={'center'}>
-                            <MjImage mj={take} direction={'right'} />
+                            {take !== -1 && <MjImage mj={take} direction={'right'} />}
                         </Stack>
                         {/* hands */}
                         <Stack spacing={0.1} >
@@ -195,7 +168,7 @@ const TopPlayer: React.FC<{ playerCtx: PlayerContext, take: number, hands: Array
             >
                 {/* take */}
                 <Stack direction={'row'}>
-                    <MjImage mj={take} direction={'top'} />
+                    {take !== -1 && <MjImage mj={take} direction={'top'} />}
                 </Stack>
                 {/* hands */}
                 <Stack direction={'row'} spacing={0.5} >

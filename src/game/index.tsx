@@ -1,4 +1,5 @@
 import * as React from 'react';
+import './index.css';
 import { Grid } from "@mui/material";
 import { FindArea, GameContext, RoomContext } from './context';
 import { NetConnect } from './context/websocket';
