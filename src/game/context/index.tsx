@@ -66,24 +66,13 @@ export class GameContext {
         }
     }
 
-    injectTurnChange: any
-    onTurnChange(fn: any) {
-        this.injectTurnChange = fn
+    centerRef: any
+    bindCenterRef(ref: any) {
+        this.centerRef = ref
     }
-
-    injectRemainedChange: any
-    onRemainedChange(fn: any) {
-        this.injectRemainedChange = fn
-    }
-
-    injectRaceEffect: any
-    onRaceEffect(fn: any) {
-        this.injectRaceEffect = fn
-    }
-
-    injectOutput: any
-    onOutput(fn: any) {
-        this.injectOutput = fn
+    effectRef: any
+    bindEffectRef(ref: any) {
+        this.effectRef = ref
     }
 
     //开始游戏

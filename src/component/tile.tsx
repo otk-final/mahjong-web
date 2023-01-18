@@ -2,6 +2,7 @@ import * as React from 'react';
 import ReactDom from 'react-dom';
 import { Badge, Box } from "@mui/material"
 import { MJImageFilter } from '../assets';
+import { Area } from '../game/context';
 // import { removeReadyCss, setReadyCss } from './dom';
 
 export const MjImageHeight = {
@@ -43,7 +44,7 @@ export const MjBottomImage: React.FC<{ mj: number, callPut?: any, extra?: MjExtr
 
 
 
-export const MjImage: React.FC<{ mj: number, direction: string, height?: string, lasted?: boolean, extra?: MjExtra }> = ({ mj, direction, height = '45px', lasted = false, extra }) => {
+export const MjImage: React.FC<{ mj: number, direction: Area | string, height?: string, lasted?: boolean, extra?: MjExtra }> = ({ mj, direction, height = '45px', lasted = false, extra }) => {
 
     let rotate = '', defaultHeight = '35px'
     if (direction === 'left') {
@@ -74,5 +75,5 @@ export const MjImage: React.FC<{ mj: number, direction: string, height?: string,
         )
     }
 
-    return (<img src={MJImageFilter(mj)} alt='' style={{ height: defaultHeight, transform: rotate, border: lasted ? '3px solid #da5151' : ''}} />)
+    return (<img src={MJImageFilter(mj)} alt='' style={{ height: defaultHeight, transform: rotate, border: lasted ? '3px solid #da5151' : '' }} />)
 }

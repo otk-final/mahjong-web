@@ -53,7 +53,7 @@ export const GameMainArea: React.FC<{ roomId: string, round: number }> = ({ room
         }]
     }
 
-
+    let centerRef = React.useRef()
 
 
 
@@ -111,7 +111,7 @@ export const GameMainArea: React.FC<{ roomId: string, round: number }> = ({ room
                         {
                             Array.from(mjExtras).map((mjItem, idx) => (
                                 <Grid item key={idx}>
-                                    <MjBottomImage mj={mjItem.tile} extra={mjItem}  />
+                                    <MjBottomImage mj={mjItem.tile} extra={mjItem} />
                                 </Grid>
                             ))
                         }
@@ -123,7 +123,7 @@ export const GameMainArea: React.FC<{ roomId: string, round: number }> = ({ room
                             <PlayerContainer roomCtx={roomCtx} gameCtx={gameCtx} playerCtx={lefter} direction='left' />
                         </Grid>
                         <Grid item xs={7} justifyContent={"center"} alignItems={'center'}>
-                            <CenterAreaContainer roomCtx={roomCtx} gameCtx={gameCtx} />
+                            <CenterAreaContainer roomCtx={roomCtx} gameCtx={gameCtx} ref={centerRef} />
                         </Grid>
                         <Grid item xs={2.5}>
                             <PlayerContainer roomCtx={roomCtx} gameCtx={gameCtx} playerCtx={righter} direction='right' />

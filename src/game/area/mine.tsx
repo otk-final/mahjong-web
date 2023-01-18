@@ -37,7 +37,7 @@ export const RaceArea = forwardRef((props: { submitCall: any, options: Array<str
 function resetNoReadyClass(ele: any) {
     var childs = ele.children
     for (var i = 0; i < childs.length; i++) {
-        let sub:any = childs[i]
+        let sub: any = childs[i]
         if (sub.className.indexOf('hasReady') === -1) {
             continue
         }
@@ -76,7 +76,7 @@ export const TileArea = forwardRef((props: { playerCtx: PlayerContext, take: num
         },
         resetReady: () => {
             //修改css
-            let handElement:any = ReactDom.findDOMNode(handRef.current)
+            let handElement: any = ReactDom.findDOMNode(handRef.current)
             var childs = handElement.children
             for (var i = 0; i < childs.length; i++) {
                 let sub: any = childs[i]
@@ -162,7 +162,7 @@ export const MineAreaContainer: React.FC<{ playerCtx: PlayerContext, take: numbe
 
     let submitConfirm = (race: string) => {
 
-        let raceIns: any = raceRef.current 
+        let raceIns: any = raceRef.current
         let tileIns: any = tileRef.current
 
         //跳过直接摸牌
@@ -182,15 +182,21 @@ export const MineAreaContainer: React.FC<{ playerCtx: PlayerContext, take: numbe
             if (idx !== -1) hands.splice(idx, 1)
         });
 
+        //show effect
+        playerCtx.gameCtx.effectRef.current.append(Area.Left, race)
 
-        playerCtx.gameCtx.injectOutput(Area.Bottom, ready[0])
+        //output
+        playerCtx.gameCtx.centerRef.current.outputOne(Area.Left, ready[0])
 
         //set value and clear css
         tileIns.resetHands(hands)
         tileIns.resetReady()
-        raceIns.resetOptions(["hu","pass"])
+        raceIns.resetOptions(["hu", "pass"])
     }
 
+    function showEffect() {
+
+    }
 
     function ignoreAndTake(tileIns: any) {
         tileIns.resetTake(24)
