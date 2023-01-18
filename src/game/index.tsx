@@ -44,13 +44,11 @@ export const GameMainArea: React.FC<{ roomId: string, round: number }> = ({ room
         members: members,
         turnTime: 30,
         turnIdx: -1,
-        mjExtra: [{
+        mjExtras: [{
             text: '朝',
-            color: 'secondary',
             tile: 2
         }, {
             text: '鬼',
-            color: 'error',
             tile: 45
         }]
     }
@@ -62,7 +60,7 @@ export const GameMainArea: React.FC<{ roomId: string, round: number }> = ({ room
     //当局上下文
     let roomCtx = new RoomContext(roomId, round)
     let defaultGameCtx = new GameContext(roomCtx)
-
+    defaultGameCtx.setMjExtras(resp.mjExtras)
 
     resp.members.forEach((item: any) => {
         let mainArea = FindArea(resp.mine.pIdx, item.pIdx)
@@ -73,7 +71,7 @@ export const GameMainArea: React.FC<{ roomId: string, round: number }> = ({ room
     //状态
     let [netOk, setNetOk] = React.useState(false)
     let [joined, setJoined] = React.useState({ left: false, right: false, top: false, bottom: false })
-    let [mjExtra, setMjExtra] = React.useState<Array<MjExtra>>(resp.mjExtra)
+    let [mjExtras, setMjExtras] = React.useState<Array<MjExtra>>(resp.mjExtras)
     let [gameCtx, setGameCtx] = React.useState(defaultGameCtx)
 
 
@@ -111,7 +109,7 @@ export const GameMainArea: React.FC<{ roomId: string, round: number }> = ({ room
 
                     <Grid item container xs={2} justifyContent={'center'} alignItems={'center'} spacing={2}>
                         {
-                            Array.from(mjExtra).map((mjItem, idx) => (
+                            Array.from(mjExtras).map((mjItem, idx) => (
                                 <Grid item key={idx}>
                                     <MjBottomImage mj={mjItem.tile} extra={mjItem}  />
                                 </Grid>

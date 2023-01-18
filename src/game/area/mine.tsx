@@ -1,4 +1,4 @@
-import React from "react"
+import React, { Ref, forwardRef, useRef, useState } from "react"
 import ReactDom from 'react-dom';
 import { Avatar, Button, Divider, Grid, Stack, Typography } from "@mui/material";
 import { Area, PlayerContext } from "../context";
@@ -7,31 +7,37 @@ import { MjBottomImage, MjImage } from "../../component/tile";
 import { MJRaceFilter } from "../../assets";
 
 
-export const RaceArea: React.FC<{ raceCall: any, races: Array<string> }> = ({ raceCall, races }) => {
+export const RaceArea = forwardRef((props: { submitCall: any, options: Array<string> }, ref: Ref<any>) => {
 
-    let [raceOptions, setRaceOptions] = React.useState<Array<string>>(races)
-    const raceClick = (event: any, race: string) => {
-        raceCall(race)
+    let [stateOptions, setOptions] = React.useState<Array<string>>(props.options)
+    const submitClick = (race: string) => {
+        return props.submitCall(race)
     }
+
+    React.useImperativeHandle(ref, () => ({
+        resetOptions: (actions: Array<string>) => {
+            setOptions(actions)
+        }
+    }))
 
     return (
         <Grid container justifyContent={'center'} alignItems={'center'} spacing={2}>
             {
-                Array.from(raceOptions).map((raceOps, idx) => (
+                Array.from(stateOptions).map((raceOps, idx) => (
                     <Grid item key={idx}>
                         <Avatar src={MJRaceFilter(raceOps)}
                             sx={{ minHeight: raceOps === 'hu' ? '60px' : 'auto', minWidth: raceOps === 'hu' ? '60px' : 'auto' }}
-                            onClick={(e) => raceClick(e, raceOps)}></Avatar>
+                            onClick={(e) => submitClick(raceOps)}></Avatar>
                     </Grid>
                 ))
             }
         </Grid >)
-}
+})
 
 function resetNoReadyClass(ele: any) {
     var childs = ele.children
     for (var i = 0; i < childs.length; i++) {
-        let sub = childs[i]
+        let sub:any = childs[i]
         if (sub.className.indexOf('hasReady') === -1) {
             continue
         }
@@ -39,19 +45,18 @@ function resetNoReadyClass(ele: any) {
     }
 }
 
-export const MineAreaContainer: React.FC<{ playerCtx: PlayerContext, take: number, hands: Array<number>, races: Array<Array<number>> }> = ({ playerCtx, take, hands, races }) => {
+export const TileArea = forwardRef((props: { playerCtx: PlayerContext, take: number, hands: Array<number>, races: Array<Array<number>> }, ref: Ref<any>) => {
 
-    //牌库状态
-    let [mineHands, setMineHands] = React.useState<Array<number>>(hands)
-    let [mineRaces, setRaces] = React.useState<Array<Array<number>>>(races)
-    let [mineTake, setMineTake] = React.useState<number>(take)
-    let handRef = React.createRef<HTMLElement>()
 
-    let [readyPuts, setReadyPuts] = React.useState<Array<number>>([])
 
-    // 出牌就绪事件
-    let readyPutCall = (mj: number, ok: boolean) => {
-        let exitReady = readyPuts.slice()
+    let [stateReady, setReady] = React.useState<Array<number>>([])
+    let [stateTake, setTake] = useState<number>(props.take)
+    let [stateHands, setHands] = useState<Array<number>>(props.hands)
+    let [stateRaces, setRaces] = React.useState<Array<Array<number>>>(props.races)
+
+    // 选择
+    let selectReady = (mj: number, ok: boolean) => {
+        let exitReady = stateReady.slice()
         if (ok) {
             exitReady.push(mj)
         } else {
@@ -60,96 +65,144 @@ export const MineAreaContainer: React.FC<{ playerCtx: PlayerContext, take: numbe
                 exitReady.splice(idx, 1)
             }
         }
-        setReadyPuts(exitReady)
+        setReady(exitReady)
     }
 
-    const raceConfirm = (race: string) => {
+    let handRef = React.createRef<HTMLElement>()
+    //暴露给父组件使用
+    React.useImperativeHandle(ref, () => ({
+        getReady: (): Array<number> => {
+            return stateReady.slice()
+        },
+        resetReady: () => {
+            //修改css
+            let handElement:any = ReactDom.findDOMNode(handRef.current)
+            var childs = handElement.children
+            for (var i = 0; i < childs.length; i++) {
+                let sub: any = childs[i]
+                if (sub.className.indexOf('hasReady') === -1) {
+                    continue
+                }
+                sub.className = sub.className.replace('hasReady', '')
+            }
+            //清空数据
+            setReady([])
+        },
+        getHands: (): Array<number> => {
+            let nowHands = stateHands.slice()
+            if (stateTake !== -1) {
+                nowHands.push(stateTake)
+            }
+            return nowHands
+        },
+        resetHands: (tiles: Array<number>) => {
+            tiles.sort((a, b) => a - b)
+            setHands(tiles)
+            setTake(-1)
+        },
+        resetTake: (tile: number) => {
+            setTake(tile)
+        },
+        mergeTake: () => {
+            let nowHands = stateHands.slice()
+            if (stateTake !== -1) {
+                nowHands.push(stateTake)
+                setTake(-1)
+            }
+            setHands(nowHands)
+        },
+        appendRace: (race: Array<number>) => {
+            stateRaces.push(race)
+            setRaces(stateRaces)
+        },
+    }))
 
-        if (readyPuts.length === 0) {
+    return (
+        <Stack
+            direction={'row'}
+            divider={<Divider orientation="vertical" flexItem />}
+            alignItems="center"
+            spacing={2}
+        >
+            <Stack direction={'row'} justifyContent={'center'} alignItems={'center'} spacing={1}>
+                {
+                    Array.from(stateRaces).map((raceGroup, idx) => (
+                        <Stack direction={'row'} justifyContent={'center'} alignItems={'center'} key={idx}>
+                            {
+                                Array.from(raceGroup).map((raceItem, idx) => (
+                                    <MjImage direction={'bottom'} height={'45px'} mj={raceItem} key={idx} extra={props.playerCtx.gameCtx.getMjExtra(raceItem)} />
+                                ))
+                            }
+                        </Stack>
+                    ))
+                }
+            </Stack>
+            <Stack direction={'row'} justifyContent={'center'} alignItems={'center'} spacing={0.5} ref={handRef}>
+                {
+                    Array.from(stateHands).map((handItem, idx) => (
+                        <MjBottomImage mj={handItem} key={idx} callPut={selectReady} extra={props.playerCtx.gameCtx.getMjExtra(handItem)} />
+                    ))
+                }
+            </Stack>
+            <Stack direction={'row'} justifyContent={'center'} alignItems={'center'}>
+                {stateTake !== -1 && <MjBottomImage mj={stateTake} callPut={selectReady} extra={props.playerCtx.gameCtx.getMjExtra(stateTake)} />}
+            </Stack>
+        </Stack>
+    )
+})
+
+
+export const MineAreaContainer: React.FC<{ playerCtx: PlayerContext, take: number, hands: Array<number>, races: Array<Array<number>> }> = ({ playerCtx, take, hands, races }) => {
+
+    console.info('MineAreaContainer')
+    //牌库状态
+    let [mineOptions, setOptions] = React.useState<Array<string>>(['peng', 'gang', 'chi', 'hu', 'pass'])
+    let tileRef = React.useRef(null)
+    let raceRef = React.useRef(null)
+
+    let submitConfirm = (race: string) => {
+
+        let raceIns: any = raceRef.current 
+        let tileIns: any = tileRef.current
+
+        //跳过直接摸牌
+        if (race === 'pass') {
+            return ignoreAndTake(tileIns)
+        }
+
+        let ready = tileIns.getReady()
+        if (ready.length === 0) {
             return
         }
-
-        //不管打出任何牌，将最后摸牌添加到手牌中再进行删除重整
-        let currentHands = mineHands.slice()
-        if (take !== -1) {
-            currentHands.push(take)
-        }
-
+        //有可能 take hand 同时提交 获取全量
+        let hands = tileIns.getHands()
         //移除牌
-        readyPuts.forEach(item => {
-            let idx = currentHands.indexOf(item)
-            if (idx !== -1) currentHands.splice(idx, 1)
+        ready.forEach((item: number) => {
+            let idx = hands.indexOf(item)
+            if (idx !== -1) hands.splice(idx, 1)
         });
 
-        //api
-        if (race === 'hu') {
 
-        } else if (race === 'peng') {
+        playerCtx.gameCtx.injectOutput(Area.Bottom, ready[0])
 
-        } else if (race === 'gang') {
-
-        } else if (race === 'chi') {
-
-        } else if (race === 'output') {
-
-        }
-
-
-        //重排序
-        currentHands.sort((a, b) => { return a - b })
-
-        //更新页面
-        setMineHands(currentHands)
-
-        //修改css
-        let handElement = ReactDom.findDOMNode(handRef.current)
-        resetNoReadyClass(handElement)
-
-        
-        playerCtx.gameCtx.injectOutput(Area.Top, readyPuts[0])
-
-        //清空就绪牌
-        setReadyPuts([])
+        //set value and clear css
+        tileIns.resetHands(hands)
+        tileIns.resetReady()
+        raceIns.resetOptions(["hu","pass"])
     }
 
-    let raceOptions = ['peng', 'gang', 'chi', 'hu', 'pass']
+
+    function ignoreAndTake(tileIns: any) {
+        tileIns.resetTake(24)
+    }
 
     return (
         <Grid container direction={'column'} alignItems={'center'} sx={{ height: '100%' }}>
             <Grid item container xs={4} justifyContent={'center'} >
-                <RaceArea raceCall={raceConfirm} races={raceOptions} />
+                <RaceArea submitCall={(race: string) => { submitConfirm(race) }} options={mineOptions} ref={raceRef} />
             </Grid>
             <Grid item container xs justifyContent={'center'} alignItems={'center'} >
-                <Stack
-                    direction={'row'}
-                    divider={<Divider orientation="vertical" flexItem />}
-                    alignItems="center"
-                    spacing={2}
-                >
-                    <Stack direction={'row'} justifyContent={'center'} alignItems={'center'} spacing={1}>
-                        {
-                            Array.from(mineRaces).map((raceGroup, idx) => (
-                                <Stack direction={'row'} justifyContent={'center'} alignItems={'center'} key={idx}>
-                                    {
-                                        Array.from(raceGroup).map((raceItem, idx) => (
-                                            <MjImage direction={'bottom'} height={'45px'} mj={raceItem} key={idx} />
-                                        ))
-                                    }
-                                </Stack>
-                            ))
-                        }
-                    </Stack>
-                    <Stack direction={'row'} justifyContent={'center'} alignItems={'center'} spacing={0.5} ref={handRef}>
-                        {
-                            Array.from(mineHands).map((handItem, idx) => (
-                                <MjBottomImage mj={handItem} key={idx} callPut={readyPutCall} />
-                            ))
-                        }
-                    </Stack>
-                    <Stack direction={'row'} justifyContent={'center'} alignItems={'center'}>
-                        {mineTake !== -1 && <MjBottomImage mj={mineTake} callPut={readyPutCall} />}
-                    </Stack>
-                </Stack>
+                <TileArea playerCtx={playerCtx} take={take} hands={hands} races={races} ref={tileRef} />
             </Grid>
             <Grid container item xs={2} justifyContent={'center'} alignItems={'center'}>
                 <Grid item>

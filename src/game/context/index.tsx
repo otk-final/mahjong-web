@@ -1,4 +1,5 @@
 import { Player } from '../../component/player';
+import { MjExtra } from '../../component/tile';
 
 
 
@@ -94,6 +95,18 @@ export class GameContext {
     finish() {
 
     }
+
+    mjExtras: Array<MjExtra> = []
+    setMjExtras(extras: Array<MjExtra>) {
+        this.mjExtras = extras
+    }
+
+    getMjExtra(mj: number): MjExtra | undefined {
+        let find = this.mjExtras.filter((item: any) => {
+            return item.tile === mj
+        })
+        return find && find.length === 1 ? find[0] : undefined
+    }
 }
 
 // 玩家
@@ -146,7 +159,7 @@ export class PlayerContext {
         if (this.area !== Area.Bottom) {
             return [0, 0, 0, 0, 0]
         }
-        return [2, 3, 4, 12, 35, 25]
+        return [2, 45, 4, 12, 35, 25]
     }
     getTake(): number {
         return -1
