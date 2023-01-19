@@ -1,5 +1,5 @@
 
-import { GameContext } from '.'
+import { GameEventBus } from '.'
 
 export class NetConnect {
 
@@ -7,9 +7,9 @@ export class NetConnect {
     setNetOk: any
     healthInterval: any
 
-    roomCtx: GameContext
+    roomCtx: GameEventBus
 
-    constructor(roomCtx: GameContext, setNetOk: any) {
+    constructor(roomCtx: GameEventBus, setNetOk: any) {
         this.roomCtx = roomCtx
         this.setNetOk = setNetOk
     }

@@ -1,59 +1,51 @@
-import React, { useEffect, useState } from "react"
-import { Area, GameContext, PlayerContext, RoomContext } from '../context';
+import React, { useState } from "react"
+import { PlayerReducer } from '../context';
 import { Box, Divider, Grid, Stack } from "@mui/material";
 import { MjImage, MjImageHeight } from "../../component/tile";
 import { AvatarArea } from "../../component/player";
 import { MineAreaContainer } from "./mine";
+import { Area } from "../context/util";
 
-const EmptyContainer: React.FC<{ roomCtx: RoomContext, gameCtx: GameContext, direction: string }> = ({ direction }) => {
+const EmptyContainer: React.FC<{ direction: string }> = ({ direction }) => {
     return (<div>{direction}</div>)
 }
 
 
-export const PlayerContainer: React.FC<{ roomCtx: RoomContext, gameCtx: GameContext, playerCtx?: PlayerContext, direction: string }> = ({ roomCtx, gameCtx, playerCtx, direction }) => {
-    if (!playerCtx) {
-        return <EmptyContainer roomCtx={roomCtx} gameCtx={gameCtx} direction={direction} />
+export const PlayerContainer: React.FC<{ playerRedux: PlayerReducer, direction: string }> = ({ playerRedux, direction }) => {
+    if (!playerRedux) {
+        return <EmptyContainer direction={direction} />
     }
-    return <JoinContainer roomCtx={roomCtx} gameCtx={gameCtx} playerCtx={playerCtx!} />
+    return <JoinContainer playerRedux={playerRedux!} />
 }
 
 
 
 
-const JoinContainer: React.FC<{ roomCtx: RoomContext, gameCtx: GameContext, playerCtx: PlayerContext }> = ({ roomCtx, gameCtx, playerCtx }) => {
+const JoinContainer: React.FC<{ playerRedux: PlayerReducer }> = ({ playerRedux }) => {
 
 
-    let [hands, setHands] = useState<Array<number>>(playerCtx.getHand())
-    let [races, setRaces] = useState<Array<Array<number>>>(playerCtx.getRaces())
-    let [take, setTake] = useState<number>(playerCtx.getTake())
-    let [display, setDisplay] = useState<boolean>(playerCtx.getDisplay())
+    let [hands, setHands] = useState<Array<number>>(playerRedux.getHand())
+    let [races, setRaces] = useState<Array<Array<number>>>(playerRedux.getRaces())
+    let [take, setTake] = useState<number>(playerRedux.getTake())
+    let [display, setDisplay] = useState<boolean>(playerRedux.getDisplay())
 
 
-    playerCtx.onHand((tiles: Array<number>) => {
-        tiles.sort((a, b) => { return a - b })
-        setHands(tiles)
-    })
-
-    playerCtx.onTake((direction: number, tile: number) => {
-        setTake(tile)
-    })
-
-    if (playerCtx.area === Area.Left) {
-        return <LeftPlayer playerCtx={playerCtx} take={take} hands={hands} races={races} />
+    if (playerRedux.area === Area.Left) {
+        return <LeftPlayer playerRedux={playerRedux} take={take} hands={hands} races={races} />
     }
-    if (playerCtx.area === Area.Right) {
-        return <RightPlayer playerCtx={playerCtx} take={take} hands={hands} races={races} />
+    if (playerRedux.area === Area.Right) {
+        return <RightPlayer playerRedux={playerRedux} take={take} hands={hands} races={races} />
     }
-    if (playerCtx.area === Area.Top) {
-        return <TopPlayer playerCtx={playerCtx} take={take} hands={hands} races={races} />
+    if (playerRedux.area === Area.Top) {
+        return <TopPlayer playerRedux={playerRedux} take={take} hands={hands} races={races} />
     }
-    return <MineAreaContainer playerCtx={playerCtx} take={take} hands={hands} races={races} />
+    return <MineAreaContainer playerRedux={playerRedux} take={take} hands={hands} races={races} />
 }
 
 
 
 
-const LeftPlayer: React.FC<{ playerCtx: PlayerContext, take: number, hands: Array<number>, races: Array<Array<number>> }> = ({ playerCtx, take, hands, races }) => {
+const LeftPlayer: React.FC<{ playerRedux: PlayerReducer, take: number, hands: Array<number>, races: Array<Array<number>> }> = ({ playerRedux, take, hands, races }) => {
     return (
         <Stack alignItems={'center'} sx={{ height: '100%' }}>
             <Grid item container xs={9} alignItems={'center'}>
@@ -99,16 +91,16 @@ const LeftPlayer: React.FC<{ playerCtx: PlayerContext, take: number, hands: Arra
                 </Grid>
             </Grid>
             <Grid item container xs={3} justifyContent={'center'} alignItems={'center'}>
-                <AvatarArea user={playerCtx.info} />
+                <AvatarArea user={playerRedux.info} />
             </Grid>
         </Stack>)
 }
 
-const RightPlayer: React.FC<{ playerCtx: PlayerContext, take: number, hands: Array<number>, races: Array<Array<number>> }> = ({ playerCtx, take, hands, races }) => {
+const RightPlayer: React.FC<{ playerRedux: PlayerReducer, take: number, hands: Array<number>, races: Array<Array<number>> }> = ({ playerRedux, take, hands, races }) => {
     return (
         <Stack alignItems={'center'} sx={{ height: '100%' }}>
             <Grid item container xs={3} justifyContent={'center'} alignItems={'center'}>
-                <AvatarArea user={playerCtx.info} />
+                <AvatarArea user={playerRedux.info} />
             </Grid>
             <Grid item container xs={9} justifyContent={'center'} alignItems={'center'} >
                 <Grid item container xs={6} justifyContent={'center'} alignItems={'center'}>
@@ -155,10 +147,10 @@ const RightPlayer: React.FC<{ playerCtx: PlayerContext, take: number, hands: Arr
         </Stack>)
 }
 
-const TopPlayer: React.FC<{ playerCtx: PlayerContext, take: number, hands: Array<number>, races: Array<Array<number>> }> = ({ playerCtx, take, hands, races }) => {
+const TopPlayer: React.FC<{ playerRedux: PlayerReducer, take: number, hands: Array<number>, races: Array<Array<number>> }> = ({ playerRedux, take, hands, races }) => {
     return (<Grid container direction={'column'} alignItems={'center'} sx={{ height: '100%' }}>
         <Grid container item xs={4} justifyContent={'center'} alignItems={'center'}>
-            <AvatarArea user={playerCtx.info} />
+            <AvatarArea user={playerRedux.info} />
         </Grid>
         <Grid item container xs={8} justifyContent={'center'} alignItems={'center'} >
             <Stack

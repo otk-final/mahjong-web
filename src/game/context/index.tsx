@@ -1,63 +1,31 @@
+import React from 'react';
 import { Player } from '../../component/player';
 import { MjExtra } from '../../component/tile';
+import { Area } from './util';
 
 
 
-export enum Area {
-    Left = 'left',
-    Right = 'right',
-    Bottom = 'bottom',
-    Top = 'top',
-    Nil = 'nil'
-}
 
+// 游戏
+export class GameEventBus {
 
-// 查找方位
-export function FindArea(minePosIdx: number, targetPosIdx: number): Area {
-    if (minePosIdx === targetPosIdx) {
-        return Area.Bottom
-    }
-    if (Math.abs(minePosIdx - targetPosIdx) === 2) {
-        return Area.Top
-    }
+    // 玩家
+    Lefter?: PlayerReducer
+    Righter?: PlayerReducer;
+    Toper?: PlayerReducer;
+    Bottomer?: PlayerReducer;
 
-    //起
-    if (minePosIdx === 0) {
-        return targetPosIdx === minePosIdx + 1 ? Area.Right : Area.Left
-    } else {
-        return targetPosIdx === minePosIdx - 1 ? Area.Left : Area.Right
-    }
-}
-
-
-// 房间
-export class RoomContext {
+    //房间信息
     roomId: string
     round: number
-
     constructor(roomId: string, round: number) {
         this.roomId = roomId
         this.round = round
     }
-}
 
-
-// 游戏
-export class GameContext {
-
-    // 玩家
-    Lefter?: PlayerContext
-    Righter?: PlayerContext;
-    Toper?: PlayerContext;
-    Bottomer?: PlayerContext;
-
-    roomCtx: RoomContext
-    constructor(roomCtx: RoomContext) {
-        this.roomCtx = roomCtx
-    }
 
     join(area: Area, member: Player) {
-        const memberCtx = new PlayerContext(area, member, this.roomCtx, this)
+        const memberCtx = new PlayerReducer(area, member)
         switch (area) {
             case Area.Left: this.Lefter = memberCtx; break
             case Area.Right: this.Righter = memberCtx; break
@@ -73,6 +41,18 @@ export class GameContext {
     effectRef: any
     bindEffectRef(ref: any) {
         this.effectRef = ref
+    }
+    turnRef: any
+    bindTurnRef(ref: any) {
+        this.turnRef = ref
+    }
+    countdwonRef: any
+    bindCountdownRef(ref: any) {
+        this.countdwonRef = ref
+    }
+    remainedRef: any
+    bindRemainedRef(ref: any) {
+        this.remainedRef = ref
     }
 
     //开始游戏
@@ -99,50 +79,15 @@ export class GameContext {
 }
 
 // 玩家
-export class PlayerContext {
+export class PlayerReducer {
 
     area: Area
     info: Player
-    roomCtx: RoomContext
-    gameCtx: GameContext
 
-    constructor(area: Area, info: Player, roomCtx: RoomContext, gameCtx: GameContext) {
+    constructor(area: Area, info: Player) {
         this.area = area
         this.info = info
-        this.roomCtx = roomCtx
-        this.gameCtx = gameCtx
     }
-
-
-    doPut(action: string, tiles: Array<number>) {
-        this.injectPut(tiles)
-    }
-
-    removeLastedOutput(tile: number) {
-
-    }
-
-    injectHand: any
-    onHand(fn: any) {
-        this.injectHand = fn
-    }
-    injectTake: any
-    onTake(fn: any) {
-        this.injectTake = fn
-    }
-    injectPut: any
-    onPut(fn: any) {
-        this.injectPut = fn
-    }
-    injectPutRemove: any
-    onPutRemove(fn: any) {
-        this.injectPutRemove = fn
-    }
-    injectRace: any
-    onRace(fn: any) {
-        this.injectRace = fn
-    }
-
 
     getHand(): Array<number> {
         if (this.area !== Area.Bottom) {
@@ -170,9 +115,6 @@ export class PlayerContext {
 
 
 
+const emptyGameContext = new GameEventBus('empty', 0)
 
-
-
-export function NewPlayerContext() {
-
-}
+export const GameContext = React.createContext<GameEventBus>(emptyGameContext)

@@ -1,9 +1,7 @@
 import * as React from 'react';
-import ReactDom from 'react-dom';
 import { Badge, Box } from "@mui/material"
 import { MJImageFilter } from '../assets';
-import { Area } from '../game/context';
-// import { removeReadyCss, setReadyCss } from './dom';
+import { Area } from '../game/context/util';
 
 export const MjImageHeight = {
     center: '55px',

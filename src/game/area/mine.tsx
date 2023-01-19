@@ -1,10 +1,11 @@
-import React, { Ref, forwardRef, useRef, useState } from "react"
+import React, { Ref, forwardRef, useContext, useState } from "react"
 import ReactDom from 'react-dom';
-import { Avatar, Button, Divider, Grid, Stack, Typography } from "@mui/material";
-import { Area, PlayerContext } from "../context";
+import { Avatar, Button, Divider, Grid, Stack } from "@mui/material";
+import { GameContext, GameEventBus, PlayerReducer } from "../context";
 import { AvatarArea } from "../../component/player";
 import { MjBottomImage, MjImage } from "../../component/tile";
 import { MJRaceFilter } from "../../assets";
+import { Area } from "../context/util";
 
 
 export const RaceArea = forwardRef((props: { submitCall: any, options: Array<string> }, ref: Ref<any>) => {
@@ -45,10 +46,10 @@ function resetNoReadyClass(ele: any) {
     }
 }
 
-export const TileArea = forwardRef((props: { playerCtx: PlayerContext, take: number, hands: Array<number>, races: Array<Array<number>> }, ref: Ref<any>) => {
+export const TileArea = forwardRef((props: { playerRedux: PlayerReducer, take: number, hands: Array<number>, races: Array<Array<number>> }, ref: Ref<any>) => {
 
 
-
+    const gameCtx = useContext<GameEventBus>(GameContext)
     let [stateReady, setReady] = React.useState<Array<number>>([])
     let [stateTake, setTake] = useState<number>(props.take)
     let [stateHands, setHands] = useState<Array<number>>(props.hands)
@@ -130,7 +131,7 @@ export const TileArea = forwardRef((props: { playerCtx: PlayerContext, take: num
                         <Stack direction={'row'} justifyContent={'center'} alignItems={'center'} key={idx}>
                             {
                                 Array.from(raceGroup).map((raceItem, idx) => (
-                                    <MjImage direction={'bottom'} height={'45px'} mj={raceItem} key={idx} extra={props.playerCtx.gameCtx.getMjExtra(raceItem)} />
+                                    <MjImage direction={'bottom'} height={'45px'} mj={raceItem} key={idx} extra={gameCtx.getMjExtra(raceItem)} />
                                 ))
                             }
                         </Stack>
@@ -140,21 +141,22 @@ export const TileArea = forwardRef((props: { playerCtx: PlayerContext, take: num
             <Stack direction={'row'} justifyContent={'center'} alignItems={'center'} spacing={0.5} ref={handRef}>
                 {
                     Array.from(stateHands).map((handItem, idx) => (
-                        <MjBottomImage mj={handItem} key={idx} callPut={selectReady} extra={props.playerCtx.gameCtx.getMjExtra(handItem)} />
+                        <MjBottomImage mj={handItem} key={idx} callPut={selectReady} extra={gameCtx.getMjExtra(handItem)} />
                     ))
                 }
             </Stack>
             <Stack direction={'row'} justifyContent={'center'} alignItems={'center'}>
-                {stateTake !== -1 && <MjBottomImage mj={stateTake} callPut={selectReady} extra={props.playerCtx.gameCtx.getMjExtra(stateTake)} />}
+                {stateTake !== -1 && <MjBottomImage mj={stateTake} callPut={selectReady} extra={gameCtx.getMjExtra(stateTake)} />}
             </Stack>
         </Stack>
     )
 })
 
 
-export const MineAreaContainer: React.FC<{ playerCtx: PlayerContext, take: number, hands: Array<number>, races: Array<Array<number>> }> = ({ playerCtx, take, hands, races }) => {
+export const MineAreaContainer: React.FC<{ playerRedux: PlayerReducer, take: number, hands: Array<number>, races: Array<Array<number>> }> = ({ playerRedux, take, hands, races }) => {
 
-    console.info('MineAreaContainer')
+    const gameCtx = useContext<GameEventBus>(GameContext)
+
     //牌库状态
     let [mineOptions, setOptions] = React.useState<Array<string>>(['peng', 'gang', 'chi', 'hu', 'pass'])
     let tileRef = React.useRef(null)
@@ -183,10 +185,10 @@ export const MineAreaContainer: React.FC<{ playerCtx: PlayerContext, take: numbe
         });
 
         //show effect
-        playerCtx.gameCtx.effectRef.current.append(Area.Left, race)
+        gameCtx.effectRef.current.append(Area.Left, race)
 
         //output
-        playerCtx.gameCtx.centerRef.current.outputOne(Area.Left, ready[0])
+        gameCtx.centerRef.current.outputOne(Area.Left, ready[0])
 
         //set value and clear css
         tileIns.resetHands(hands)
@@ -208,14 +210,14 @@ export const MineAreaContainer: React.FC<{ playerCtx: PlayerContext, take: numbe
                 <RaceArea submitCall={(race: string) => { submitConfirm(race) }} options={mineOptions} ref={raceRef} />
             </Grid>
             <Grid item container xs justifyContent={'center'} alignItems={'center'} >
-                <TileArea playerCtx={playerCtx} take={take} hands={hands} races={races} ref={tileRef} />
+                <TileArea playerRedux={playerRedux} take={take} hands={hands} races={races} ref={tileRef} />
             </Grid>
             <Grid container item xs={2} justifyContent={'center'} alignItems={'center'}>
                 <Grid item>
                     <Button variant="contained" color="warning" size="small">我要明牌</Button>
                 </Grid>
                 <Grid item container xs={6} justifyContent={'center'} alignItems={'center'}>
-                    <AvatarArea user={playerCtx.info} />
+                    <AvatarArea user={playerRedux.info} />
                 </Grid>
                 <Grid item>
                     <Button variant="contained" color="primary" size="small">挂机托管</Button>

@@ -1,6 +1,6 @@
-import React, { Ref, useEffect, useRef, useState, forwardRef, useImperativeHandle } from "react"
-import { Area, GameContext, PlayerContext, RoomContext } from "../context"
-import { Avatar, Box, Grid, Stack, Typography, Zoom } from "@mui/material"
+import React, { Ref, useEffect, useRef, useState, forwardRef, useImperativeHandle, useContext } from "react"
+import { GameContext, GameEventBus } from "../context"
+import { Avatar, Grid, Stack, Typography, Zoom } from "@mui/material"
 
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
@@ -8,6 +8,7 @@ import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import { MjImage, MjImageHeight } from "../../component/tile";
 import { MJRaceFilter } from "../../assets";
+import { Area } from "../context/util";
 
 
 const maxOut = 21
@@ -20,7 +21,7 @@ interface RaceEffect {
 }
 
 
-const NormOutputArea = forwardRef((props: { roomCtx: RoomContext, gameCtx: GameContext, area: Area, lasted: boolean, output: Array<number> }, ref: Ref<any>) => {
+const NormOutputArea = forwardRef((props: { area: Area, lasted: boolean, output: Array<number> }, ref: Ref<any>) => {
 
     let [lasted, setLasted] = useState<boolean>(props.lasted)
     let [output, setOutput] = useState<Array<number>>(props.output)
@@ -42,15 +43,15 @@ const NormOutputArea = forwardRef((props: { roomCtx: RoomContext, gameCtx: GameC
                 return
             }
             existput.splice(idx, 1)
-            setOutput(existput) 
+            setOutput(existput)
             setLasted(false)
         }
     }))
 
 
-    useEffect(()=>{
+    useEffect(() => {
 
-    }, [output,lasted])
+    }, [output, lasted])
 
 
     // 样式
@@ -98,24 +99,27 @@ interface effectItem {
 }
 
 
-const RaceEffectArea = forwardRef((props: { roomCtx: RoomContext, gameCtx: GameContext }, ref: Ref<any>) => {
+const RaceEffectArea = forwardRef((props: {}, ref: Ref<any>) => {
 
+
+    const gameCtx = useContext<GameEventBus>(GameContext)
     let [stateEffect, setEffect] = useState<Array<effectItem>>([])
+
 
     useImperativeHandle(ref, () => ({
         append: (area: Area, race: string) => {
-            let sx: any
+            let sx: any = { position: 'absolute', height: 100, width: 100 }
             if (area === Area.Top) {
-                sx = { position: 'absolute', height: 100, width: 100, top: -30 }
+                sx.top = -30
             }
             if (area === Area.Left) {
-                sx = { position: 'absolute', height: 100, width: 100, left: -30 }
+                sx.left = -30
             }
             if (area === Area.Right) {
-                sx = { position: 'absolute', height: 100, width: 100, right: -30 }
+                sx.right = -30
             }
             if (area === Area.Bottom) {
-                sx = { position: 'absolute', height: 100, width: 100, bottom: -100 }
+                sx.bottom = -30
             }
             //胡牌可以多方显示
             let hasHu = stateEffect.filter((it) => {
@@ -134,7 +138,7 @@ const RaceEffectArea = forwardRef((props: { roomCtx: RoomContext, gameCtx: GameC
         }
     }))
 
-    props.gameCtx.bindEffectRef(ref)
+    gameCtx.bindEffectRef(ref)
 
     return (<Grid container sx={{ height: '100%', width: '100%', position: 'relative' }} justifyContent={'center'} alignItems={'center'} >
         {
@@ -148,13 +152,15 @@ const RaceEffectArea = forwardRef((props: { roomCtx: RoomContext, gameCtx: GameC
     </Grid>)
 })
 
-export const CenterAreaContainer = forwardRef((props: { roomCtx: RoomContext, gameCtx: GameContext }, ref: Ref<any>) => {
+export const CenterAreaContainer = forwardRef((props: {}, ref: Ref<any>) => {
 
+    const gameCtx = useContext<GameEventBus>(GameContext)
     let leftRef: any = useRef(null)
     let rightRef: any = useRef(null)
     let topRef: any = useRef(null)
     let bottomRef: any = useRef(null)
     let effectRef: any = useRef(null)
+    let turnRef: any = useRef(null)
 
     const dispatchRefIns = (area: Area): any => {
         if (area === Area.Top) {
@@ -189,232 +195,125 @@ export const CenterAreaContainer = forwardRef((props: { roomCtx: RoomContext, ga
         }
     }))
 
-    props.gameCtx.bindCenterRef(ref)
+    gameCtx.bindCenterRef(ref)
     return (
         <Stack sx={{ height: '100%', width: '100%', border: '1px dotted black', borderRadius: '20px', position: 'relative' }} justifyContent={'center'} alignItems={'center'} >
-            <CountdownArea turn={''} remained={57} />
-            <NormOutputArea roomCtx={props.roomCtx} gameCtx={props.gameCtx} area={Area.Top} lasted={false} output={[1, 2, 3]} ref={topRef} />
-            <NormOutputArea roomCtx={props.roomCtx} gameCtx={props.gameCtx} area={Area.Left} lasted={false} output={[4, 5, 6]} ref={leftRef} />
-            <NormOutputArea roomCtx={props.roomCtx} gameCtx={props.gameCtx} area={Area.Right} lasted={true} output={[11, 12, 13]} ref={rightRef} />
-            <NormOutputArea roomCtx={props.roomCtx} gameCtx={props.gameCtx} area={Area.Bottom} lasted={true} output={[21, 22, 23]} ref={bottomRef} />
-            <RaceEffectArea roomCtx={props.roomCtx} gameCtx={props.gameCtx} ref={effectRef} />
+            <TurnArea turn={Area.Top} ref={turnRef} />
+            <NormOutputArea area={Area.Top} lasted={false} output={[1, 2, 3]} ref={topRef} />
+            <NormOutputArea area={Area.Left} lasted={false} output={[4, 5, 6]} ref={leftRef} />
+            <NormOutputArea area={Area.Right} lasted={true} output={[11, 12, 13]} ref={rightRef} />
+            <NormOutputArea area={Area.Bottom} lasted={true} output={[21, 22, 23]} ref={bottomRef} />
+            <RaceEffectArea ref={effectRef} />
         </Stack >
     )
 })
 
 
-// export const CenterAreaContainer2: React.FC<{ roomCtx: RoomContext, gameCtx: GameContext }> = ({ roomCtx, gameCtx }) => {
-//     //当前回合
-//     let [turn, setTurn] = useState<string>('')
-//     //剩余牌数
-//     let [remained, setRemained] = useState(0)
+const CountdownArea = forwardRef((props: {}, ref: Ref<any>) => {
 
-//     //已出牌
-//     let [leftOut, setLeftOut] = useState<Array<number>>(gameCtx.Lefter!.getOuts())
-//     let [rightOut, setRightOut] = useState<Array<number>>(gameCtx.Righter!.getOuts())
-//     let [topOut, setTopOut] = useState<Array<number>>(gameCtx.Toper!.getOuts())
-//     let [bottomOut, setBottomOut] = useState<Array<number>>(gameCtx.Bottomer!.getOuts())
-//     let [lastedArea, setLastedArea] = useState<Area | undefined>()
+    const gameCtx = useContext<GameEventBus>(GameContext)
+    let [stateTime, setTime] = useState<number>(30)
+    let [stateEnable, setEnable] = useState<boolean>(true)
 
-
-
-//     //判定特效
-//     let [raceEffects, setRaceEffects] = useState<Array<RaceEffect>>(new Array<RaceEffect>())
-
-//     gameCtx.onTurnChange((event: any) => {
-//         setTurn(Area.Bottom)
-//     })
-
-//     gameCtx.onRemainedChange((num: number) => {
-//         setRemained(num)
-//     })
-
-//     gameCtx.onRaceEffect((newEvent: RaceEffect) => {
-//         //只有胡牌可以多方渲染显示
-//         let notHupai = raceEffects.length === 1 && raceEffects[0].Event !== 'hu'
-//         if (notHupai) {
-//             raceEffects.pop()
-//         }
-//         raceEffects.push(newEvent)
-//         setRaceEffects(raceEffects)
-//     })
-
-//     gameCtx.onOutput((who: Area, tile: number) => {
-//         if (who === Area.Left) {
-//             leftOut.push(tile)
-//             setLeftOut(leftOut.slice())
-//         } else if (who === Area.Right) {
-//             rightOut.push(tile)
-//             setRightOut(rightOut.slice())
-//         } else if (who === Area.Top) {
-//             topOut.push(tile)
-//             setTopOut(topOut.slice())
-//         } else if (who === Area.Bottom) {
-//             bottomOut.push(tile)
-//             setBottomOut(bottomOut.slice())
-//         }
-//         setLastedArea(who)
-//     })
-
-
-//     const isLastedOuput = (direction: Area, arr: Array<number>, currIdx: number): boolean => {
-//         if (direction !== lastedArea) {
-//             return false
-//         }
-//         return currIdx === arr.length - 1
-//     }
-
-//     return (
-//         <Stack sx={{ height: '100%', width: '100%', border: '1px dotted black', borderRadius: '20px', position: 'relative' }} justifyContent={'center'} alignItems={'center'}>
-//             <CountdownArea turn={turn} remained={remained} />
-//             <Grid container direction={"row-reverse"} alignItems={'center'} justifyContent={'center'}
-//                 columns={maxOut} spacing={0.2}
-//                 sx={{
-//                     position: 'absolute',
-//                     top: '0px',
-//                     left: minPx,
-//                     width: maxPx,
-//                     height: minPx
-//                 }}>
-//                 {
-//                     Array.from(topOut).map((outItem, idx) => (
-//                         <Grid item key={idx}>
-//                             <MjImage mj={outItem} direction={'top'} height={MjImageHeight.center} lasted={isLastedOuput(Area.Top, topOut, idx)} />
-//                         </Grid>
-//                     ))
-//                 }
-//             </Grid>
-//             <Grid container direction={'column'} justifyContent={'center'} alignItems={'center'}
-//                 sx={{
-//                     position: 'absolute',
-//                     bottom: minPx,
-//                     left: '0px',
-//                     width: minPx,
-//                     height: maxPx,
-//                     padding: '5px'
-//                 }}>
-//                 {
-//                     Array.from(leftOut).map((outItem, idx) => (
-//                         <Grid item sx={{ height: MjImageHeight.centerRotate }} key={idx} >
-//                             <MjImage mj={outItem} direction={'left'} height={MjImageHeight.center} lasted={isLastedOuput(Area.Left, leftOut, idx)} />
-//                         </Grid>
-//                     ))
-//                 }
-//             </Grid>
-//             <Grid container direction={'column-reverse'} justifyContent={'center'} alignItems={'center'}
-//                 columns={maxOut}
-//                 sx={{
-//                     position: 'absolute',
-//                     bottom: '0px',
-//                     right: '0px',
-//                     width: minPx,
-//                     height: maxPx
-//                 }}>
-//                 {
-//                     Array.from(rightOut).map((outItem, idx) => (
-//                         <Grid item sx={{ height: MjImageHeight.centerRotate }} key={idx}>
-//                             <MjImage mj={outItem} direction={'right'} height={MjImageHeight.center} lasted={isLastedOuput(Area.Right, rightOut, idx)} />
-//                         </Grid>
-//                     ))
-//                 }
-
-//             </Grid>
-//             <Grid container justifyContent={'center'} alignItems={'center'}
-//                 columns={maxOut}
-//                 spacing={0.2}
-//                 sx={{
-//                     position: 'absolute',
-//                     bottom: '0px',
-//                     left: '0px',
-//                     width: maxPx,
-//                     height: minPx
-//                 }}>
-
-//                 {
-//                     Array.from(bottomOut).map((outItem, idx) => (
-//                         <Grid item xs={'auto'} key={idx} >
-//                             <MjImage mj={outItem} direction={'bottom'} height={MjImageHeight.center} lasted={isLastedOuput(Area.Bottom, bottomOut, idx)} />
-//                         </Grid>
-//                     ))
-//                 }
-//             </Grid>
-//             {
-//                 Array.from(raceEffects).map((raceItem: RaceEffect, idx) => (
-//                     <Zoom in={raceItem.Display} style={{ position: 'absolute', height: 100, width: 100, right: -30 }}>
-//                         <Avatar>{raceItem.Event}</Avatar>
-//                     </Zoom>
-//                 ))
-//             }
-//         </Stack >
-//     )
-// }
-
-const CountdownArea: React.FC<{ turn: string, remained: number }> = ({ turn, remained }) => {
-
-    let [timeNumber, setTimeNumber] = useState(0)
-    var cd = new Countdown(30, setTimeNumber)
+    useImperativeHandle(ref, () => ({
+        suspend: () => {
+            setEnable(false)
+        },
+        start: () => {
+            setEnable(true)
+        }
+    }))
 
 
     useEffect(() => {
-        cd.start()
-        return () => { cd.exit() }
-    })
+        if (stateEnable) {
+            const interval = setInterval(() => {
+                setTime(stateTime--)
+            }, 1000)
+            return () => clearInterval(interval)
+        } else {
+            //nothing
+            setTime(-1)
+        }
+    }, [stateEnable])
+
+
+    gameCtx.bindCountdownRef(ref)
+    return (
+        <Typography variant='h4' sx={{ color: stateTime === -1 ? 'gray' : (stateTime < 10 ? 'red' : 'orange') }}>
+            {stateTime <= 0 ? '--' : stateTime}
+        </Typography>
+    )
+})
+
+const RemainedArea = forwardRef((props: { remained: number }, ref: Ref<any>) => {
+    const gameCtx = useContext<GameEventBus>(GameContext)
+    let [stateRemained, setRemained] = useState(props.remained)
+
+    useImperativeHandle(ref, () => ({
+        // 剩余牌
+        updateRemained: () => {
+            stateRemained--
+            if (stateRemained === 0) {
+                stateRemained = 0
+            }
+            setRemained(stateRemained)
+        },
+    }))
+
+    gameCtx.bindRemainedRef(ref)
+    return (
+        <Typography variant='caption' sx={{ color: 'yellow' }}>剩余{stateRemained}张</Typography>
+    )
+})
+
+
+const TurnArea = forwardRef((props: { turn: Area }, ref: Ref<any>) => {
+
+    const gameCtx = useContext<GameEventBus>(GameContext)
+    let [stateTurn, setTurn] = useState(props.turn)
+    let countdownRef: any = useRef(null)
+    let remainedRef: any = useRef(null)
+
+    useImperativeHandle(ref, () => ({
+        changeTurn: (turn: Area) => {
+            setTurn(turn)
+
+            // 重置计时器
+            countdownRef.current.reset()
+        }
+    }))
+
+    const turnColor = (area: Area): string => {
+        return stateTurn === area ? 'red' : 'gray'
+    }
+
+    gameCtx.bindTurnRef(ref)
 
     return (<Grid container sx={{ height: '25%', width: '25%', position: 'absolute' }}>
         {/*  */}
         <Grid item xs={4}></Grid>
         <Grid item xs={4} justifyContent={'center'} alignItems={'flex-end'} container>
-            <ArrowDropUpIcon sx={{ color: turn === 'top' ? 'red' : 'gray' }} fontSize={'large'} />
+            <ArrowDropUpIcon sx={{ color: turnColor(Area.Top) }} fontSize={'large'} />
         </Grid>
         <Grid item xs={4}></Grid>
         {/*  */}
         <Grid item xs={4} justifyContent={'flex-end'} alignItems={'center'} container>
-            <ArrowLeftIcon sx={{ color: turn === 'left' ? 'red' : 'gray' }} fontSize={'large'} />
+            <ArrowLeftIcon sx={{ color: turnColor(Area.Left) }} fontSize={'large'} />
         </Grid>
         <Grid item xs={4} justifyContent={'center'} alignItems={'center'} container >
             <Stack justifyContent={'center'} alignItems={'center'}>
-                <Typography variant='h4' sx={{ color: timeNumber === 0 ? 'gray' : (timeNumber < 10 ? 'red' : 'orange') }}>
-                    {timeNumber <= 0 ? '--' : timeNumber}
-                </Typography>
-                <Typography variant='caption' sx={{ color: 'yellow' }}>剩余{remained}张</Typography>
+                <CountdownArea ref={countdownRef} />
+                <RemainedArea remained={123} ref={remainedRef} />
             </Stack>
         </Grid>
         <Grid item xs={4} justifyContent={'flex-start'} alignItems={'center'} container>
-            <ArrowRightIcon sx={{ color: turn === 'right' ? 'red' : 'gray' }} fontSize={'large'} />
+            <ArrowRightIcon sx={{ color: turnColor(Area.Right) }} fontSize={'large'} />
         </Grid>
         <Grid item xs={4}></Grid>
         <Grid item xs={4} justifyContent={'center'} alignItems={'flex-start'} container>
-            <ArrowDropDownIcon sx={{ color: turn === 'bottom' ? 'red' : 'gray' }} fontSize={'large'} />
+            <ArrowDropDownIcon sx={{ color: turnColor(Area.Bottom) }} fontSize={'large'} />
         </Grid>
         <Grid item xs={4}></Grid>
     </Grid >)
-}
-
-
-// 计时器
-export class Countdown {
-
-    timeOut: number = 0
-    interval: any
-    // 最大计数
-    maxTime: number
-
-    stateInject: any
-    constructor(maxTime: number, stateInject: any) {
-        this.maxTime = maxTime
-        this.stateInject = stateInject
-    }
-
-    // 开始
-    start() {
-        this.interval = setInterval(() => {
-            this.timeOut--
-            this.stateInject(this.timeOut)
-        })
-    }
-
-    // 销毁
-    exit() {
-        clearInterval(this.interval)
-    }
-}
+})

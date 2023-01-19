@@ -1,16 +1,15 @@
 import * as React from 'react';
 import './index.css';
 import { Grid } from "@mui/material";
-import { FindArea, GameContext, RoomContext } from './context';
+import { GameEventBus, GameContext } from './context';
 import { NetConnect } from './context/websocket';
 import { PlayerContainer } from './area';
 import { CenterAreaContainer } from './area/center';
 import { MjBottomImage, MjExtra } from '../component/tile';
-
+import { FindArea } from './context/util';
 
 
 export const GameMainArea: React.FC<{ roomId: string, round: number }> = ({ roomId, round }) => {
-
 
 
     // 模拟数据
@@ -58,13 +57,12 @@ export const GameMainArea: React.FC<{ roomId: string, round: number }> = ({ room
 
 
     //当局上下文
-    let roomCtx = new RoomContext(roomId, round)
-    let defaultGameCtx = new GameContext(roomCtx)
-    defaultGameCtx.setMjExtras(resp.mjExtras)
+    let contextBus = new GameEventBus(roomId, round)
+    contextBus.setMjExtras(resp.mjExtras)
 
     resp.members.forEach((item: any) => {
         let mainArea = FindArea(resp.mine.pIdx, item.pIdx)
-        defaultGameCtx.join(mainArea, item)
+        contextBus.join(mainArea, item)
     })
 
 
@@ -72,8 +70,6 @@ export const GameMainArea: React.FC<{ roomId: string, round: number }> = ({ room
     let [netOk, setNetOk] = React.useState(false)
     let [joined, setJoined] = React.useState({ left: false, right: false, top: false, bottom: false })
     let [mjExtras, setMjExtras] = React.useState<Array<MjExtra>>(resp.mjExtras)
-    let [gameCtx, setGameCtx] = React.useState(defaultGameCtx)
-
 
 
     //长连接
@@ -90,51 +86,52 @@ export const GameMainArea: React.FC<{ roomId: string, round: number }> = ({ room
 
 
     // 玩家
-    let lefter = gameCtx.Lefter
-    let righter = gameCtx.Righter;
-    let toper = gameCtx.Toper;
-    let bottomer = gameCtx.Bottomer;
-
+    let lefter = contextBus.Lefter!
+    let righter = contextBus.Righter!;
+    let toper = contextBus.Toper!;
+    let bottomer = contextBus.Bottomer!;
 
     return (
-        <Grid className='App' container justifyContent={'center'}>
-            <Grid item container xs={9} direction={'column'} sx={sx}>
-                <Grid item container xs={2} >
-                    <Grid item container xs={2} justifyContent={'center'} alignItems={'center'}>
-                        exit
-                    </Grid>
-                    <Grid item xs={8}>
-                        <PlayerContainer roomCtx={roomCtx} gameCtx={gameCtx} playerCtx={toper} direction='top' />
-                    </Grid>
+        <GameContext.Provider value={contextBus}>
+            <Grid className='App' container justifyContent={'center'}>
+                <Grid item container xs={9} direction={'column'} sx={sx}>
+                    <Grid item container xs={2} >
+                        <Grid item container xs={2} justifyContent={'center'} alignItems={'center'}>
+                            exit
+                        </Grid>
+                        <Grid item xs={8}>
+                            <PlayerContainer playerRedux={toper} direction='top' />
+                        </Grid>
 
-                    <Grid item container xs={2} justifyContent={'center'} alignItems={'center'} spacing={2}>
-                        {
-                            Array.from(mjExtras).map((mjItem, idx) => (
-                                <Grid item key={idx}>
-                                    <MjBottomImage mj={mjItem.tile} extra={mjItem} />
-                                </Grid>
-                            ))
-                        }
-                    </Grid>
-                </Grid>
-                <Grid item xs  >
-                    <Grid container sx={{ height: '100%' }}>
-                        <Grid item xs={2.5}>
-                            <PlayerContainer roomCtx={roomCtx} gameCtx={gameCtx} playerCtx={lefter} direction='left' />
-                        </Grid>
-                        <Grid item xs={7} justifyContent={"center"} alignItems={'center'}>
-                            <CenterAreaContainer roomCtx={roomCtx} gameCtx={gameCtx} ref={centerRef} />
-                        </Grid>
-                        <Grid item xs={2.5}>
-                            <PlayerContainer roomCtx={roomCtx} gameCtx={gameCtx} playerCtx={righter} direction='right' />
+                        <Grid item container xs={2} justifyContent={'center'} alignItems={'center'} spacing={2}>
+                            {
+                                Array.from(mjExtras).map((mjItem, idx) => (
+                                    <Grid item key={idx}>
+                                        <MjBottomImage mj={mjItem.tile} extra={mjItem} />
+                                    </Grid>
+                                ))
+                            }
                         </Grid>
                     </Grid>
+                    <Grid item xs  >
+                        <Grid container sx={{ height: '100%' }}>
+                            <Grid item xs={2.5}>
+                                <PlayerContainer playerRedux={lefter} direction='left' />
+                            </Grid>
+                            <Grid item xs={7} justifyContent={"center"} alignItems={'center'}>
+                                <CenterAreaContainer ref={centerRef} />
+                            </Grid>
+                            <Grid item xs={2.5}>
+                                <PlayerContainer playerRedux={righter} direction='right' />
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                    <Grid item xs={3} >
+                        <PlayerContainer playerRedux={bottomer} direction='bottom' />
+                    </Grid>
                 </Grid>
-                <Grid item xs={3} >
-                    <PlayerContainer roomCtx={roomCtx} gameCtx={gameCtx} playerCtx={bottomer} direction='bottom' />
-                </Grid>
-            </Grid>
-        </Grid >
+            </Grid >
+        </GameContext.Provider>
     )
 }
 
