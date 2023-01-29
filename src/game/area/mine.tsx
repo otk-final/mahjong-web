@@ -6,6 +6,8 @@ import { AvatarArea } from "../../component/player";
 import { MjBottomImage, MjImage } from "../../component/tile";
 import { MJRaceFilter } from "../../assets";
 import { Area } from "../context/util";
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import SmartToyIcon from '@mui/icons-material/SmartToy';
 
 
 export const RaceArea = forwardRef((props: { submitCall: any, options: Array<string> }, ref: Ref<any>) => {
@@ -185,10 +187,10 @@ export const MineAreaContainer: React.FC<{ playerRedux: PlayerReducer, take: num
         });
 
         //show effect
-        gameCtx.effectRef.current.append(Area.Left, race)
+        gameCtx.doEffect(Area.Left, race)
 
         //output
-        gameCtx.centerRef.current.outputOne(Area.Left, ready[0])
+        gameCtx.doOutput(Area.Right, ...ready)
 
         //set value and clear css
         tileIns.resetHands(hands)
@@ -196,9 +198,6 @@ export const MineAreaContainer: React.FC<{ playerRedux: PlayerReducer, take: num
         raceIns.resetOptions(["hu", "pass"])
     }
 
-    function showEffect() {
-
-    }
 
     function ignoreAndTake(tileIns: any) {
         tileIns.resetTake(24)
@@ -214,13 +213,13 @@ export const MineAreaContainer: React.FC<{ playerRedux: PlayerReducer, take: num
             </Grid>
             <Grid container item xs={2} justifyContent={'center'} alignItems={'center'}>
                 <Grid item>
-                    <Button variant="contained" color="warning" size="small">我要明牌</Button>
+                    <Button variant="contained" color="warning" size="small" startIcon={<VisibilityIcon />} >我要明牌</Button>
                 </Grid>
-                <Grid item container xs={6} justifyContent={'center'} alignItems={'center'}>
+                <Grid item container xs={5} justifyContent={'center'} alignItems={'center'}>
                     <AvatarArea user={playerRedux.info} />
                 </Grid>
                 <Grid item>
-                    <Button variant="contained" color="primary" size="small">挂机托管</Button>
+                    <Button variant="contained" color="primary" size="small" startIcon={<SmartToyIcon />} >挂机托管</Button>
                 </Grid>
             </Grid>
         </Grid>

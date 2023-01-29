@@ -7,10 +7,10 @@ export class NetConnect {
     setNetOk: any
     healthInterval: any
 
-    roomCtx: GameEventBus
+    eventBus: GameEventBus
 
-    constructor(roomCtx: GameEventBus, setNetOk: any) {
-        this.roomCtx = roomCtx
+    constructor(eventBus: GameEventBus, setNetOk: any) {
+        this.eventBus = eventBus
         this.setNetOk = setNetOk
     }
 

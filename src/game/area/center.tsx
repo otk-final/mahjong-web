@@ -14,13 +14,6 @@ import { Area } from "../context/util";
 const maxOut = 21
 const minPx = '30%', maxPx = '70%'
 
-interface RaceEffect {
-    Display: boolean,
-    Area: Area
-    Event: string
-}
-
-
 const NormOutputArea = forwardRef((props: { area: Area, lasted: boolean, output: Array<number> }, ref: Ref<any>) => {
 
     let [lasted, setLasted] = useState<boolean>(props.lasted)
@@ -29,9 +22,9 @@ const NormOutputArea = forwardRef((props: { area: Area, lasted: boolean, output:
         removeLasted: () => {
             setLasted(false)
         },
-        append: (tile: number) => {
+        append: (...tiles: number[]) => {
             let existput = output.slice()
-            existput.push(tile)
+            existput = existput.concat(...tiles)
             setOutput(existput)
             setLasted(true)
         },
@@ -177,7 +170,7 @@ export const CenterAreaContainer = forwardRef((props: {}, ref: Ref<any>) => {
 
 
     useImperativeHandle(ref, () => ({
-        outputOne: (area: Area, tile: number) => {
+        output: (area: Area, ...tiles: number[]) => {
             //默认重置所有
             leftRef.current.removeLasted()
             rightRef.current.removeLasted()
@@ -185,10 +178,8 @@ export const CenterAreaContainer = forwardRef((props: {}, ref: Ref<any>) => {
             bottomRef.current.removeLasted()
             // debugger
             //添加
-            dispatchRefIns(area).append(tile)
+            dispatchRefIns(area).append(tiles)
 
-            //添加特效
-            // effectRef.current.append(Area.Left, 'peng')
         },
         raceOne: (area: Area, tile: number) => {
             dispatchRefIns(area).remove(tile)
@@ -201,7 +192,7 @@ export const CenterAreaContainer = forwardRef((props: {}, ref: Ref<any>) => {
             <TurnArea turn={Area.Top} ref={turnRef} />
             <NormOutputArea area={Area.Top} lasted={false} output={[1, 2, 3]} ref={topRef} />
             <NormOutputArea area={Area.Left} lasted={false} output={[4, 5, 6]} ref={leftRef} />
-            <NormOutputArea area={Area.Right} lasted={true} output={[11, 12, 13]} ref={rightRef} />
+            <NormOutputArea area={Area.Right} lasted={false} output={[11, 12, 13]} ref={rightRef} />
             <NormOutputArea area={Area.Bottom} lasted={true} output={[21, 22, 23]} ref={bottomRef} />
             <RaceEffectArea ref={effectRef} />
         </Stack >
@@ -266,7 +257,6 @@ const RemainedArea = forwardRef((props: { remained: number }, ref: Ref<any>) => 
         <Typography variant='caption' sx={{ color: 'yellow' }}>剩余{stateRemained}张</Typography>
     )
 })
-
 
 const TurnArea = forwardRef((props: { turn: Area }, ref: Ref<any>) => {
 

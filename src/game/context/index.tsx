@@ -55,6 +55,15 @@ export class GameEventBus {
         this.remainedRef = ref
     }
 
+    doEffect(area: Area, race: string) {
+        this.effectRef.current.append(area, race)
+    }
+
+    doOutput(area: Area, ...tiles: number[]) {
+        this.centerRef.current.output(area, ...tiles)
+    }
+
+
     //开始游戏
     start() {
 
@@ -93,7 +102,7 @@ export class PlayerReducer {
         if (this.area !== Area.Bottom) {
             return [0, 0, 0, 0, 0]
         }
-        return [2, 45, 4, 12, 35, 25]
+        return [2, 45, 4, 12, 35, 25, 2, 3, 4, 11, 25, 1]
     }
     getTake(): number {
         return -1

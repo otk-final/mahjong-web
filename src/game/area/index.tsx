@@ -5,9 +5,12 @@ import { MjImage, MjImageHeight } from "../../component/tile";
 import { AvatarArea } from "../../component/player";
 import { MineAreaContainer } from "./mine";
 import { Area } from "../context/util";
+import AddIcon from '@mui/icons-material/Add';
 
 const EmptyContainer: React.FC<{ direction: string }> = ({ direction }) => {
-    return (<div>{direction}</div>)
+    return (<Stack sx={{ height: '100%' }} justifyContent={'center'} alignItems={'center'}>
+        <AddIcon color="disabled" sx={{ fontSize: 80 }}></AddIcon>
+    </Stack>)
 }
 
 
@@ -39,6 +42,8 @@ const JoinContainer: React.FC<{ playerRedux: PlayerReducer }> = ({ playerRedux }
     if (playerRedux.area === Area.Top) {
         return <TopPlayer playerRedux={playerRedux} take={take} hands={hands} races={races} />
     }
+
+    //当前玩家
     return <MineAreaContainer playerRedux={playerRedux} take={take} hands={hands} races={races} />
 }
 
@@ -148,43 +153,44 @@ const RightPlayer: React.FC<{ playerRedux: PlayerReducer, take: number, hands: A
 }
 
 const TopPlayer: React.FC<{ playerRedux: PlayerReducer, take: number, hands: Array<number>, races: Array<Array<number>> }> = ({ playerRedux, take, hands, races }) => {
-    return (<Grid container direction={'column'} alignItems={'center'} sx={{ height: '100%' }}>
-        <Grid container item xs={4} justifyContent={'center'} alignItems={'center'}>
-            <AvatarArea user={playerRedux.info} />
-        </Grid>
-        <Grid item container xs={8} justifyContent={'center'} alignItems={'center'} >
-            <Stack
-                direction={'row'} spacing={3}
-                divider={<Divider orientation="vertical" flexItem />}
-                alignItems="center"
-            >
-                {/* take */}
-                <Stack direction={'row'}>
-                    {take !== -1 && <MjImage mj={take} direction={'top'} />}
+    return (
+        <Grid container direction={'column'} alignItems={'center'} sx={{ height: '100%' }}>
+            <Grid container item xs={4} justifyContent={'center'} alignItems={'center'}>
+                <AvatarArea user={playerRedux.info} />
+            </Grid>
+            <Grid item container xs={8} justifyContent={'center'} alignItems={'center'} >
+                <Stack
+                    direction={'row'} spacing={3}
+                    divider={<Divider orientation="vertical" flexItem />}
+                    alignItems="center"
+                >
+                    {/* take */}
+                    <Stack direction={'row'}>
+                        {take !== -1 && <MjImage mj={take} direction={'top'} />}
+                    </Stack>
+                    {/* hands */}
+                    <Stack direction={'row'} spacing={0.5} >
+                        {
+                            Array.from(hands).map((handItem, idx) => (
+                                <MjImage mj={handItem} direction={'top'} key={idx} />
+                            ))
+                        }
+                    </Stack>
+                    {/* races */}
+                    <Stack direction={'row'} spacing={1} >
+                        {
+                            Array.from(races).map((raceGroup, idx) => (
+                                <Stack direction={'row'} key={idx} spacing={0.3}>
+                                    {
+                                        Array.from(raceGroup).map((raceItem, idx) => (
+                                            <MjImage mj={raceItem} direction={'top'} key={idx} />
+                                        ))
+                                    }
+                                </Stack>
+                            ))
+                        }
+                    </Stack>
                 </Stack>
-                {/* hands */}
-                <Stack direction={'row'} spacing={0.5} >
-                    {
-                        Array.from(hands).map((handItem, idx) => (
-                            <MjImage mj={handItem} direction={'top'} key={idx} />
-                        ))
-                    }
-                </Stack>
-                {/* races */}
-                <Stack direction={'row'} spacing={1} >
-                    {
-                        Array.from(races).map((raceGroup, idx) => (
-                            <Stack direction={'row'} key={idx} spacing={0.3}>
-                                {
-                                    Array.from(raceGroup).map((raceItem, idx) => (
-                                        <MjImage mj={raceItem} direction={'top'} key={idx} />
-                                    ))
-                                }
-                            </Stack>
-                        ))
-                    }
-                </Stack>
-            </Stack>
-        </Grid>
-    </Grid>)
+            </Grid>
+        </Grid>)
 }
