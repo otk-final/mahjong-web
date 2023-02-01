@@ -10,6 +10,12 @@ import { FindArea } from './context/util';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import ScoreboardIcon from '@mui/icons-material/Scoreboard';
 import ChatIcon from '@mui/icons-material/Chat';
+import { useParams } from 'react-router-dom';
+
+export const GameMainRoute: React.FC = () => {
+    const params: any = useParams()
+    return (<GameMainArea roomId={params.roomId} round={0} />)
+}
 
 export const GameMainArea: React.FC<{ roomId: string, round: number }> = ({ roomId, round }) => {
 
