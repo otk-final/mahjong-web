@@ -14,22 +14,24 @@ let defaultAxios = axios.create({
 })
 
 
-let http = function (method: string, path: string, params: any) {
+let http = function (method: string, path: string, params: any, headers?: any) {
     return new Promise((resolve, reject) => {
         //get or ?
         var req: any = {
             url: path,
             method: method,
-            // headers:header
+            headers: headers
         }
         method === 'get' ? req.params = params : req.data = params
-        defaultAxios(req).then((res) => {
+        defaultAxios(req).then(res => {
             resolve(res.data)
         }).catch(err => {
             reject(err)
         })
     })
 }
+
+
 
 
 let roomApi = {
@@ -43,6 +45,53 @@ let roomApi = {
         return http('post', '/room/exit', data)
     }
 }
+
+const memberHeader: any = {
+    'a': {
+        userId: 'a',
+        userName: encodeURIComponent('张三'),
+        token: GUID()
+    },
+    'b': {
+        userId: 'a',
+        userName: encodeURIComponent('李四'),
+        token: GUID()
+    },
+    'c': {
+        userId: 'c',
+        userName: encodeURIComponent('王五'),
+        token: GUID()
+    },
+    'd': {
+        userId: 'd',
+        userName: encodeURIComponent('赵六'),
+        token: GUID()
+    }
+}
+
+function GUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = Math.random() * 16 | 0,
+            v = c === 'x' ? r : (r && 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
+
+export const roomProxy = function (key: any) {
+    const header = memberHeader[key]
+    return {
+        create: (data: any) => {
+            return http('post', '/room/create', data, header)
+        },
+        join: (data: any) => {
+            return http('post', '/room/join', data, header)
+        },
+        exit: (data: any) => {
+            return http('post', '/room/exit', data, header)
+        }
+    }
+}
+
 
 
 let gameApi = {

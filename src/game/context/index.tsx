@@ -23,7 +23,6 @@ export class GameEventBus {
         this.round = round
     }
 
-
     join(area: Area, member: Player) {
         const memberCtx = new PlayerReducer(area, member)
         switch (area) {
@@ -53,6 +52,10 @@ export class GameEventBus {
     remainedRef: any
     bindRemainedRef(ref: any) {
         this.remainedRef = ref
+    }
+    extraRef:any
+    bindExtraRef(ref:any){
+        this.extraRef = ref
     }
 
     doEffect(area: Area, race: string) {
