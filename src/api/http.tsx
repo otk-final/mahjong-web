@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { NetAuthor } from './websocket'
 
 let serverUrl = "http://localhost:7070"
 
@@ -46,7 +47,7 @@ let roomApi = {
     }
 }
 
-const memberHeader: any = {
+const authorHeaders: any = {
     'a': {
         userId: 'a',
         userName: encodeURIComponent('张三'),
@@ -69,6 +70,11 @@ const memberHeader: any = {
     }
 }
 
+export const MockAuthor = function (autorKey: string): NetAuthor {
+    return authorHeaders[autorKey]
+}
+
+
 function GUID() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
         var r = Math.random() * 16 | 0,
@@ -77,8 +83,8 @@ function GUID() {
     });
 }
 
-export const roomProxy = function (key: any) {
-    const header = memberHeader[key]
+export const roomProxy = function (autorKey: string) {
+    const header = authorHeaders[autorKey]
     return {
         create: (data: any) => {
             return http('post', '/room/create', data, header)

@@ -10,8 +10,9 @@ import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import ScoreboardIcon from '@mui/icons-material/Scoreboard';
 import ChatIcon from '@mui/icons-material/Chat';
 import { useParams } from 'react-router-dom';
-import { roomProxy } from '../api/http';
+import { MockAuthor, roomProxy } from '../api/http';
 import { Box } from '@mui/system';
+import { NetConnect } from '../api/websocket';
 
 export const GameMainRoute: React.FC = () => {
     const params: any = useParams()
@@ -20,12 +21,6 @@ export const GameMainRoute: React.FC = () => {
 
 export const GameMainArea: React.FC<{ roomId: string, playerId: string, round: number }> = ({ roomId, playerId, round }) => {
 
-    //加入房间
-    roomProxy(playerId).join({ roomId: roomId }).then((resp: any) => {
-        // debugger
-    }).catch((err: any) => {
-        // debugger
-    })
 
     useEffect(() => {
         console.info("init")
@@ -56,36 +51,43 @@ export const GameMainArea: React.FC<{ roomId: string, playerId: string, round: n
 
     var resp = {
         mine: minePlayer,
-        members: members,
-        turnTime: 30,
-        turnIdx: -1,
-        mjExtras: [
-            {
-                text: '朝',
-                tile: 2
-            }, {
-                text: '鬼',
-                tile: 45
-            }
-        ]
+        members: members
     }
 
     let centerRef = useRef()
     let extraRef = useRef()
 
 
-
     //当局上下文
     let contextBus = new GameEventBus(roomId, round)
-    contextBus.setMjExtras(resp.mjExtras)
+
+
+    //加入房间
+    roomProxy(playerId).join({ roomId: roomId }).then((resp: any) => {
+        // debugger
+
+    }).catch((err: any) => {
+        // debugger
+    })
+
+
+    //长连接
+    let netAuthor = MockAuthor(playerId)
+    let netConn = new NetConnect(netAuthor)
+    netConn.onerror((err: any) => {
+        netConn.retry(3)
+    })
+
+    
+    netConn.conn("ws://localhost:7070/ws/" + roomId)
+    contextBus.bindConnect(netConn)
+
+
     resp.members.forEach((item: any) => {
         let mainArea = FindArea(resp.mine.pIdx, item.pIdx)
         contextBus.join(mainArea, item)
     })
 
-
-    //状态
-    let [mjExtras, setMjExtras] = React.useState<Array<MjExtra>>(resp.mjExtras)
 
     // 玩家
     let lefter = contextBus.Lefter!

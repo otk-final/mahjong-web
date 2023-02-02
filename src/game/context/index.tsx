@@ -2,6 +2,7 @@ import React from 'react';
 import { Player } from '../../component/player';
 import { MjExtra } from '../../component/tile';
 import { Area } from './util';
+import { NetConnect } from '../../api/websocket';
 
 
 
@@ -53,8 +54,8 @@ export class GameEventBus {
     bindRemainedRef(ref: any) {
         this.remainedRef = ref
     }
-    extraRef:any
-    bindExtraRef(ref:any){
+    extraRef: any
+    bindExtraRef(ref: any) {
         this.extraRef = ref
     }
 
@@ -88,6 +89,46 @@ export class GameEventBus {
         })
         return find && find.length === 1 ? find[0] : undefined
     }
+
+    bindConnect(conn: NetConnect) {
+        //玩家加入
+        conn.subscribe('100', (msg: any) => {
+
+        })
+        //玩家推出
+        conn.subscribe('101', (msg: any) => {
+
+        })
+        //游戏开始
+        conn.subscribe('102', (msg: any) => {
+
+        })
+        //摸牌
+        conn.subscribe('103', (msg: any) => {
+
+        })
+        //出牌
+        conn.subscribe('104', (msg: any) => {
+
+        })
+        //判断
+        conn.subscribe('105', (msg: any) => {
+
+        })
+        //胡牌
+        conn.subscribe('106', (msg: any) => {
+
+        })
+        //忽略
+        conn.subscribe('107', (msg: any) => {
+
+        })
+        //回合
+        conn.subscribe('108', (msg: any) => {
+
+        })
+    }
+
 }
 
 // 玩家
