@@ -1,102 +1,73 @@
-import React, { Ref, useEffect, useRef, useState, forwardRef, useImperativeHandle, useContext } from 'react';
+import React, { Ref, useRef, useState, forwardRef, useImperativeHandle, useContext, useEffect } from 'react';
 import './index.css';
 import { Button, Grid, SwipeableDrawer } from "@mui/material";
 import { GameEventBus, GameContext } from './context';
 import { PlayerContainer } from './area';
 import { CenterAreaContainer } from './area/center';
 import { MjBottomImage, MjExtra } from '../component/tile';
-import { FindArea } from './context/util';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import ScoreboardIcon from '@mui/icons-material/Scoreboard';
 import ChatIcon from '@mui/icons-material/Chat';
 import { useParams } from 'react-router-dom';
-import { MockAuthor, roomProxy } from '../api/http';
+import { FilterAuthor, roomProxy } from '../api/http';
 import { Box } from '@mui/system';
 import { NetConnect } from '../api/websocket';
+import { LoadingArea, LoadingBus, LoadingContext } from '../component/loading';
+import { FindArea } from './context/util';
 
 export const GameMainRoute: React.FC = () => {
     const params: any = useParams()
-    return (<GameMainArea roomId={params.roomId} playerId={params.playerId} round={0} />)
-}
-
-export const GameMainArea: React.FC<{ roomId: string, playerId: string, round: number }> = ({ roomId, playerId, round }) => {
-
+    let [stateContext, setGameContext] = useState<GameEventBus>()
+    //loading
+    const loadingCtx = useContext<LoadingBus>(LoadingContext)
+    // 模拟数据
+    const ownAuthor = FilterAuthor(params.playerId)
 
     useEffect(() => {
-        console.info("init")
-    })
+        //加入房间
+        roomProxy(params.playerId).join({ roomId: params.roomId }).then((resp: any) => {
+            //设置基础成员信息
+            const own = resp.data.own
+            const players = resp.data.players
+
+            //初始化
+            const ctx = new GameEventBus(params.roomId, 0, own)
+            players.forEach((item: any) => {
+                ctx.join(FindArea(own.idx, item.idx), item)
+            });
+
+            //长连接
+            const netConn = new NetConnect(ownAuthor)
+            netConn.conn("ws://localhost:7070/ws/" + params.roomId)
+            ctx.bindConnect(netConn)
+
+            setGameContext(ctx)
+        }).catch((err: any) => {
+            loadingCtx.hide()
+        })
+    }, [])
+
+    return (
+        <React.Fragment>
+            {stateContext ? <GameMainArea ctx={stateContext!} /> : <LoadingArea open={true} />}
+        </React.Fragment>)
+}
 
 
-    // 模拟数据
-    const minePlayer = {
-        pIdx: 0,
-        name: "我",
-        ip: "192.168.1.34",
-        status: "user"
-    }
 
-    const members = [minePlayer,
-        {
-            pIdx: 0,
-            name: "玩家0",
-            ip: "192.168.1.34",
-            status: "user"
-        }, {
-            pIdx: 1,
-            name: "玩家1",
-            ip: "192.168.1.34",
-            status: "user"
-        }
-    ]
+const GameMainArea: React.FC<{ ctx: GameEventBus }> = ({ ctx }) => {
 
-    var resp = {
-        mine: minePlayer,
-        members: members
-    }
 
     let centerRef = useRef()
     let extraRef = useRef()
-
-
-    //当局上下文
-    let contextBus = new GameEventBus(roomId, round)
-
-
-    //加入房间
-    roomProxy(playerId).join({ roomId: roomId }).then((resp: any) => {
-        // debugger
-
-    }).catch((err: any) => {
-        // debugger
-    })
-
-
-    //长连接
-    let netAuthor = MockAuthor(playerId)
-    let netConn = new NetConnect(netAuthor)
-    netConn.onerror((err: any) => {
-        netConn.retry(3)
-    })
-
-
-    netConn.conn("ws://localhost:7070/ws/" + roomId)
-    contextBus.bindConnect(netConn)
-
-
-    resp.members.forEach((item: any) => {
-        let mainArea = FindArea(resp.mine.pIdx, item.pIdx)
-        contextBus.join(mainArea, item)
-    })
-
-
     // 玩家
-    let lefter = contextBus.Lefter!
-    let righter = contextBus.Righter!;
-    let toper = contextBus.Toper!;
-    let bottomer = contextBus.Bottomer!;
+    let lefter = ctx?.Lefter!
+    let righter = ctx?.Righter!;
+    let toper = ctx?.Toper!;
+    let bottomer = ctx?.Bottomer!;
 
     return (
-        <GameContext.Provider value={contextBus}>
+        <GameContext.Provider value={ctx!}>
             <Grid className='App' container justifyContent={'center'}>
                 <Grid item container xs={1.5} justifyContent={'flex-start'} alignItems="center">
                     <RankDrawer />

@@ -12,13 +12,14 @@ function App() {
 
   const [roomId, setRoomId] = useState<string>('100')
   const navigator = useNavigate()
-  const mockRef = useRef(null)
+  const mockRef = useRef()
 
   //跳转
   const submitJoin = function (event: any) {
     if (roomId === '') {
       return
     }
+    //模拟用户
     const mc: any = mockRef.current
     const playId: string = mc.getCheck()
     navigator('/game/' + roomId + "/" + playId)
@@ -91,7 +92,7 @@ const UserDial: React.FC = () => {
   const notifyCtx = useContext<NotifyBus>(NotifyContext)
   const navigator = useNavigate()
 
-  
+
   const createRoom = (event: any) => {
     var param = {
       game: { mode: "std", nums: 4, custom: {} },
@@ -100,8 +101,7 @@ const UserDial: React.FC = () => {
     //创建房间
     roomProxy('a').create(param).then((resp: any) => {
       notifyCtx.success('创建成功')
-      //进入房间
-      navigator('/game/' + resp.data.roomId + "/" + resp.data.own.acctId)
+      navigator('/game/' + resp.data.roomId + "/" + resp.data.own.uid)
     }).catch((err: any) => {
       notifyCtx.error(err.message)
     })

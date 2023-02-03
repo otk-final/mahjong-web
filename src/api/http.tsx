@@ -25,7 +25,11 @@ let http = function (method: string, path: string, params: any, headers?: any) {
         }
         method === 'get' ? req.params = params : req.data = params
         defaultAxios(req).then(res => {
-            resolve(res.data)
+            if (res.data.code !== '200') {
+                reject(res.data.message)
+            } else {
+                resolve(res.data)
+            }
         }).catch(err => {
             reject(err)
         })
@@ -47,14 +51,14 @@ let roomApi = {
     }
 }
 
-const authorHeaders: any = {
+const memberHeader: any = {
     'a': {
         userId: 'a',
         userName: encodeURIComponent('张三'),
         token: GUID()
     },
     'b': {
-        userId: 'a',
+        userId: 'b',
         userName: encodeURIComponent('李四'),
         token: GUID()
     },
@@ -70,8 +74,8 @@ const authorHeaders: any = {
     }
 }
 
-export const MockAuthor = function (autorKey: string): NetAuthor {
-    return authorHeaders[autorKey]
+export const FilterAuthor = function (uid: string): NetAuthor {
+    return memberHeader[uid]
 }
 
 
@@ -84,7 +88,7 @@ function GUID() {
 }
 
 export const roomProxy = function (autorKey: string) {
-    const header = authorHeaders[autorKey]
+    const header = memberHeader[autorKey]
     return {
         create: (data: any) => {
             return http('post', '/room/create', data, header)

@@ -1,7 +1,7 @@
 import React from 'react';
-import { Player } from '../../component/player';
+import { EmptyPlayer, Player } from '../../component/player';
 import { MjExtra } from '../../component/tile';
-import { Area } from './util';
+import { Area, FindArea } from './util';
 import { NetConnect } from '../../api/websocket';
 import { memberExit, memberJoin, putPlay, racePlay, skipPlay, startGame, takePlay, turnPlay, winPlay } from './consumer';
 
@@ -18,9 +18,11 @@ export class GameEventBus {
     //房间信息
     roomId: string
     round: number
-    constructor(roomId: string, round: number) {
+    mine: Player
+    constructor(roomId: string, round: number, mine: Player) {
         this.roomId = roomId
         this.round = round
+        this.mine = mine
     }
 
     join(area: Area, member: Player) {
@@ -152,6 +154,5 @@ export class PlayerReducer {
 
 
 
-const emptyGameContext = new GameEventBus('empty', 0)
-
+const emptyGameContext = new GameEventBus('empty', 0, EmptyPlayer)
 export const GameContext = React.createContext<GameEventBus>(emptyGameContext)

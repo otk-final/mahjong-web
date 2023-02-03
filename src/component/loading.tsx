@@ -2,27 +2,26 @@
 import React, { Ref, forwardRef, useContext, useImperativeHandle, useRef, useState } from 'react';
 import { Backdrop, CircularProgress } from '@mui/material';
 
-export const LoadingArea: React.FC = () => {
+export const LoadingArea: React.FC<{ open: boolean }> = ({ open }) => {
     let loadingyRef = useRef()
     return (
-        <LoadingBackdrop ref={loadingyRef} />
+        <LoadingBackdrop ref={loadingyRef} open={open} />
     )
 }
 
-export const LoadingBackdrop = forwardRef((props: {}, ref: Ref<any>) => {
-    const notifyCtx = useContext<LoadingBus>(LoadingContext)
-    const [stateOpen, setOpen] = useState<boolean>(false)
+
+
+export const LoadingBackdrop = forwardRef((props: { open: boolean }, ref: Ref<any>) => {
+    const loadingCtx = useContext<LoadingBus>(LoadingContext)
+    const [stateOpen, setOpen] = useState<boolean>(props.open)
 
     useImperativeHandle(ref, () => ({
-        loading: (msg: string) => {
-            setOpen(true)
+        setOpen: (flag: boolean) => {
+            setOpen(flag)
         },
-        finish: () => {
-            setOpen(false)
-        }
     }))
 
-    notifyCtx.bindRef(ref)
+    loadingCtx.bindRef(ref)
     return (
         <React.Fragment>
             <Backdrop
@@ -41,11 +40,11 @@ export class LoadingBus {
     bindRef(ref: any) {
         this.dropRef = ref
     }
-    loading(msg: string) {
-        this.dropRef.current.loading(msg)
+    show() {
+        this.dropRef.current.setOpen(true)
     }
-    finish() {
-
+    hide() {
+        this.dropRef.current.setOpen(false)
     }
 }
 

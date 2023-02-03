@@ -22,6 +22,7 @@ export class NetConnect {
         let socket = new WebSocket(address, subp)
         socket.onmessage = (event: any) => {
             const serverEvent = JSON.parse(event.data)
+            console.info(serverEvent)
             this.consumers[serverEvent.event](serverEvent.payload)
         }
         socket.onopen = (event: any) => {
@@ -85,5 +86,9 @@ export class NetConnect {
         this.retryTimer = setTimeout(() => {
             that.conn(that.socketAddress)
         }, 3000)
+    }
+
+    close() {
+        this.socket.close()
     }
 }
