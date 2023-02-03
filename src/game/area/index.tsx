@@ -1,51 +1,67 @@
-import React, { useState } from "react"
-import { PlayerReducer } from '../context';
+import React, { useImperativeHandle, useRef, useState, forwardRef, Ref, useContext, useEffect } from "react"
+import { GameContext, GameEventBus, PlayerReducer } from '../context';
 import { Box, Divider, Grid, Stack } from "@mui/material";
 import { MjImage, MjImageHeight } from "../../component/tile";
-import { AvatarArea } from "../../component/player";
+import { AvatarArea, Player } from "../../component/player";
 import { MineAreaContainer } from "./mine";
 import { Area } from "../context/util";
 import AddIcon from '@mui/icons-material/Add';
 
-const EmptyContainer: React.FC<{ direction: string }> = ({ direction }) => {
+const EmptyContainer: React.FC<{ direction: Area }> = ({ direction }) => {
     return (<Stack sx={{ height: '100%' }} justifyContent={'center'} alignItems={'center'}>
         <AddIcon color="disabled" sx={{ fontSize: 80 }}></AddIcon>
     </Stack>)
 }
 
 
-export const PlayerContainer: React.FC<{ playerRedux: PlayerReducer, direction: string }> = ({ playerRedux, direction }) => {
-    if (!playerRedux) {
-        return <EmptyContainer direction={direction} />
+export const PlayerContainer = forwardRef((props: { player?: Player, direction: Area }, ref: Ref<any>) => {
+
+
+    const gameCtx = useContext<GameEventBus>(GameContext)
+    const [stateJoined, setJoined] = useState<{ direction: Area, redux?: PlayerReducer }>({
+        direction: props.direction,
+        redux: props.player ? new PlayerReducer(props.direction, props.player!) : undefined,
+    })
+
+    useImperativeHandle(ref, () => ({
+        join(direction: Area, joined: Player) {
+            setJoined({ direction: direction, redux: new PlayerReducer(direction, joined) })
+        },
+        exit() {
+            setJoined({ direction: props.direction })
+        }
+    }))
+
+    //bind
+    gameCtx.bindPlayerRef(props.direction, ref)
+
+    return (
+        stateJoined.redux ? <JoinContainer ref={ref} redux={stateJoined.redux!} direction={stateJoined.direction} /> : <EmptyContainer direction={props.direction} />
+    )
+})
+
+
+const JoinContainer = forwardRef((props: { redux: PlayerReducer, direction: Area }, ref: Ref<any>) => {
+
+    const reduxOps = props.redux
+    let [hands, setHands] = useState<Array<number>>(reduxOps.getHand())
+    let [races, setRaces] = useState<Array<Array<number>>>(reduxOps.getRaces())
+    let [take, setTake] = useState<number>(reduxOps.getTake())
+    let [display, setDisplay] = useState<boolean>(reduxOps.getDisplay())
+    useImperativeHandle(ref, () => ({
+
+    }))
+    reduxOps.bindRef(ref)
+
+    if (props.direction === Area.Left) {
+        return <LeftPlayer playerRedux={reduxOps} take={take} hands={hands} races={races} />
+    } else if (props.direction === Area.Right) {
+        return <RightPlayer playerRedux={reduxOps} take={take} hands={hands} races={races} />
+    } else if (props.direction === Area.Top) {
+        return <TopPlayer playerRedux={reduxOps} take={take} hands={hands} races={races} />
     }
-    return <JoinContainer playerRedux={playerRedux!} />
-}
-
-
-
-
-const JoinContainer: React.FC<{ playerRedux: PlayerReducer }> = ({ playerRedux }) => {
-
-
-    let [hands, setHands] = useState<Array<number>>(playerRedux.getHand())
-    let [races, setRaces] = useState<Array<Array<number>>>(playerRedux.getRaces())
-    let [take, setTake] = useState<number>(playerRedux.getTake())
-    let [display, setDisplay] = useState<boolean>(playerRedux.getDisplay())
-
-
-    if (playerRedux.area === Area.Left) {
-        return <LeftPlayer playerRedux={playerRedux} take={take} hands={hands} races={races} />
-    }
-    if (playerRedux.area === Area.Right) {
-        return <RightPlayer playerRedux={playerRedux} take={take} hands={hands} races={races} />
-    }
-    if (playerRedux.area === Area.Top) {
-        return <TopPlayer playerRedux={playerRedux} take={take} hands={hands} races={races} />
-    }
-
-    //当前玩家
-    return <MineAreaContainer playerRedux={playerRedux} take={take} hands={hands} races={races} />
-}
+    return <MineAreaContainer playerRedux={reduxOps} take={take} hands={hands} races={races} />
+})
 
 
 
@@ -96,7 +112,7 @@ const LeftPlayer: React.FC<{ playerRedux: PlayerReducer, take: number, hands: Ar
                 </Grid>
             </Grid>
             <Grid item container xs={3} justifyContent={'center'} alignItems={'center'}>
-                <AvatarArea user={playerRedux.info} />
+                <AvatarArea user={playerRedux.player} />
             </Grid>
         </Stack>)
 }
@@ -105,7 +121,7 @@ const RightPlayer: React.FC<{ playerRedux: PlayerReducer, take: number, hands: A
     return (
         <Stack alignItems={'center'} sx={{ height: '100%' }}>
             <Grid item container xs={3} justifyContent={'center'} alignItems={'center'}>
-                <AvatarArea user={playerRedux.info} />
+                <AvatarArea user={playerRedux.player} />
             </Grid>
             <Grid item container xs={9} justifyContent={'center'} alignItems={'center'} >
                 <Grid item container xs={6} justifyContent={'center'} alignItems={'center'}>
@@ -156,7 +172,7 @@ const TopPlayer: React.FC<{ playerRedux: PlayerReducer, take: number, hands: Arr
     return (
         <Grid container direction={'column'} alignItems={'center'} sx={{ height: '100%' }}>
             <Grid container item xs={4} justifyContent={'center'} alignItems={'center'}>
-                <AvatarArea user={playerRedux.info} />
+                <AvatarArea user={playerRedux.player} />
             </Grid>
             <Grid item container xs={8} justifyContent={'center'} alignItems={'center'} >
                 <Stack

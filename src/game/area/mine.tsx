@@ -216,7 +216,7 @@ export const MineAreaContainer: React.FC<{ playerRedux: PlayerReducer, take: num
                     <Button variant="contained" color="warning" size="small" startIcon={<VisibilityIcon />} >我要明牌</Button>
                 </Grid>
                 <Grid item container xs={5} justifyContent={'center'} alignItems={'center'}>
-                    <AvatarArea user={playerRedux.info} />
+                    <AvatarArea user={playerRedux.player} />
                 </Grid>
                 <Grid item>
                     <Button variant="contained" color="primary" size="small" startIcon={<SmartToyIcon />} >挂机托管</Button>

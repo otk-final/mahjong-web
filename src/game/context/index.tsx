@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Ref } from 'react';
 import { EmptyPlayer, Player } from '../../component/player';
 import { MjExtra } from '../../component/tile';
 import { Area, FindArea } from './util';
@@ -10,10 +10,16 @@ import { memberExit, memberJoin, putPlay, racePlay, skipPlay, startGame, takePla
 export class GameEventBus {
 
     // 玩家
-    Lefter?: PlayerReducer
-    Righter?: PlayerReducer;
-    Toper?: PlayerReducer;
-    Bottomer?: PlayerReducer;
+    Lefter?: Player
+    Righter?: Player
+    Toper?: Player
+    Bottomer?: Player
+
+
+    LefterRef: any
+    RighterRef: any
+    ToperRef: any
+    BottomerRef: any
 
     //房间信息
     roomId: string
@@ -26,14 +32,32 @@ export class GameEventBus {
     }
 
     join(area: Area, member: Player) {
-        const memberCtx = new PlayerReducer(area, member)
         switch (area) {
-            case Area.Left: this.Lefter = memberCtx; break
-            case Area.Right: this.Righter = memberCtx; break
-            case Area.Bottom: this.Bottomer = memberCtx; break
-            case Area.Top: this.Toper = memberCtx; break
+            case Area.Left: this.Lefter = member; break
+            case Area.Right: this.Righter = member; break
+            case Area.Bottom: this.Bottomer = member; break
+            case Area.Top: this.Toper = member; break
         }
     }
+
+    bindPlayerRef(area: Area, ref: any) {
+        switch (area) {
+            case Area.Left: this.LefterRef = ref; break
+            case Area.Right: this.RighterRef = ref; break
+            case Area.Bottom: this.BottomerRef = ref; break
+            case Area.Top: this.ToperRef = ref; break
+        }
+    }
+
+    getPlayerRef(area: Area) {
+        switch (area) {
+            case Area.Left: return this.LefterRef;
+            case Area.Right: return this.RighterRef;
+            case Area.Bottom: return this.BottomerRef;
+            case Area.Top: return this.ToperRef;
+        }
+    }
+
 
     centerRef: any
     bindCenterRef(ref: any) {
@@ -121,11 +145,10 @@ export class GameEventBus {
 export class PlayerReducer {
 
     area: Area
-    info: Player
-
-    constructor(area: Area, info: Player) {
+    player: Player
+    constructor(area: Area, player: Player) {
         this.area = area
-        this.info = info
+        this.player = player
     }
 
     getHand(): Array<number> {
@@ -149,6 +172,11 @@ export class PlayerReducer {
 
     getOuts(): Array<number> {
         return []
+    }
+
+    reducerRef: any
+    bindRef(ref: any) {
+        this.reducerRef = ref
     }
 }
 

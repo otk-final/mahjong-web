@@ -13,7 +13,7 @@ import { FilterAuthor, roomProxy } from '../api/http';
 import { Box } from '@mui/system';
 import { NetConnect } from '../api/websocket';
 import { LoadingArea, LoadingBus, LoadingContext } from '../component/loading';
-import { FindArea } from './context/util';
+import { Area, FindArea } from './context/util';
 
 export const GameMainRoute: React.FC = () => {
     const params: any = useParams()
@@ -35,7 +35,6 @@ export const GameMainRoute: React.FC = () => {
             players.forEach((item: any) => {
                 ctx.join(FindArea(own.idx, item.idx), item)
             });
-
             //长连接
             const netConn = new NetConnect(ownAuthor)
             netConn.conn("ws://localhost:7070/ws/" + params.roomId)
@@ -57,17 +56,17 @@ export const GameMainRoute: React.FC = () => {
 
 const GameMainArea: React.FC<{ ctx: GameEventBus }> = ({ ctx }) => {
 
-
     let centerRef = useRef()
     let extraRef = useRef()
+
     // 玩家
-    let lefter = ctx?.Lefter!
-    let righter = ctx?.Righter!;
-    let toper = ctx?.Toper!;
-    let bottomer = ctx?.Bottomer!;
+    let lefterRef = useRef()
+    let righterRef = useRef()
+    let toperRef = useRef()
+    let bottomerRef = useRef()
 
     return (
-        <GameContext.Provider value={ctx!}>
+        <GameContext.Provider value={ctx}>
             <Grid className='App' container justifyContent={'center'}>
                 <Grid item container xs={1.5} justifyContent={'flex-start'} alignItems="center">
                     <RankDrawer />
@@ -78,7 +77,7 @@ const GameMainArea: React.FC<{ ctx: GameEventBus }> = ({ ctx }) => {
                             <Button variant="contained" startIcon={<ExitToAppIcon />} color="primary" size="small">退出游戏</Button>
                         </Grid>
                         <Grid item xs={8}>
-                            <PlayerContainer playerRedux={toper} direction='top' />
+                            <PlayerContainer ref={toperRef} player={ctx.Toper} direction={Area.Top} />
                         </Grid>
                         <Grid item container xs={2} justifyContent={'center'} alignItems={'center'} spacing={2}>
                             <ExtraArea ref={extraRef} extras={[]} />
@@ -87,18 +86,18 @@ const GameMainArea: React.FC<{ ctx: GameEventBus }> = ({ ctx }) => {
                     <Grid item xs  >
                         <Grid container sx={{ height: '100%' }}>
                             <Grid item xs={2.5}>
-                                <PlayerContainer playerRedux={lefter} direction='left' />
+                                <PlayerContainer ref={lefterRef} player={ctx.Lefter} direction={Area.Left} />
                             </Grid>
                             <Grid item xs={7} justifyContent={"center"} alignItems={'center'}>
                                 <CenterAreaContainer ref={centerRef} />
                             </Grid>
                             <Grid item xs={2.5}>
-                                <PlayerContainer playerRedux={righter} direction='right' />
+                                <PlayerContainer ref={righterRef} player={ctx.Righter} direction={Area.Right} />
                             </Grid>
                         </Grid>
                     </Grid>
                     <Grid item xs={3} >
-                        <PlayerContainer playerRedux={bottomer} direction='bottom' />
+                        <PlayerContainer ref={bottomerRef} player={ctx.Bottomer} direction={Area.Bottom} />
                     </Grid>
                 </Grid>
                 <Grid item container xs={1.5} justifyContent={'flex-end'} alignItems="center">

@@ -1,8 +1,16 @@
 import { GameEventBus } from ".";
+import { FindArea } from "./util";
 
 //加入房间
 export const memberJoin = (bus: GameEventBus, payload: any) => {
     console.info("memberJoin", payload)
+
+    //查询方位
+    const newArea = FindArea(bus.mine.idx, payload.newPlayer.idx)
+    bus.join(newArea, payload.newPlayer)
+
+    //新玩家加入
+    bus.getPlayerRef(newArea).current.join(newArea, payload.newPlayer)
 }
 
 //退出房间
