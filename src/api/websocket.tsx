@@ -16,15 +16,13 @@ export class NetConnect {
 
 
     conn(address: string) {
-        const subp = [
-            "userId=" + this.author.userId,
-            "userName=" + this.author.userName,
-            "token=" + this.author.token]
+        const subp = [this.author.userId, this.author.userName, this.author.token]
 
         //建立连接
-        let socket = new WebSocket(address)
-        socket.onmessage = (data: any) => {
-            this.consumers[''](data)
+        let socket = new WebSocket(address, subp)
+        socket.onmessage = (event: any) => {
+            const serverEvent = JSON.parse(event.data)
+            this.consumers[serverEvent.event](serverEvent.payload)
         }
         socket.onopen = (event: any) => {
             this.retryCount = 0
@@ -45,7 +43,7 @@ export class NetConnect {
 
 
     consumers: any = {}
-    subscribe(key: string, call: any) {
+    subscribe(key: number, call: any) {
         this.consumers[key] = call
     }
 
@@ -79,9 +77,10 @@ export class NetConnect {
         }
         this.retryLock = true
         this.retryCount++
-        if (this.retryTimer) clearInterval(this.retryTimer)
 
         console.info('retry', this.retryCount)
+
+        if (this.retryTimer) clearInterval(this.retryTimer)
         const that = this
         this.retryTimer = setTimeout(() => {
             that.conn(that.socketAddress)

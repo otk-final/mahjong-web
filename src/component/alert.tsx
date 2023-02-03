@@ -40,11 +40,13 @@ export const NotifyBar = forwardRef((props: {}, ref: Ref<any>) => {
     notifyCtx.bindRef(ref)
     const alertRef = useRef()
     return (
-        <Snackbar open={stateOpen.open} autoHideDuration={3000} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }} onClose={handleClose}>
-            <NotifyAlert severity={stateOpen.severity} sx={{ width: '100%' }} ref={alertRef} onClose={handleClose}>
-                {stateOpen.message}
-            </NotifyAlert>
-        </Snackbar>
+        <React.Fragment>
+            <Snackbar open={stateOpen.open} autoHideDuration={3000} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }} onClose={handleClose}>
+                <NotifyAlert severity={stateOpen.severity} sx={{ width: '100%' }} ref={alertRef} onClose={handleClose}>
+                    {stateOpen.message}
+                </NotifyAlert>
+            </Snackbar>
+        </React.Fragment>
     )
 })
 

@@ -3,8 +3,7 @@ import { Player } from '../../component/player';
 import { MjExtra } from '../../component/tile';
 import { Area } from './util';
 import { NetConnect } from '../../api/websocket';
-
-
+import { memberExit, memberJoin, putPlay, racePlay, skipPlay, startGame, takePlay, turnPlay, winPlay } from './consumer';
 
 
 // 游戏
@@ -92,44 +91,29 @@ export class GameEventBus {
 
     bindConnect(conn: NetConnect) {
         //玩家加入
-        conn.subscribe('100', (msg: any) => {
-
-        })
-        //玩家推出
-        conn.subscribe('101', (msg: any) => {
-
-        })
+        conn.subscribe(100, (payload: any) => { memberJoin(this, payload) })
+        //玩家退出
+        conn.subscribe(101, (payload: any) => { memberExit(this, payload) })
         //游戏开始
-        conn.subscribe('102', (msg: any) => {
-
-        })
+        conn.subscribe(102, (payload: any) => { startGame(this, payload) })
         //摸牌
-        conn.subscribe('103', (msg: any) => {
-
-        })
+        conn.subscribe(103, (payload: any) => { takePlay(this, payload) })
         //出牌
-        conn.subscribe('104', (msg: any) => {
-
-        })
+        conn.subscribe(104, (payload: any) => { putPlay(this, payload) })
         //判断
-        conn.subscribe('105', (msg: any) => {
-
-        })
+        conn.subscribe(105, (payload: any) => { racePlay(this, payload) })
         //胡牌
-        conn.subscribe('106', (msg: any) => {
-
-        })
+        conn.subscribe(106, (payload: any) => { winPlay(this, payload) })
         //忽略
-        conn.subscribe('107', (msg: any) => {
-
-        })
+        conn.subscribe(107, (payload: any) => { skipPlay(this, payload) })
         //回合
-        conn.subscribe('108', (msg: any) => {
-
-        })
+        conn.subscribe(108, (payload: any) => { turnPlay(this, payload) })
     }
-
 }
+
+
+
+
 
 // 玩家
 export class PlayerReducer {
@@ -144,16 +128,16 @@ export class PlayerReducer {
 
     getHand(): Array<number> {
         if (this.area !== Area.Bottom) {
-            return [0, 0, 0, 0, 0]
+            return []
         }
-        return [2, 45, 4, 12, 35, 25, 2, 3, 4, 11, 25, 1]
+        return []
     }
     getTake(): number {
         return -1
     }
     getRaces(): Array<Array<number>> {
         if (this.area !== Area.Bottom) {
-            return [[1, 2, 3], [11, 12, 13], [21, 22, 23], [17, 18, 19]]
+            return []
         }
         return []
     }
@@ -162,7 +146,7 @@ export class PlayerReducer {
     }
 
     getOuts(): Array<number> {
-        return [1, 2, 3, 12, 3]
+        return []
     }
 }
 

@@ -89,15 +89,19 @@ const UserPlayer = forwardRef((props: { defaultPlayerId: string }, ref: Ref<any>
 
 const UserDial: React.FC = () => {
   const notifyCtx = useContext<NotifyBus>(NotifyContext)
+  const navigator = useNavigate()
 
+  
   const createRoom = (event: any) => {
-
-    
-
-
-
-    roomProxy('a').create({}).then((resp: any) => {
-
+    var param = {
+      game: { mode: "std", nums: 4, custom: {} },
+      payment: { mode: 1, amount: 3 }
+    }
+    //创建房间
+    roomProxy('a').create(param).then((resp: any) => {
+      notifyCtx.success('创建成功')
+      //进入房间
+      navigator('/game/' + resp.data.roomId + "/" + resp.data.own.acctId)
     }).catch((err: any) => {
       notifyCtx.error(err.message)
     })

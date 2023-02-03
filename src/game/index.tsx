@@ -78,7 +78,7 @@ export const GameMainArea: React.FC<{ roomId: string, playerId: string, round: n
         netConn.retry(3)
     })
 
-    
+
     netConn.conn("ws://localhost:7070/ws/" + roomId)
     contextBus.bindConnect(netConn)
 

@@ -190,10 +190,10 @@ export const CenterAreaContainer = forwardRef((props: {}, ref: Ref<any>) => {
     return (
         <Stack sx={{ height: '100%', width: '100%', border: '1px dotted black', borderRadius: '20px', position: 'relative' }} justifyContent={'center'} alignItems={'center'} >
             <TurnArea turn={Area.Top} ref={turnRef} />
-            <NormOutputArea area={Area.Top} lasted={false} output={[1, 2, 3]} ref={topRef} />
-            <NormOutputArea area={Area.Left} lasted={false} output={[4, 5, 6]} ref={leftRef} />
-            <NormOutputArea area={Area.Right} lasted={false} output={[11, 12, 13]} ref={rightRef} />
-            <NormOutputArea area={Area.Bottom} lasted={true} output={[21, 22, 23]} ref={bottomRef} />
+            <NormOutputArea area={Area.Top} lasted={false} output={[]} ref={topRef} />
+            <NormOutputArea area={Area.Left} lasted={false} output={[]} ref={leftRef} />
+            <NormOutputArea area={Area.Right} lasted={false} output={[]} ref={rightRef} />
+            <NormOutputArea area={Area.Bottom} lasted={true} output={[]} ref={bottomRef} />
             <RaceEffectArea ref={effectRef} />
         </Stack >
     )
