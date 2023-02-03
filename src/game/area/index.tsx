@@ -51,22 +51,21 @@ const JoinContainer = forwardRef((props: { redux: PlayerReducer, direction: Area
     useImperativeHandle(ref, () => ({
 
     }))
-    reduxOps.bindRef(ref)
 
     if (props.direction === Area.Left) {
-        return <LeftPlayer playerRedux={reduxOps} take={take} hands={hands} races={races} />
+        return <LeftPlayer redux={reduxOps} take={take} hands={hands} races={races} />
     } else if (props.direction === Area.Right) {
-        return <RightPlayer playerRedux={reduxOps} take={take} hands={hands} races={races} />
+        return <RightPlayer redux={reduxOps} take={take} hands={hands} races={races} />
     } else if (props.direction === Area.Top) {
-        return <TopPlayer playerRedux={reduxOps} take={take} hands={hands} races={races} />
+        return <TopPlayer redux={reduxOps} take={take} hands={hands} races={races} />
     }
-    return <MineAreaContainer playerRedux={reduxOps} take={take} hands={hands} races={races} />
+    return <MineAreaContainer redux={reduxOps} take={take} hands={hands} races={races} />
 })
 
 
 
 
-const LeftPlayer: React.FC<{ playerRedux: PlayerReducer, take: number, hands: Array<number>, races: Array<Array<number>> }> = ({ playerRedux, take, hands, races }) => {
+const LeftPlayer: React.FC<{ redux: PlayerReducer, take: number, hands: Array<number>, races: Array<Array<number>> }> = ({ redux, take, hands, races }) => {
     return (
         <Stack alignItems={'center'} sx={{ height: '100%' }}>
             <Grid item container xs={9} alignItems={'center'}>
@@ -112,16 +111,16 @@ const LeftPlayer: React.FC<{ playerRedux: PlayerReducer, take: number, hands: Ar
                 </Grid>
             </Grid>
             <Grid item container xs={3} justifyContent={'center'} alignItems={'center'}>
-                <AvatarArea user={playerRedux.player} />
+                <AvatarArea user={redux.player} />
             </Grid>
         </Stack>)
 }
 
-const RightPlayer: React.FC<{ playerRedux: PlayerReducer, take: number, hands: Array<number>, races: Array<Array<number>> }> = ({ playerRedux, take, hands, races }) => {
+const RightPlayer: React.FC<{ redux: PlayerReducer, take: number, hands: Array<number>, races: Array<Array<number>> }> = ({ redux, take, hands, races }) => {
     return (
         <Stack alignItems={'center'} sx={{ height: '100%' }}>
             <Grid item container xs={3} justifyContent={'center'} alignItems={'center'}>
-                <AvatarArea user={playerRedux.player} />
+                <AvatarArea user={redux.player} />
             </Grid>
             <Grid item container xs={9} justifyContent={'center'} alignItems={'center'} >
                 <Grid item container xs={6} justifyContent={'center'} alignItems={'center'}>
@@ -168,11 +167,11 @@ const RightPlayer: React.FC<{ playerRedux: PlayerReducer, take: number, hands: A
         </Stack>)
 }
 
-const TopPlayer: React.FC<{ playerRedux: PlayerReducer, take: number, hands: Array<number>, races: Array<Array<number>> }> = ({ playerRedux, take, hands, races }) => {
+const TopPlayer: React.FC<{ redux: PlayerReducer, take: number, hands: Array<number>, races: Array<Array<number>> }> = ({ redux, take, hands, races }) => {
     return (
         <Grid container direction={'column'} alignItems={'center'} sx={{ height: '100%' }}>
             <Grid container item xs={4} justifyContent={'center'} alignItems={'center'}>
-                <AvatarArea user={playerRedux.player} />
+                <AvatarArea user={redux.player} />
             </Grid>
             <Grid item container xs={8} justifyContent={'center'} alignItems={'center'} >
                 <Stack

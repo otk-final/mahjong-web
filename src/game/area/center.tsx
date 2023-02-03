@@ -148,12 +148,12 @@ const RaceEffectArea = forwardRef((props: {}, ref: Ref<any>) => {
 export const CenterAreaContainer = forwardRef((props: {}, ref: Ref<any>) => {
 
     const gameCtx = useContext<GameEventBus>(GameContext)
-    let leftRef: any = useRef(null)
-    let rightRef: any = useRef(null)
-    let topRef: any = useRef(null)
-    let bottomRef: any = useRef(null)
-    let effectRef: any = useRef(null)
-    let turnRef: any = useRef(null)
+    let leftRef: any = useRef()
+    let rightRef: any = useRef()
+    let topRef: any = useRef()
+    let bottomRef: any = useRef()
+    let effectRef: any = useRef()
+    let turnRef: any = useRef()
 
     const dispatchRefIns = (area: Area): any => {
         if (area === Area.Top) {

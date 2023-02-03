@@ -41,6 +41,8 @@ export const GameMainRoute: React.FC = () => {
             ctx.bindConnect(netConn)
 
             setGameContext(ctx)
+
+            document.title = '玩家：' + own.uname
         }).catch((err: any) => {
             loadingCtx.hide()
         })

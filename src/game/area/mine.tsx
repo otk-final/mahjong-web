@@ -37,18 +37,18 @@ export const RaceArea = forwardRef((props: { submitCall: any, options: Array<str
         </Grid >)
 })
 
-function resetNoReadyClass(ele: any) {
-    var childs = ele.children
-    for (var i = 0; i < childs.length; i++) {
-        let sub: any = childs[i]
-        if (sub.className.indexOf('hasReady') === -1) {
-            continue
-        }
-        sub.className = sub.className.replace('hasReady', '')
-    }
-}
+// function resetNoReadyClass(ele: any) {
+//     var childs = ele.children
+//     for (var i = 0; i < childs.length; i++) {
+//         let sub: any = childs[i]
+//         if (sub.className.indexOf('hasReady') === -1) {
+//             continue
+//         }
+//         sub.className = sub.className.replace('hasReady', '')
+//     }
+// }
 
-export const TileArea = forwardRef((props: { playerRedux: PlayerReducer, take: number, hands: Array<number>, races: Array<Array<number>> }, ref: Ref<any>) => {
+export const TileArea = forwardRef((props: { mineRedux: PlayerReducer, take: number, hands: Array<number>, races: Array<Array<number>> }, ref: Ref<any>) => {
 
 
     const gameCtx = useContext<GameEventBus>(GameContext)
@@ -104,6 +104,7 @@ export const TileArea = forwardRef((props: { playerRedux: PlayerReducer, take: n
             setTake(-1)
         },
         resetTake: (tile: number) => {
+            debugger
             setTake(tile)
         },
         mergeTake: () => {
@@ -155,14 +156,14 @@ export const TileArea = forwardRef((props: { playerRedux: PlayerReducer, take: n
 })
 
 
-export const MineAreaContainer: React.FC<{ playerRedux: PlayerReducer, take: number, hands: Array<number>, races: Array<Array<number>> }> = ({ playerRedux, take, hands, races }) => {
+export const MineAreaContainer: React.FC<{ redux: PlayerReducer, take: number, hands: Array<number>, races: Array<Array<number>> }> = ({ redux, take, hands, races }) => {
 
     const gameCtx = useContext<GameEventBus>(GameContext)
 
     //牌库状态
     let [mineOptions, setOptions] = React.useState<Array<string>>(['peng', 'gang', 'chi', 'hu', 'pass'])
-    let tileRef = React.useRef(null)
-    let raceRef = React.useRef(null)
+    let tileRef = React.useRef()
+    let raceRef = React.useRef()
 
     let submitConfirm = (race: string) => {
 
@@ -209,14 +210,14 @@ export const MineAreaContainer: React.FC<{ playerRedux: PlayerReducer, take: num
                 <RaceArea submitCall={(race: string) => { submitConfirm(race) }} options={mineOptions} ref={raceRef} />
             </Grid>
             <Grid item container xs justifyContent={'center'} alignItems={'center'} >
-                <TileArea playerRedux={playerRedux} take={take} hands={hands} races={races} ref={tileRef} />
+                <TileArea mineRedux={redux} take={take} hands={hands} races={races} ref={tileRef} />
             </Grid>
             <Grid container item xs={2} justifyContent={'center'} alignItems={'center'}>
                 <Grid item>
                     <Button variant="contained" color="warning" size="small" startIcon={<VisibilityIcon />} >我要明牌</Button>
                 </Grid>
                 <Grid item container xs={5} justifyContent={'center'} alignItems={'center'}>
-                    <AvatarArea user={playerRedux.player} />
+                    <AvatarArea user={redux.player} />
                 </Grid>
                 <Grid item>
                     <Button variant="contained" color="primary" size="small" startIcon={<SmartToyIcon />} >挂机托管</Button>

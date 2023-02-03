@@ -155,7 +155,7 @@ export class PlayerReducer {
         if (this.area !== Area.Bottom) {
             return []
         }
-        return []
+        return [1,2,3]
     }
     getTake(): number {
         return -1
@@ -172,11 +172,6 @@ export class PlayerReducer {
 
     getOuts(): Array<number> {
         return []
-    }
-
-    reducerRef: any
-    bindRef(ref: any) {
-        this.reducerRef = ref
     }
 }
 
