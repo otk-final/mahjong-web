@@ -14,26 +14,36 @@ const EmptyContainer: React.FC<{ direction: Area }> = ({ direction }) => {
 }
 
 
-export const PlayerContainer = forwardRef((props: { player?: Player, direction: Area }, ref: Ref<any>) => {
+export const PlayerContainer = forwardRef((props: { direction: Area }, ref: Ref<any>) => {
 
 
     const gameCtx = useContext<GameEventBus>(GameContext)
-    const [stateJoined, setJoined] = useState<{ direction: Area, redux?: PlayerReducer }>({
-        direction: props.direction,
-        redux: props.player ? new PlayerReducer(props.direction, props.player!) : undefined,
+    const player = gameCtx.getPlayer(props.direction)
+
+    const [stateJoined, setJoined] = useState<{ direction: Area, redux?: PlayerReducer }>(() => {
+        //不存在
+        let redux = gameCtx.getPlayerReducer(props.direction)
+        if (!redux || !player) {
+            redux = new PlayerReducer(props.direction, player!, ref)
+        }
+        return {
+            direction: props.direction,
+            redux: redux,
+        }
     })
 
     useImperativeHandle(ref, () => ({
-        join(direction: Area, joined: Player) {
-            setJoined({ direction: direction, redux: new PlayerReducer(direction, joined) })
+        join(direction: Area, newPlayer: Player) {
+            setJoined({ direction: direction, redux: new PlayerReducer(direction, newPlayer, ref) })
         },
         exit() {
-            setJoined({ direction: props.direction })
+            setJoined({ direction: props.direction, redux: undefined })
         }
     }))
 
     //bind
-    gameCtx.bindPlayerRef(props.direction, ref)
+    gameCtx.setPlayerRef(props.direction, ref)
+    if (stateJoined.redux) { gameCtx.setPlayerReducer(stateJoined.direction, stateJoined.redux) }
 
     return (
         stateJoined.redux ? <JoinContainer ref={ref} redux={stateJoined.redux!} direction={stateJoined.direction} /> : <EmptyContainer direction={props.direction} />

@@ -59,16 +59,16 @@ export const TileArea = forwardRef((props: { mineRedux: PlayerReducer, take: num
 
     // 选择
     let selectReady = (mj: number, ok: boolean) => {
-        let exitReady = stateReady.slice()
+        let existReady = stateReady.slice()
         if (ok) {
-            exitReady.push(mj)
+            existReady.push(mj)
         } else {
-            let idx = exitReady.indexOf(mj)
+            let idx = existReady.indexOf(mj)
             if (idx !== -1) {
-                exitReady.splice(idx, 1)
+                existReady.splice(idx, 1)
             }
         }
-        setReady(exitReady)
+        setReady(existReady)
     }
 
     let handRef = React.createRef<HTMLElement>()
@@ -172,7 +172,7 @@ export const MineAreaContainer: React.FC<{ redux: PlayerReducer, take: number, h
 
         //跳过直接摸牌
         if (race === 'pass') {
-            return ignoreAndTake(tileIns)
+            return ignoreAndTake(gameCtx, tileIns)
         }
 
         let ready = tileIns.getReady()
@@ -191,19 +191,13 @@ export const MineAreaContainer: React.FC<{ redux: PlayerReducer, take: number, h
         gameCtx.doEffect(Area.Left, race)
 
         //output
-        gameCtx.doOutput(Area.Right, ...ready)
+        gameCtx.doOutput(Area.Left, ...ready)
 
         //set value and clear css
         tileIns.resetHands(hands)
         tileIns.resetReady()
         raceIns.resetOptions(["hu", "pass"])
     }
-
-
-    function ignoreAndTake(tileIns: any) {
-        tileIns.resetTake(24)
-    }
-
     return (
         <Grid container direction={'column'} alignItems={'center'} sx={{ height: '100%' }}>
             <Grid item container xs={4} justifyContent={'center'} >
@@ -225,4 +219,9 @@ export const MineAreaContainer: React.FC<{ redux: PlayerReducer, take: number, h
             </Grid>
         </Grid>
     )
+}
+
+
+function ignoreAndTake(gameCtx: GameEventBus, tileIns: any) {
+    tileIns.resetTake(24)
 }

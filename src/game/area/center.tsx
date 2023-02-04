@@ -242,10 +242,13 @@ const RemainedArea = forwardRef((props: { remained: number }, ref: Ref<any>) => 
     let [stateRemained, setRemained] = useState(props.remained)
 
     useImperativeHandle(ref, () => ({
+        setRemained:(num:number)=>{
+            setRemained(num)
+        },
         // 剩余牌
-        updateRemained: () => {
+        take: () => {
             stateRemained--
-            if (stateRemained === 0) {
+            if (stateRemained < 0) {
                 stateRemained = 0
             }
             setRemained(stateRemained)

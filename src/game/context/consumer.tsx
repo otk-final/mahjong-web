@@ -1,16 +1,14 @@
 import { GameEventBus } from ".";
-import { FindArea } from "./util";
+import { Area, FindArea } from "./util";
 
 //加入房间
 export const memberJoin = (bus: GameEventBus, payload: any) => {
-    console.info("memberJoin", payload)
-
     //查询方位
     const newArea = FindArea(bus.mine.idx, payload.newPlayer.idx)
-    bus.join(newArea, payload.newPlayer)
+    bus.setPlayer(newArea, payload.newPlayer)
 
     //新玩家加入
-    bus.getPlayerRef(newArea).current.join(newArea, payload.newPlayer)
+    bus.getPlayerRef(newArea)?.current.join(newArea, payload.newPlayer)
 }
 
 //退出房间
@@ -21,6 +19,31 @@ export const memberExit = (bus: GameEventBus, payload: any) => {
 //游戏开始
 export const startGame = (bus: GameEventBus, payload: any) => {
 
+    const mineIdx = bus.mine.idx
+    //初始化渲染玩家手牌
+    payload.hands.forEach((item: any) => {
+        const itemArea = FindArea(mineIdx, item.idx)
+        bus.getPlayerReducer(itemArea)?.setHand(item.hands)
+    });
+    //渲染当前方位
+    const turnArea = FindArea(mineIdx, payload.turnIdx)
+    bus.turnRef.current.changeTurn(turnArea)
+
+    //开启计时器
+    bus.countdwonRef.current.start()
+
+    //剩余牌库
+    bus.remainedRef.current.setRemained(payload.remained)
+
+    //非本回合
+    if (!payload.turn) { return }
+
+    //延迟触发摸牌事件
+    setTimeout(() => {
+        //从前摸牌
+        const mineRedux = bus.getPlayerReducer(Area.Bottom)
+        mineRedux!.doTake(1)
+    }, 500)
 }
 
 export const takePlay = (bus: GameEventBus, payload: any) => {

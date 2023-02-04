@@ -9,17 +9,9 @@ import { memberExit, memberJoin, putPlay, racePlay, skipPlay, startGame, takePla
 // 游戏
 export class GameEventBus {
 
-    // 玩家
-    Lefter?: Player
-    Righter?: Player
-    Toper?: Player
-    Bottomer?: Player
-
-
-    LefterRef: any
-    RighterRef: any
-    ToperRef: any
-    BottomerRef: any
+    playerMap: Map<Area, Player> = new Map()
+    refMap: Map<Area, PlayerReducer> = new Map()
+    reduxMap: Map<Area, PlayerReducer> = new Map()
 
     //房间信息
     roomId: string
@@ -30,32 +22,23 @@ export class GameEventBus {
         this.round = round
         this.mine = mine
     }
-
-    join(area: Area, member: Player) {
-        switch (area) {
-            case Area.Left: this.Lefter = member; break
-            case Area.Right: this.Righter = member; break
-            case Area.Bottom: this.Bottomer = member; break
-            case Area.Top: this.Toper = member; break
-        }
+    setPlayer(area: Area, member: Player) {
+        this.playerMap.set(area, member)
     }
-
-    bindPlayerRef(area: Area, ref: any) {
-        switch (area) {
-            case Area.Left: this.LefterRef = ref; break
-            case Area.Right: this.RighterRef = ref; break
-            case Area.Bottom: this.BottomerRef = ref; break
-            case Area.Top: this.ToperRef = ref; break
-        }
+    getPlayer(area: Area): Player | undefined {
+        return this.playerMap.get(area)
     }
-
-    getPlayerRef(area: Area) {
-        switch (area) {
-            case Area.Left: return this.LefterRef;
-            case Area.Right: return this.RighterRef;
-            case Area.Bottom: return this.BottomerRef;
-            case Area.Top: return this.ToperRef;
-        }
+    setPlayerRef(area: Area, ref: any) {
+        this.refMap.set(area, ref)
+    }
+    getPlayerRef(area: Area): any | undefined {
+        return this.refMap.get(area)
+    }
+    setPlayerReducer(area: Area, redux: PlayerReducer) {
+        this.reduxMap.set(area, redux)
+    }
+    getPlayerReducer(area: Area): PlayerReducer | undefined {
+        return this.reduxMap.get(area)
     }
 
 
@@ -146,23 +129,27 @@ export class PlayerReducer {
 
     area: Area
     player: Player
-    constructor(area: Area, player: Player) {
+    holdRef: any
+    constructor(area: Area, player: Player, ref: any) {
         this.area = area
         this.player = player
+        this.holdRef = ref
     }
-
+    setHand(tiles: Array<number>) {
+        this.getRefCurrent().initHand(tiles)
+    }
     getHand(): Array<number> {
         if (this.area !== Area.Bottom) {
-            return []
+            return [0, 0, 0, 0]
         }
-        return [1,2,3]
+        return [1, 2, 3, 4, 5, 11, 12, 13, 14, 21, 22, 25, 26, 29]
     }
     getTake(): number {
         return -1
     }
     getRaces(): Array<Array<number>> {
         if (this.area !== Area.Bottom) {
-            return []
+            return [[1, 2, 3], [11, 12, 13], [21, 22, 23], [27, 28, 29]]
         }
         return []
     }
@@ -173,6 +160,20 @@ export class PlayerReducer {
     getOuts(): Array<number> {
         return []
     }
+
+    getRefCurrent(): any {
+        return this.holdRef.current
+    }
+
+    //摸牌
+    doTake(direction: number) {
+
+    }
+
+    doPut() {
+
+    }
+
 }
 
 

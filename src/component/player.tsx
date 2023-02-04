@@ -31,7 +31,7 @@ export const AvatarArea: React.FC<{ user: Player }> = ({ user }) => {
         <Stack direction={'row'} spacing={1}>
             <Avatar variant="rounded" src={AvatarRandom()} sx={{ width: 50, height: 50 }} />
             <Stack justifyContent={'center'}>
-                <Typography variant='caption'>{user.uname}</Typography>
+                <Typography variant='caption'>{user.uname}({user.alias})</Typography>
                 <Typography variant='caption'>{user.ip}</Typography>
             </Stack>
         </Stack>

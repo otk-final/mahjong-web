@@ -33,7 +33,7 @@ export const GameMainRoute: React.FC = () => {
             //初始化
             const ctx = new GameEventBus(params.roomId, 0, own)
             players.forEach((item: any) => {
-                ctx.join(FindArea(own.idx, item.idx), item)
+                ctx.setPlayer(FindArea(own.idx, item.idx), item)
             });
             //长连接
             const netConn = new NetConnect(ownAuthor)
@@ -79,7 +79,7 @@ const GameMainArea: React.FC<{ ctx: GameEventBus }> = ({ ctx }) => {
                             <Button variant="contained" startIcon={<ExitToAppIcon />} color="primary" size="small">退出游戏</Button>
                         </Grid>
                         <Grid item xs={8}>
-                            <PlayerContainer ref={toperRef} player={ctx.Toper} direction={Area.Top} />
+                            <PlayerContainer ref={toperRef} direction={Area.Top} />
                         </Grid>
                         <Grid item container xs={2} justifyContent={'center'} alignItems={'center'} spacing={2}>
                             <ExtraArea ref={extraRef} extras={[]} />
@@ -88,18 +88,18 @@ const GameMainArea: React.FC<{ ctx: GameEventBus }> = ({ ctx }) => {
                     <Grid item xs  >
                         <Grid container sx={{ height: '100%' }}>
                             <Grid item xs={2.5}>
-                                <PlayerContainer ref={lefterRef} player={ctx.Lefter} direction={Area.Left} />
+                                <PlayerContainer ref={lefterRef} direction={Area.Left} />
                             </Grid>
                             <Grid item xs={7} justifyContent={"center"} alignItems={'center'}>
                                 <CenterAreaContainer ref={centerRef} />
                             </Grid>
                             <Grid item xs={2.5}>
-                                <PlayerContainer ref={righterRef} player={ctx.Righter} direction={Area.Right} />
+                                <PlayerContainer ref={righterRef} direction={Area.Right} />
                             </Grid>
                         </Grid>
                     </Grid>
                     <Grid item xs={3} >
-                        <PlayerContainer ref={bottomerRef} player={ctx.Bottomer} direction={Area.Bottom} />
+                        <PlayerContainer ref={bottomerRef} direction={Area.Bottom} />
                     </Grid>
                 </Grid>
                 <Grid item container xs={1.5} justifyContent={'flex-end'} alignItems="center">
@@ -175,9 +175,7 @@ const ExtraArea = forwardRef((props: { extras: Array<MjExtra> }, ref: Ref<any>) 
     const [stateExtras, setExtras] = useState<Array<MjExtra>>(props.extras)
 
     useImperativeHandle(ref, () => ({
-        renderExtras: (mj: Array<MjExtra>) => {
-            setExtras(mj)
-        }
+        renderExtras: (mj: Array<MjExtra>) => { setExtras(mj) }
     }))
 
     gameCtx.bindExtraRef(ref)
