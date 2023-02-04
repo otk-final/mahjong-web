@@ -75,15 +75,14 @@ export class GameEventBus {
         this.centerRef.current.output(area, ...tiles)
     }
 
-
     //开始游戏
     start() {
-
+        debugger
     }
 
-    //游戏结束
-    finish() {
-
+    //退出游戏
+    exit() {
+        debugger
     }
 
     mjExtras: Array<MjExtra> = []
@@ -119,9 +118,6 @@ export class GameEventBus {
         conn.subscribe(108, (payload: any) => { turnPlay(this, payload) })
     }
 }
-
-
-
 
 
 // 玩家

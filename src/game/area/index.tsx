@@ -18,12 +18,12 @@ export const PlayerContainer = forwardRef((props: { direction: Area }, ref: Ref<
 
 
     const gameCtx = useContext<GameEventBus>(GameContext)
-    const player = gameCtx.getPlayer(props.direction)
 
     const [stateJoined, setJoined] = useState<{ direction: Area, redux?: PlayerReducer }>(() => {
         //不存在
+        let player = gameCtx.getPlayer(props.direction)
         let redux = gameCtx.getPlayerReducer(props.direction)
-        if (!redux || !player) {
+        if (player) {
             redux = new PlayerReducer(props.direction, player!, ref)
         }
         return {

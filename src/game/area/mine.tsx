@@ -6,6 +6,8 @@ import { AvatarArea } from "../../component/player";
 import { MjBottomImage, MjImage } from "../../component/tile";
 import { MJRaceFilter } from "../../assets";
 import { Area } from "../context/util";
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 
@@ -198,6 +200,15 @@ export const MineAreaContainer: React.FC<{ redux: PlayerReducer, take: number, h
         tileIns.resetReady()
         raceIns.resetOptions(["hu", "pass"])
     }
+
+    let startGame = (event: any) => {
+        gameCtx.start()
+    }
+
+    let exitGame = (event: any) => {
+        gameCtx.exit()
+    }
+
     return (
         <Grid container direction={'column'} alignItems={'center'} sx={{ height: '100%' }}>
             <Grid item container xs={4} justifyContent={'center'} >
@@ -206,7 +217,10 @@ export const MineAreaContainer: React.FC<{ redux: PlayerReducer, take: number, h
             <Grid item container xs justifyContent={'center'} alignItems={'center'} >
                 <TileArea mineRedux={redux} take={take} hands={hands} races={races} ref={tileRef} />
             </Grid>
-            <Grid container item xs={2} justifyContent={'center'} alignItems={'center'}>
+            <Grid container item xs={2} spacing={2} justifyContent={'center'} alignItems={'center'}>
+                <Grid item>
+                    <Button variant="contained" color="info" size="small" startIcon={<PlayCircleOutlineIcon />} onClick={(e) => { startGame(e) }} >开始游戏</Button>
+                </Grid>
                 <Grid item>
                     <Button variant="contained" color="warning" size="small" startIcon={<VisibilityIcon />} >我要明牌</Button>
                 </Grid>
@@ -215,6 +229,9 @@ export const MineAreaContainer: React.FC<{ redux: PlayerReducer, take: number, h
                 </Grid>
                 <Grid item>
                     <Button variant="contained" color="primary" size="small" startIcon={<SmartToyIcon />} >挂机托管</Button>
+                </Grid>
+                <Grid item>
+                    <Button variant="contained" startIcon={<ExitToAppIcon />} color="info" size="small" onClick={(e) => { exitGame(e) }} >退出游戏</Button>
                 </Grid>
             </Grid>
         </Grid>
