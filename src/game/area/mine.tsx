@@ -10,6 +10,8 @@ import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
+import { LoadingArea, LoadingBus, LoadingContext } from "../../component/loading";
+import { NotifyBus, NotifyContext } from "../../component/alert";
 
 
 export const RaceArea = forwardRef((props: { submitCall: any, options: Array<string> }, ref: Ref<any>) => {
@@ -20,9 +22,7 @@ export const RaceArea = forwardRef((props: { submitCall: any, options: Array<str
     }
 
     React.useImperativeHandle(ref, () => ({
-        resetOptions: (actions: Array<string>) => {
-            setOptions(actions)
-        }
+        updateOptions: (actions: Array<string>) => { setOptions(actions) }
     }))
 
     return (
@@ -158,50 +158,40 @@ export const TileArea = forwardRef((props: { mineRedux: PlayerReducer, take: num
     )
 })
 
-
 export const MineAreaContainer: React.FC<{ redux: PlayerReducer, take: number, hands: Array<number>, races: Array<Array<number>> }> = ({ redux, take, hands, races }) => {
 
     const gameCtx = useContext<GameEventBus>(GameContext)
+    const loadingCtx = useContext<LoadingBus>(LoadingContext)
+    const notifyCtx = useContext<NotifyBus>(NotifyContext)
+
 
     //牌库状态
     let [mineOptions, setOptions] = React.useState<Array<string>>(['peng', 'gang', 'chi', 'hu', 'pass'])
     let tileRef = React.useRef()
     let raceRef = React.useRef()
 
+
     let submitConfirm = (race: string) => {
 
         let raceIns: any = raceRef.current
         let tileIns: any = tileRef.current
 
-        //跳过直接摸牌
         if (race === 'pass') {
-            return ignoreAndTake(gameCtx, tileIns)
+            //跳过直接摸牌
+            return doIgnore(gameCtx, tileIns)
+        } else if (race === 'hu') {
+            //胡牌
+            return doHu(gameCtx, tileIns, raceIns)
+        } else {
+            //判定
+            let ready = tileIns.getReady()
+            if (ready.length === 0) {
+                return notifyCtx.warn("操作非法")
+            }
+            //TODO 判定数量
+            return doRace(gameCtx, tileIns, raceIns, race, ready)
         }
-
-        let ready = tileIns.getReady()
-        if (ready.length === 0) {
-            return
-        }
-        //有可能 take hand 同时提交 获取全量
-        let hands = tileIns.getHands()
-        //移除牌
-        ready.forEach((item: number) => {
-            let idx = hands.indexOf(item)
-            if (idx !== -1) hands.splice(idx, 1)
-        });
-
-        //show effect
-        gameCtx.doEffect(Area.Left, race)
-
-        //output
-        gameCtx.doOutput(Area.Left, ...ready)
-
-        //set value and clear css
-        tileIns.updateHands(hands)
-        tileIns.resetReady()
-        raceIns.resetOptions(["hu", "pass"])
     }
-
 
     return (
         <Grid container direction={'column'} alignItems={'center'} sx={{ height: '100%' }}>
@@ -233,6 +223,35 @@ export const MineAreaContainer: React.FC<{ redux: PlayerReducer, take: number, h
 }
 
 
-function ignoreAndTake(gameCtx: GameEventBus, tileIns: any) {
-    tileIns.resetTake(24)
+function doIgnore(gameCtx: GameEventBus, tileIns: any) {
+    tileIns.updateTake(24)
 }
+
+function doHu(gameCtx: GameEventBus, tileIns: any, raceIns: any) {
+
+}
+function doTake() { }
+
+function doPut() {
+
+}
+
+function doRace(gameCtx: GameEventBus, tileIns: any, raceIns: any, race: string, raceReady: Array<number>) {
+
+    //有可能 take hand 同时提交 获取全量, 移除牌
+    let hands = tileIns.getHands()
+    raceReady.forEach((item: number) => {
+        let idx = hands.indexOf(item)
+        if (idx !== -1) hands.splice(idx, 1)
+    });
+
+    //show effect and output
+    gameCtx.doEffect(Area.Bottom, race)
+    gameCtx.doOutput(Area.Bottom, ...raceReady)
+
+    //set value and clear css
+    tileIns.updateHands(hands)
+    tileIns.resetReady()
+    raceIns.updateOptions([])
+}
+

@@ -28,34 +28,28 @@ function App() {
   const valueChange = function (event: any) {
     setRoomId(event.target.value)
   }
-
-
-  const appNotify = new NotifyBus()
-
   return (
-    <NotifyContext.Provider value={appNotify}>
-      <Box sx={{ height: '100vh', bgcolor: 'aliceblue' }} justifyContent={'center'} >
-        <Stack sx={{ height: '100%' }} justifyContent="center" alignItems="center" spacing={2}>
-          <Paper elevation={1} sx={{ p: '2px 4px', display: 'flex', alignItems: 'center' }}>
-            <TextField label="请输入游戏房间号"
-              variant="standard"
-              color="primary"
-              sx={{ width: '400px' }}
-              value={roomId}
-              onChange={valueChange}
-              autoFocus
-              focused />
-            <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
-            <IconButton color="primary" sx={{ p: '10px' }} aria-label="directions" onClick={(e) => submitJoin(e)}>
-              <ArrowRightAltIcon />
-            </IconButton>
-          </Paper>
-          <UserPlayer defaultPlayerId={'a'} ref={mockRef} />
-        </Stack>
-        <UserDial />
-        <NotifyArea />
-      </Box>
-    </NotifyContext.Provider>
+    <Box sx={{ height: '100vh', bgcolor: 'aliceblue' }} justifyContent={'center'} >
+      <Stack sx={{ height: '100%' }} justifyContent="center" alignItems="center" spacing={2}>
+        <Paper elevation={1} sx={{ p: '2px 4px', display: 'flex', alignItems: 'center' }}>
+          <TextField label="请输入游戏房间号"
+            variant="standard"
+            color="primary"
+            sx={{ width: '400px' }}
+            value={roomId}
+            onChange={valueChange}
+            autoFocus
+            focused />
+          <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
+          <IconButton color="primary" sx={{ p: '10px' }} aria-label="directions" onClick={(e) => submitJoin(e)}>
+            <ArrowRightAltIcon />
+          </IconButton>
+        </Paper>
+        <UserPlayer defaultPlayerId={'a'} ref={mockRef} />
+      </Stack>
+      <UserDial />
+      <NotifyArea />
+    </Box>
   );
 }
 

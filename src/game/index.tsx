@@ -13,6 +13,7 @@ import { Box } from '@mui/system';
 import { NetConnect } from '../api/websocket';
 import { LoadingArea, LoadingBus, LoadingContext } from '../component/loading';
 import { Area, FindArea } from './context/util';
+import { NotifyArea, NotifyBus, NotifyContext } from '../component/alert';
 
 export const GameMainRoute: React.FC = () => {
     const params: any = useParams()
@@ -66,6 +67,12 @@ const GameMainArea: React.FC<{ ctx: GameEventBus }> = ({ ctx }) => {
     let toperRef = useRef()
     let bottomerRef = useRef()
 
+    const loadingCtx = useContext<LoadingBus>(LoadingContext)
+    const notifyCtx = useContext<NotifyBus>(NotifyContext)
+    ctx.bindLoadingCtx(loadingCtx)
+    ctx.bindNotifyCtx(notifyCtx)
+
+    
     return (
         <GameContext.Provider value={ctx}>
             <Grid className='App' container justifyContent={'center'}>
@@ -75,7 +82,7 @@ const GameMainArea: React.FC<{ ctx: GameEventBus }> = ({ ctx }) => {
                 <Grid item container xs={9} direction={'column'} sx={{ height: '100vh', border: '1px dotted green', background: '#1f793b', borderRadius: '50px' }}>
                     <Grid item container xs={2} >
                         <Grid item container xs={2} spacing={2} justifyContent={'center'} alignItems={'center'}>
-                            
+
                         </Grid>
                         <Grid item xs={8}>
                             <PlayerContainer ref={toperRef} direction={Area.Top} />
@@ -105,6 +112,8 @@ const GameMainArea: React.FC<{ ctx: GameEventBus }> = ({ ctx }) => {
                     <ChatDrawer />
                 </Grid>
             </Grid >
+            <NotifyArea />
+            <LoadingArea open={false} />
         </GameContext.Provider>
     )
 }

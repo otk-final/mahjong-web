@@ -5,6 +5,8 @@ import { Area, FindArea } from './util';
 import { NetConnect } from '../../api/websocket';
 import { memberExit, memberJoin, putPlay, racePlay, skipPlay, startGame, takePlay, turnPlay, winPlay } from './consumer';
 import { gameProxy } from '../../api/http';
+import { LoadingBus } from '../../component/loading';
+import { NotifyBus } from '../../component/alert';
 
 
 // 游戏
@@ -69,11 +71,27 @@ export class GameEventBus {
     }
 
     doEffect(area: Area, race: string) {
+        //延迟
         this.effectRef.current.append(area, race)
+        setTimeout(() => {
+            this.removeEffect()
+        }, 2000)
+    }
+    removeEffect() {
+        this.effectRef.current.remove()
     }
 
     doOutput(area: Area, ...tiles: number[]) {
         this.centerRef.current.output(area, ...tiles)
+    }
+
+    loadingCtx?: LoadingBus
+    notifyCtx?: NotifyBus
+    bindLoadingCtx(ctx: LoadingBus) {
+        this.loadingCtx = ctx
+    }
+    bindNotifyCtx(ctx: NotifyBus) {
+        this.notifyCtx = ctx
     }
 
     //开始游戏
