@@ -6,6 +6,7 @@ export enum Area {
     Right = 'right',
     Bottom = 'bottom',
     Top = 'top',
+    Nil = 'nil',
 }
 
 

@@ -189,7 +189,7 @@ export const CenterAreaContainer = forwardRef((props: {}, ref: Ref<any>) => {
     gameCtx.bindCenterRef(ref)
     return (
         <Stack sx={{ height: '100%', width: '100%', border: '1px dotted black', borderRadius: '20px', position: 'relative' }} justifyContent={'center'} alignItems={'center'} >
-            <TurnArea turn={Area.Top} ref={turnRef} />
+            <TurnArea turn={Area.Nil} ref={turnRef} />
             <NormOutputArea area={Area.Top} lasted={false} output={[]} ref={topRef} />
             <NormOutputArea area={Area.Left} lasted={false} output={[]} ref={leftRef} />
             <NormOutputArea area={Area.Right} lasted={false} output={[]} ref={rightRef} />
@@ -203,36 +203,27 @@ export const CenterAreaContainer = forwardRef((props: {}, ref: Ref<any>) => {
 const CountdownArea = forwardRef((props: {}, ref: Ref<any>) => {
 
     const gameCtx = useContext<GameEventBus>(GameContext)
-    let [stateTime, setTime] = useState<number>(30)
-    let [stateEnable, setEnable] = useState<boolean>(true)
+    let [stateDuration, setDuration] = useState<number>(0)
 
     useImperativeHandle(ref, () => ({
-        suspend: () => {
-            setEnable(false)
-        },
-        start: () => {
-            setEnable(true)
-        }
+        start: (duration: number) => { setDuration(duration);}
     }))
 
-
     useEffect(() => {
-        if (stateEnable) {
-            const interval = setInterval(() => {
-                setTime(stateTime--)
-            }, 1000)
-            return () => clearInterval(interval)
-        } else {
-            //nothing
-            setTime(-1)
+        //定时
+        let tempDuration = stateDuration
+        if(tempDuration === 0){
+            return;
         }
-    }, [stateEnable])
 
+        const interval = setInterval(() => { setDuration(tempDuration--) }, 1000)
+        return () => { clearInterval(interval) }
+    })
 
     gameCtx.bindCountdownRef(ref)
     return (
-        <Typography variant='h4' sx={{ color: stateTime === -1 ? 'gray' : (stateTime < 10 ? 'red' : 'orange') }}>
-            {stateTime <= 0 ? '--' : stateTime}
+        <Typography variant='h4' sx={{ color: stateDuration === -1 ? 'gray' : (stateDuration < 10 ? 'red' : 'orange') }}>
+            {stateDuration <= 0 ? '--' : stateDuration}
         </Typography>
     )
 })
@@ -242,7 +233,7 @@ const RemainedArea = forwardRef((props: { remained: number }, ref: Ref<any>) => 
     let [stateRemained, setRemained] = useState(props.remained)
 
     useImperativeHandle(ref, () => ({
-        setRemained:(num:number)=>{
+        setRemained: (num: number) => {
             setRemained(num)
         },
         // 剩余牌
@@ -271,8 +262,6 @@ const TurnArea = forwardRef((props: { turn: Area }, ref: Ref<any>) => {
     useImperativeHandle(ref, () => ({
         changeTurn: (turn: Area) => {
             setTurn(turn)
-            // 重置计时器
-            countdownRef.current.reset()
         }
     }))
 
@@ -296,7 +285,7 @@ const TurnArea = forwardRef((props: { turn: Area }, ref: Ref<any>) => {
         <Grid item xs={4} justifyContent={'center'} alignItems={'center'} container >
             <Stack justifyContent={'center'} alignItems={'center'}>
                 <CountdownArea ref={countdownRef} />
-                <RemainedArea remained={123} ref={remainedRef} />
+                <RemainedArea remained={0} ref={remainedRef} />
             </Stack>
         </Grid>
         <Grid item xs={4} justifyContent={'flex-start'} alignItems={'center'} container>

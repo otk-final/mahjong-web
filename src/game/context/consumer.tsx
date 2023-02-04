@@ -28,16 +28,14 @@ export const startGame = (bus: GameEventBus, payload: any) => {
 
     //渲染当前方位
     const turnArea = FindArea(mineIdx, payload.turnIdx)
-    // bus.turnRef.current.changeTurn(turnArea)
-
+    bus.turnRef.current.changeTurn(turnArea)
     //开启计时器
-    // bus.countdwonRef.current.start()
-
+    bus.countdwonRef.current.start(30)
     //剩余牌库
-    // bus.remainedRef.current.setRemained(payload.remained)
+    bus.remainedRef.current.setRemained(payload.remained)
 
     //非本回合
-    // if (mineIdx !== payload.turnIdx) { return }
+    if (mineIdx !== payload.turnIdx) { return }
 
     //延迟触发摸牌事件
     // setTimeout(() => {
@@ -68,5 +66,7 @@ export const skipPlay = (bus: GameEventBus, payload: any) => {
 }
 
 export const turnPlay = (bus: GameEventBus, payload: any) => {
-
+    const turnArea = FindArea(bus.mine.idx, payload.who)
+    bus.turnRef.current.changeTurn(turnArea)
+    bus.countdwonRef.current.start(payload.duration)
 }

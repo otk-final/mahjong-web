@@ -140,7 +140,6 @@ export class PlayerReducer {
 
     hands: Array<number> = new Array<number>()
     setHand(tiles: Array<number>) {
-        debugger
         this.hands = tiles
         this.getHoldRefCurrent().updateHands(tiles)
     }
