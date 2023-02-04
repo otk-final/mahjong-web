@@ -265,13 +265,12 @@ const TurnArea = forwardRef((props: { turn: Area }, ref: Ref<any>) => {
 
     const gameCtx = useContext<GameEventBus>(GameContext)
     let [stateTurn, setTurn] = useState(props.turn)
-    let countdownRef: any = useRef(null)
-    let remainedRef: any = useRef(null)
+    let countdownRef: any = useRef()
+    let remainedRef: any = useRef()
 
     useImperativeHandle(ref, () => ({
         changeTurn: (turn: Area) => {
             setTurn(turn)
-
             // 重置计时器
             countdownRef.current.reset()
         }

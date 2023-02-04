@@ -113,6 +113,20 @@ let gameApi = {
     }
 }
 
+export const gameProxy = function (autorKey: string) {
+    const header = memberHeader[autorKey]
+    return {
+        start: (data: any) => {
+            return http('post', '/game/start', data, header)
+        },
+        load: (data: any) => {
+            return http('post', '/game/load', data, header)
+        }
+    }
+}
+
+
+
 
 let playApi = {
     take: (data: any) => {

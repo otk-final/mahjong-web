@@ -5,7 +5,6 @@ import { GameEventBus, GameContext } from './context';
 import { PlayerContainer } from './area';
 import { CenterAreaContainer } from './area/center';
 import { MjBottomImage, MjExtra } from '../component/tile';
-import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import ScoreboardIcon from '@mui/icons-material/Scoreboard';
 import ChatIcon from '@mui/icons-material/Chat';
 import { useParams } from 'react-router-dom';
@@ -76,7 +75,7 @@ const GameMainArea: React.FC<{ ctx: GameEventBus }> = ({ ctx }) => {
                 <Grid item container xs={9} direction={'column'} sx={{ height: '100vh', border: '1px dotted green', background: '#1f793b', borderRadius: '50px' }}>
                     <Grid item container xs={2} >
                         <Grid item container xs={2} spacing={2} justifyContent={'center'} alignItems={'center'}>
-                            <Button variant="contained" startIcon={<ExitToAppIcon />} color="primary" size="small">退出游戏</Button>
+                            
                         </Grid>
                         <Grid item xs={8}>
                             <PlayerContainer ref={toperRef} direction={Area.Top} />

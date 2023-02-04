@@ -45,8 +45,9 @@ export const PlayerContainer = forwardRef((props: { direction: Area }, ref: Ref<
     gameCtx.setPlayerRef(props.direction, ref)
     if (stateJoined.redux) { gameCtx.setPlayerReducer(stateJoined.direction, stateJoined.redux) }
 
+    const holdRef = useRef()
     return (
-        stateJoined.redux ? <JoinContainer ref={ref} redux={stateJoined.redux!} direction={stateJoined.direction} /> : <EmptyContainer direction={props.direction} />
+        stateJoined.redux ? <JoinContainer ref={holdRef} redux={stateJoined.redux!} direction={stateJoined.direction} /> : <EmptyContainer direction={props.direction} />
     )
 })
 
@@ -59,8 +60,11 @@ const JoinContainer = forwardRef((props: { redux: PlayerReducer, direction: Area
     let [take, setTake] = useState<number>(reduxOps.getTake())
     let [display, setDisplay] = useState<boolean>(reduxOps.getDisplay())
     useImperativeHandle(ref, () => ({
-
+        updateHands(tiles: Array<number>) {
+            setHands(tiles)
+        }
     }))
+    reduxOps.bindHoldRef(ref)
 
     if (props.direction === Area.Left) {
         return <LeftPlayer redux={reduxOps} take={take} hands={hands} races={races} />

@@ -4,6 +4,7 @@ import { MjExtra } from '../../component/tile';
 import { Area, FindArea } from './util';
 import { NetConnect } from '../../api/websocket';
 import { memberExit, memberJoin, putPlay, racePlay, skipPlay, startGame, takePlay, turnPlay, winPlay } from './consumer';
+import { gameProxy } from '../../api/http';
 
 
 // 游戏
@@ -77,7 +78,11 @@ export class GameEventBus {
 
     //开始游戏
     start() {
-        debugger
+        gameProxy(this.mine.uid).start({ roomId: this.roomId }).then((resp) => {
+            console.info(resp)
+        }).catch((err) => {
+
+        })
     }
 
     //退出游戏
@@ -126,27 +131,26 @@ export class PlayerReducer {
     area: Area
     player: Player
     holdRef: any
-    constructor(area: Area, player: Player, ref: any) {
+    areaRef: any
+    constructor(area: Area, player: Player, areaRef: any) {
         this.area = area
         this.player = player
-        this.holdRef = ref
+        this.areaRef = areaRef
     }
+
+    hands: Array<number> = new Array<number>()
     setHand(tiles: Array<number>) {
-        this.getRefCurrent().initHand(tiles)
+        debugger
+        this.hands = tiles
+        this.getHoldRefCurrent().updateHands(tiles)
     }
     getHand(): Array<number> {
-        if (this.area !== Area.Bottom) {
-            return [0, 0, 0, 0]
-        }
-        return [1, 2, 3, 4, 5, 11, 12, 13, 14, 21, 22, 25, 26, 29]
+        return this.hands
     }
     getTake(): number {
         return -1
     }
     getRaces(): Array<Array<number>> {
-        if (this.area !== Area.Bottom) {
-            return [[1, 2, 3], [11, 12, 13], [21, 22, 23], [27, 28, 29]]
-        }
         return []
     }
     getDisplay(): boolean {
@@ -157,8 +161,16 @@ export class PlayerReducer {
         return []
     }
 
-    getRefCurrent(): any {
+    getAreaRefCurrent(): any {
+        return this.areaRef.current
+    }
+
+    getHoldRefCurrent(): any {
         return this.holdRef.current
+    }
+
+    bindHoldRef(ref: any) {
+        this.holdRef = ref
     }
 
     //摸牌

@@ -1,4 +1,4 @@
-import React, { Ref, forwardRef, useContext, useState } from "react"
+import React, { Ref, forwardRef, useContext, useImperativeHandle, useState } from "react"
 import ReactDom from 'react-dom';
 import { Avatar, Button, Divider, Grid, Stack } from "@mui/material";
 import { GameContext, GameEventBus, PlayerReducer } from "../context";
@@ -75,7 +75,7 @@ export const TileArea = forwardRef((props: { mineRedux: PlayerReducer, take: num
 
     let handRef = React.createRef<HTMLElement>()
     //暴露给父组件使用
-    React.useImperativeHandle(ref, () => ({
+    useImperativeHandle(ref, () => ({
         getReady: (): Array<number> => {
             return stateReady.slice()
         },
@@ -100,13 +100,12 @@ export const TileArea = forwardRef((props: { mineRedux: PlayerReducer, take: num
             }
             return nowHands
         },
-        resetHands: (tiles: Array<number>) => {
+        updateHands: (tiles: Array<number>) => {
             tiles.sort((a, b) => a - b)
             setHands(tiles)
             setTake(-1)
         },
-        resetTake: (tile: number) => {
-            debugger
+        updateTake: (tile: number) => {
             setTake(tile)
         },
         mergeTake: () => {
@@ -122,6 +121,8 @@ export const TileArea = forwardRef((props: { mineRedux: PlayerReducer, take: num
             setRaces(stateRaces)
         },
     }))
+
+    props.mineRedux.bindHoldRef(ref)
 
     return (
         <Stack
@@ -196,18 +197,11 @@ export const MineAreaContainer: React.FC<{ redux: PlayerReducer, take: number, h
         gameCtx.doOutput(Area.Left, ...ready)
 
         //set value and clear css
-        tileIns.resetHands(hands)
+        tileIns.updateHands(hands)
         tileIns.resetReady()
         raceIns.resetOptions(["hu", "pass"])
     }
 
-    let startGame = (event: any) => {
-        gameCtx.start()
-    }
-
-    let exitGame = (event: any) => {
-        gameCtx.exit()
-    }
 
     return (
         <Grid container direction={'column'} alignItems={'center'} sx={{ height: '100%' }}>
@@ -219,7 +213,7 @@ export const MineAreaContainer: React.FC<{ redux: PlayerReducer, take: number, h
             </Grid>
             <Grid container item xs={2} spacing={2} justifyContent={'center'} alignItems={'center'}>
                 <Grid item>
-                    <Button variant="contained" color="info" size="small" startIcon={<PlayCircleOutlineIcon />} onClick={(e) => { startGame(e) }} >开始游戏</Button>
+                    <Button variant="contained" color="info" size="small" startIcon={<PlayCircleOutlineIcon />} onClick={() => { gameCtx.start() }} >开始游戏</Button>
                 </Grid>
                 <Grid item>
                     <Button variant="contained" color="warning" size="small" startIcon={<VisibilityIcon />} >我要明牌</Button>
@@ -231,7 +225,7 @@ export const MineAreaContainer: React.FC<{ redux: PlayerReducer, take: number, h
                     <Button variant="contained" color="primary" size="small" startIcon={<SmartToyIcon />} >挂机托管</Button>
                 </Grid>
                 <Grid item>
-                    <Button variant="contained" startIcon={<ExitToAppIcon />} color="info" size="small" onClick={(e) => { exitGame(e) }} >退出游戏</Button>
+                    <Button variant="contained" startIcon={<ExitToAppIcon />} color="info" size="small" onClick={(e) => { gameCtx.exit() }} >退出游戏</Button>
                 </Grid>
             </Grid>
         </Grid>

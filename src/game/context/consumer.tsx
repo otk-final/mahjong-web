@@ -18,32 +18,33 @@ export const memberExit = (bus: GameEventBus, payload: any) => {
 
 //游戏开始
 export const startGame = (bus: GameEventBus, payload: any) => {
-
     const mineIdx = bus.mine.idx
+
     //初始化渲染玩家手牌
-    payload.hands.forEach((item: any) => {
+    payload.tiles.forEach((item: any) => {
         const itemArea = FindArea(mineIdx, item.idx)
         bus.getPlayerReducer(itemArea)?.setHand(item.hands)
-    });
+    })
+
     //渲染当前方位
     const turnArea = FindArea(mineIdx, payload.turnIdx)
-    bus.turnRef.current.changeTurn(turnArea)
+    // bus.turnRef.current.changeTurn(turnArea)
 
     //开启计时器
-    bus.countdwonRef.current.start()
+    // bus.countdwonRef.current.start()
 
     //剩余牌库
-    bus.remainedRef.current.setRemained(payload.remained)
+    // bus.remainedRef.current.setRemained(payload.remained)
 
     //非本回合
-    if (!payload.turn) { return }
+    // if (mineIdx !== payload.turnIdx) { return }
 
     //延迟触发摸牌事件
-    setTimeout(() => {
-        //从前摸牌
-        const mineRedux = bus.getPlayerReducer(Area.Bottom)
-        mineRedux!.doTake(1)
-    }, 500)
+    // setTimeout(() => {
+    //     //从前摸牌
+    //     const mineRedux = bus.getPlayerReducer(Area.Bottom)
+    //     mineRedux!.doTake(1)
+    // }, 500)
 }
 
 export const takePlay = (bus: GameEventBus, payload: any) => {
