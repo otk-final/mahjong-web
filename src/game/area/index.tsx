@@ -58,13 +58,19 @@ const JoinContainer = forwardRef((props: { redux: PlayerReducer, direction: Area
     let [hands, setHands] = useState<Array<number>>(reduxOps.getHand())
     let [races, setRaces] = useState<Array<Array<number>>>(reduxOps.getRaces())
     let [take, setTake] = useState<number>(reduxOps.getTake())
-    let [display, setDisplay] = useState<boolean>(reduxOps.getDisplay())
     useImperativeHandle(ref, () => ({
         updateHands(tiles: Array<number>) {
             setHands(tiles)
+        },
+        updateTake(tile: number) {
+            setTake(tile)
+        },
+        appendRace(race: Array<number>){
+            races.push(race)
+            setRaces(races)
         }
     }))
-    reduxOps.bindHoldRef(ref)
+    reduxOps.bindTileRef(ref)
 
     if (props.direction === Area.Left) {
         return <LeftPlayer redux={reduxOps} take={take} hands={hands} races={races} />

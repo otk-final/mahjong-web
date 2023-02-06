@@ -125,7 +125,29 @@ export const gameProxy = function (autorKey: string) {
     }
 }
 
-
+export const playProxy = function (autorKey: string) {
+    const header = memberHeader[autorKey]
+    return {
+        take: (data: any) => {
+            return http('post', '/play/take', data, header)
+        },
+        put: (data: any) => {
+            return http('post', '/play/put', data, header)
+        },
+        race: (data: any) => {
+            return http('post', '/play/race', data, header)
+        },
+        racePre: (data: any) => {
+            return http('post', '/play/race-pre', data, header)
+        },
+        win: (data: any) => {
+            return http('post', '/play/win', data, header)
+        },
+        ignore: (data: any) => {
+            return http('post', '/play/ignore', data, header)
+        }
+    }
+}
 
 
 let playApi = {

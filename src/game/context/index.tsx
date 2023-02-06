@@ -80,9 +80,11 @@ export class GameEventBus {
     removeEffect() {
         this.effectRef.current.remove()
     }
-
     doOutput(area: Area, ...tiles: number[]) {
         this.centerRef.current.output(area, ...tiles)
+    }
+    doRaceby(area: Area, tile: number) {
+        this.centerRef.current.raceby(area, tile)
     }
 
     loadingCtx?: LoadingBus
@@ -148,7 +150,6 @@ export class PlayerReducer {
 
     area: Area
     player: Player
-    holdRef: any
     areaRef: any
     constructor(area: Area, player: Player, areaRef: any) {
         this.area = area
@@ -156,27 +157,38 @@ export class PlayerReducer {
         this.areaRef = areaRef
     }
 
-    getAreaRefCurrent(): any {
+    getAreaCurrent(): any {
         return this.areaRef.current
     }
-    getHoldRefCurrent(): any {
-        return this.holdRef.current
+
+    tileRef: any
+    raceRef: any
+    getTileCurrent(): any {
+        return this.tileRef.current
     }
-    bindHoldRef(ref: any) {
-        this.holdRef = ref
+    bindTileRef(ref: any) {
+        this.tileRef = ref
+    }
+    bindRaceRef(ref: any) {
+        this.raceRef = ref
+    }
+    getRaceCurrent(): any {
+        return this.raceRef.current
     }
 
-
+    //持有数据
     hands: Array<number> = new Array<number>()
     take: number = -1
     races: Array<Array<number>> = new Array<Array<number>>()
-    
+
     display: boolean = false
     outs: Array<number> = new Array<number>()
-    outLasted:boolean = false
+    outLasted: boolean = false
+
+
     setHand(tiles: Array<number>) {
         this.hands = tiles
-        this.getHoldRefCurrent().updateHands(tiles)
+        this.getTileCurrent().updateHands(tiles)
     }
     isLastedOuput(): boolean {
         return this.outLasted
@@ -196,12 +208,19 @@ export class PlayerReducer {
     getOuts(): Array<number> {
         return this.outs
     }
+    //出牌
+    doPut(tile: number) {
+        this.outs.push(tile)
+    }
     //摸牌
     doTake(tile: number) {
         this.take = tile
+        this.getTileCurrent().updateTake(tile)
     }
+    //判定
     doRace(tiles: Array<number>) {
         this.races.push(tiles)
+        this.getTileCurrent().appendRace(tiles)
     }
 }
 

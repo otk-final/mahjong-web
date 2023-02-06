@@ -10,11 +10,11 @@ import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
-import { LoadingArea, LoadingBus, LoadingContext } from "../../component/loading";
 import { NotifyBus, NotifyContext } from "../../component/alert";
+import { playProxy } from "../../api/http";
 
 
-export const RaceArea = forwardRef((props: { submitCall: any, options: Array<string> }, ref: Ref<any>) => {
+export const RaceArea = forwardRef((props: { mineRedux: PlayerReducer, submitCall: any, options: Array<string> }, ref: Ref<any>) => {
 
     let [stateOptions, setOptions] = React.useState<Array<string>>(props.options)
     const submitClick = (race: string) => {
@@ -22,8 +22,10 @@ export const RaceArea = forwardRef((props: { submitCall: any, options: Array<str
     }
 
     React.useImperativeHandle(ref, () => ({
-        updateOptions: (actions: Array<string>) => { setOptions(actions) }
+        updateOptions: (actions: Array<string>) => { setOptions(actions) },
+        removeOptions: () => { setOptions([]) }
     }))
+    props.mineRedux.bindRaceRef(ref)
 
     return (
         <Grid container justifyContent={'center'} alignItems={'center'} spacing={2}>
@@ -39,16 +41,6 @@ export const RaceArea = forwardRef((props: { submitCall: any, options: Array<str
         </Grid >)
 })
 
-// function resetNoReadyClass(ele: any) {
-//     var childs = ele.children
-//     for (var i = 0; i < childs.length; i++) {
-//         let sub: any = childs[i]
-//         if (sub.className.indexOf('hasReady') === -1) {
-//             continue
-//         }
-//         sub.className = sub.className.replace('hasReady', '')
-//     }
-// }
 
 export const TileArea = forwardRef((props: { mineRedux: PlayerReducer, take: number, hands: Array<number>, races: Array<Array<number>> }, ref: Ref<any>) => {
 
@@ -73,6 +65,20 @@ export const TileArea = forwardRef((props: { mineRedux: PlayerReducer, take: num
         setReady(existReady)
     }
 
+    let removeReadyCss = () => {
+        //修改css
+        let handElement: any = ReactDom.findDOMNode(handRef.current)
+        var childs = handElement.children
+        for (var i = 0; i < childs.length; i++) {
+            let sub: any = childs[i]
+            if (sub.className.indexOf('hasReady') === -1) {
+                continue
+            }
+            sub.className = sub.className.replace('hasReady', '')
+        }
+        setReady([])
+    }
+
     let handRef = React.createRef<HTMLElement>()
     //暴露给父组件使用
     useImperativeHandle(ref, () => ({
@@ -80,18 +86,7 @@ export const TileArea = forwardRef((props: { mineRedux: PlayerReducer, take: num
             return stateReady.slice()
         },
         resetReady: () => {
-            //修改css
-            let handElement: any = ReactDom.findDOMNode(handRef.current)
-            var childs = handElement.children
-            for (var i = 0; i < childs.length; i++) {
-                let sub: any = childs[i]
-                if (sub.className.indexOf('hasReady') === -1) {
-                    continue
-                }
-                sub.className = sub.className.replace('hasReady', '')
-            }
-            //清空数据
-            setReady([])
+            removeReadyCss()
         },
         getHands: (): Array<number> => {
             let nowHands = stateHands.slice()
@@ -101,6 +96,8 @@ export const TileArea = forwardRef((props: { mineRedux: PlayerReducer, take: num
             return nowHands
         },
         updateHands: (tiles: Array<number>) => {
+            //清空css
+            if (stateReady.length > 0) { removeReadyCss() }
             tiles.sort((a, b) => a - b)
             setHands(tiles)
             setTake(-1)
@@ -109,11 +106,12 @@ export const TileArea = forwardRef((props: { mineRedux: PlayerReducer, take: num
             setTake(tile)
         },
         mergeTake: () => {
-            let nowHands = stateHands.slice()
-            if (stateTake !== -1) {
-                nowHands.push(stateTake)
-                setTake(-1)
+            if (stateTake === -1) {
+                return
             }
+            let nowHands = stateHands.slice()
+            nowHands.push(stateTake)
+            setTake(-1)
             setHands(nowHands)
         },
         appendRace: (race: Array<number>) => {
@@ -122,7 +120,7 @@ export const TileArea = forwardRef((props: { mineRedux: PlayerReducer, take: num
         },
     }))
 
-    props.mineRedux.bindHoldRef(ref)
+    props.mineRedux.bindTileRef(ref)
 
     return (
         <Stack
@@ -161,9 +159,7 @@ export const TileArea = forwardRef((props: { mineRedux: PlayerReducer, take: num
 export const MineAreaContainer: React.FC<{ redux: PlayerReducer, take: number, hands: Array<number>, races: Array<Array<number>> }> = ({ redux, take, hands, races }) => {
 
     const gameCtx = useContext<GameEventBus>(GameContext)
-    const loadingCtx = useContext<LoadingBus>(LoadingContext)
     const notifyCtx = useContext<NotifyBus>(NotifyContext)
-
 
     //牌库状态
     let [mineOptions, setOptions] = React.useState<Array<string>>(['peng', 'gang', 'chi', 'hu', 'pass'])
@@ -173,36 +169,39 @@ export const MineAreaContainer: React.FC<{ redux: PlayerReducer, take: number, h
 
     let submitConfirm = (race: string) => {
 
-        let raceIns: any = raceRef.current
-        let tileIns: any = tileRef.current
+        let tileCurrent: any = redux.getTileCurrent()
 
         if (race === 'pass') {
             //跳过直接摸牌
-            return doIgnore(gameCtx, tileIns)
+            return doIgnore(gameCtx)
         } else if (race === 'put') {
+            let ready = tileCurrent.getReady()
+            if (ready.length !== 1) {
+                return notifyCtx.warn("选择一张牌")
+            }
             //出牌
-            return doHu(gameCtx, tileIns, raceIns)
+            return doPut(gameCtx, redux, ready)
         } else if (race === 'take') {
             //摸牌
-            return doHu(gameCtx, tileIns, raceIns)
+            return doTake(gameCtx, redux)
         } else if (race === 'hu') {
             //胡牌
-            return doHu(gameCtx, tileIns, raceIns)
+            return doHu(gameCtx)
         } else {
             //判定
-            let ready = tileIns.getReady()
+            let ready = tileCurrent.getReady()
             if (ready.length === 0) {
                 return notifyCtx.warn("操作非法")
             }
             //TODO 判定数量
-            return doRace(gameCtx, tileIns, raceIns, race, ready)
+            return doRace(gameCtx, redux, race, ready)
         }
     }
 
     return (
         <Grid container direction={'column'} alignItems={'center'} sx={{ height: '100%' }}>
             <Grid item container xs={4} justifyContent={'center'} >
-                <RaceArea submitCall={(race: string) => { submitConfirm(race) }} options={mineOptions} ref={raceRef} />
+                <RaceArea mineRedux={redux} submitCall={(race: string) => { submitConfirm(race) }} options={mineOptions} ref={raceRef} />
             </Grid>
             <Grid item container xs justifyContent={'center'} alignItems={'center'} >
                 <TileArea mineRedux={redux} take={take} hands={hands} races={races} ref={tileRef} />
@@ -229,35 +228,110 @@ export const MineAreaContainer: React.FC<{ redux: PlayerReducer, take: number, h
 }
 
 
-function doIgnore(gameCtx: GameEventBus, tileIns: any) {
-    tileIns.updateTake(24)
+function doIgnore(gameCtx: GameEventBus) {
+    const params = { roomId: gameCtx.roomId, direction: 1 }
+    return playProxy(gameCtx.mine.uid).ignore(params).then((resp: any) => {
+
+    }).catch(err => {
+        gameCtx.notifyCtx?.error(err)
+    })
 }
 
-function doHu(gameCtx: GameEventBus, tileIns: any, raceIns: any) {
+function doHu(gameCtx: GameEventBus) {
+    const params = { roomId: gameCtx.roomId }
+    playProxy(gameCtx.mine.uid).win(params).then((resp: any) => {
 
+    }).catch(err => {
+
+    })
 }
-function doTake() { }
 
-function doPut() {
-
+function doTake(gameCtx: GameEventBus, redux: PlayerReducer) {
+    return triggerTake(gameCtx, redux, 1)
 }
 
-function doRace(gameCtx: GameEventBus, tileIns: any, raceIns: any, race: string, raceReady: Array<number>) {
 
-    //有可能 take hand 同时提交 获取全量, 移除牌
-    let hands = tileIns.getHands()
-    raceReady.forEach((item: number) => {
+export function triggerTake(gameCtx: GameEventBus, redux: PlayerReducer, direction: number) {
+    const params = { roomId: gameCtx.roomId, direction: direction }
+    const tileCurrent = redux.getTileCurrent()
+    playProxy(gameCtx.mine.uid).take(params).then((resp: any) => {
+        //渲染页面
+        redux.doTake(resp.data.tile)
+        tileCurrent.updateTake(resp.data.tile)
+        //触发判定
+        return triggerRace(gameCtx, redux, { who: gameCtx.mine.idx, tile: resp.data.tile })
+    }).catch(err => {
+        gameCtx.notifyCtx?.error(err)
+    })
+}
+
+
+
+export function triggerRace(gameCtx: GameEventBus, redux: PlayerReducer, target: { who: number, tile: number }) {
+    const params = { roomId: gameCtx.roomId, hands: [], who: target.who, tile: target.tile }
+    return playProxy(gameCtx.mine.uid).racePre(params).then((resp: any) => {
+        redux.getRaceCurrent().updateOptions([])
+    }).catch(err => {
+        gameCtx.notifyCtx?.error(err)
+    })
+}
+
+
+function doPut(gameCtx: GameEventBus, redux: PlayerReducer, output: Array<number>) {
+    const params = { roomId: gameCtx.roomId, who: gameCtx.mine.idx, round: 0, tile: output[0] }
+    playProxy(gameCtx.mine.uid).put(params).then(resp => {
+        withOutput(redux, output)
+        gameCtx.doOutput(Area.Bottom, ...output)
+    }).catch(err => {
+        gameCtx.notifyCtx?.error(err)
+    })
+}
+
+//有可能 take hand 同时提交 获取全量, 移除牌
+function withOutput(redux: PlayerReducer, output: Array<number>) {
+    let hands = redux.getHand()
+    output.forEach((item: number) => {
         let idx = hands.indexOf(item)
         if (idx !== -1) hands.splice(idx, 1)
     });
-    //set value and clear css
-    tileIns.updateHands(hands)
-    tileIns.resetReady()
-    raceIns.updateOptions([])
+    redux.setHand(hands)
+}
 
 
-    //show effect and output
-    gameCtx.doEffect(Area.Bottom, race)
-    gameCtx.doOutput(Area.Bottom, ...raceReady)
+function doRace(gameCtx: GameEventBus, redux: PlayerReducer, race: string, raceReady: Array<number>) {
+    const params = {
+        roomId: gameCtx.roomId,
+        round: 0,
+        raceType: race,
+        // 当前玩家
+        who: gameCtx.mine.idx,
+        tiles: raceReady,
+        //目标玩家
+        target: 0,
+        tile: 1,
+    }
+    const raceCurrent = redux.getRaceCurrent()
+
+    playProxy(gameCtx.mine.uid).race(params).then((resp: any) => {
+        //后置事件
+        const action = resp.data.action
+        if (action === 'take') {
+            return triggerTake(gameCtx, redux, resp.data.direction)
+        } else if (action === 'put') {
+            raceCurrent.updateOptions(['pass'])
+        } else {
+
+        }
+        //show effect and output
+        withOutput(redux, raceReady)
+
+        raceReady.push(params.tile)
+        raceReady.sort((a, b) => a - b)
+
+        gameCtx.doEffect(Area.Bottom, race)
+        redux.doRace(raceReady)
+    }).catch(err => {
+        gameCtx.notifyCtx?.error(err)
+    })
 }
 

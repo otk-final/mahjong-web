@@ -23,8 +23,11 @@ const NormOutputArea = forwardRef((props: { area: Area }, ref: Ref<any>) => {
     let [stateOutput, setOutput] = useState<Array<number>>(redux ? redux!.getOuts() : [])
 
     useImperativeHandle(ref, () => ({
-        removeLasted: () => {
-            setLasted(false)
+        updateLasted: (enabel:boolean) => {
+            if (stateLasted === enabel){
+                return
+            }
+            setLasted(enabel)
         },
         append: (...tiles: number[]) => {
             let existput = stateOutput.slice()
@@ -115,15 +118,6 @@ const RaceEffectArea = forwardRef((props: {}, ref: Ref<any>) => {
             if (area === Area.Bottom) {
                 sx.bottom = -30
             }
-            //胡牌可以多方显示
-            let hasHu = stateEffect.filter((it) => {
-                return it.race === 'hu'
-            })
-
-            if (hasHu.length === 0) {
-                stateEffect = []
-            }
-
             stateEffect.push({ area: area, sx: sx, display: true, race: race })
             setEffect(stateEffect)
         },
@@ -139,7 +133,6 @@ const RaceEffectArea = forwardRef((props: {}, ref: Ref<any>) => {
             Array.from(stateEffect).map((item: effectItem, idx) => (
                 <Zoom in={item.display} style={item.sx} key={idx}>
                     <Avatar src={MJRaceFilter(item.race)}></Avatar>
-
                 </Zoom>
             ))
         }
@@ -156,7 +149,7 @@ export const CenterAreaContainer = forwardRef((props: {}, ref: Ref<any>) => {
     let effectRef: any = useRef()
     let turnRef: any = useRef()
 
-    const dispatchRefIns = (area: Area): any => {
+    const findOutputRef = (area: Area): any => {
         if (area === Area.Top) {
             return topRef.current
         }
@@ -169,21 +162,18 @@ export const CenterAreaContainer = forwardRef((props: {}, ref: Ref<any>) => {
         return bottomRef.current
     }
 
-
     useImperativeHandle(ref, () => ({
         output: (area: Area, ...tiles: number[]) => {
             //默认重置所有
-            leftRef.current.removeLasted()
-            rightRef.current.removeLasted()
-            topRef.current.removeLasted()
-            bottomRef.current.removeLasted()
-            // debugger
+            leftRef.current.updateLasted(false)
+            rightRef.current.updateLasted(false)
+            topRef.current.updateLasted(false)
+            bottomRef.current.updateLasted(false)
             //添加
-            dispatchRefIns(area).append(tiles)
-
+            findOutputRef(area).append(tiles)
         },
-        raceOne: (area: Area, tile: number) => {
-            dispatchRefIns(area).remove(tile)
+        raceby: (area: Area, tile: number) => {
+            findOutputRef(area).remove(tile)
         }
     }))
 
@@ -261,9 +251,7 @@ const TurnArea = forwardRef((props: { turn: Area }, ref: Ref<any>) => {
     let remainedRef: any = useRef()
 
     useImperativeHandle(ref, () => ({
-        changeTurn: (turn: Area) => {
-            setTurn(turn)
-        }
+        changeTurn: (turn: Area) => {setTurn(turn)}
     }))
 
     const turnColor = (area: Area): string => {
