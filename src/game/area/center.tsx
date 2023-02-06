@@ -14,22 +14,26 @@ import { Area } from "../context/util";
 const maxOut = 21
 const minPx = '30%', maxPx = '70%'
 
-const NormOutputArea = forwardRef((props: { area: Area, lasted: boolean, output: Array<number> }, ref: Ref<any>) => {
+const NormOutputArea = forwardRef((props: { area: Area }, ref: Ref<any>) => {
 
-    let [lasted, setLasted] = useState<boolean>(props.lasted)
-    let [output, setOutput] = useState<Array<number>>(props.output)
+    const gameCtx = useContext<GameEventBus>(GameContext)
+    const redux = gameCtx.getPlayerReducer(props.area)
+
+    let [stateLasted, setLasted] = useState<boolean>(redux ? redux!.isLastedOuput() : false)
+    let [stateOutput, setOutput] = useState<Array<number>>(redux ? redux!.getOuts() : [])
+
     useImperativeHandle(ref, () => ({
         removeLasted: () => {
             setLasted(false)
         },
         append: (...tiles: number[]) => {
-            let existput = output.slice()
+            let existput = stateOutput.slice()
             existput = existput.concat(...tiles)
             setOutput(existput)
             setLasted(true)
         },
         remove: (tile: number) => {
-            let existput = output.slice()
+            let existput = stateOutput.slice()
             //反向查找
             let idx = existput.lastIndexOf(tile)
             if (idx === -1) {
@@ -42,9 +46,6 @@ const NormOutputArea = forwardRef((props: { area: Area, lasted: boolean, output:
     }))
 
 
-    useEffect(() => {
-
-    }, [output, lasted])
 
 
     // 样式
@@ -74,9 +75,9 @@ const NormOutputArea = forwardRef((props: { area: Area, lasted: boolean, output:
         columns={maxOut} spacing={spacingGrid}
         sx={sxx}>
         {
-            Array.from(output).map((outItem, idx) => (
+            Array.from(stateOutput).map((outItem, idx) => (
                 <Grid item key={idx} sx={{ height: MjImageHeight.centerRotate }}>
-                    <MjImage mj={outItem} direction={props.area} height={MjImageHeight.center} lasted={lasted && idx === output.length - 1} />
+                    <MjImage mj={outItem} direction={props.area} height={MjImageHeight.center} lasted={stateLasted && idx === stateOutput.length - 1} />
                 </Grid>
             ))
         }
@@ -190,10 +191,10 @@ export const CenterAreaContainer = forwardRef((props: {}, ref: Ref<any>) => {
     return (
         <Stack sx={{ height: '100%', width: '100%', border: '1px dotted black', borderRadius: '20px', position: 'relative' }} justifyContent={'center'} alignItems={'center'} >
             <TurnArea turn={Area.Nil} ref={turnRef} />
-            <NormOutputArea area={Area.Top} lasted={false} output={[]} ref={topRef} />
-            <NormOutputArea area={Area.Left} lasted={false} output={[]} ref={leftRef} />
-            <NormOutputArea area={Area.Right} lasted={false} output={[]} ref={rightRef} />
-            <NormOutputArea area={Area.Bottom} lasted={true} output={[]} ref={bottomRef} />
+            <NormOutputArea area={Area.Top} ref={topRef} />
+            <NormOutputArea area={Area.Left} ref={leftRef} />
+            <NormOutputArea area={Area.Right} ref={rightRef} />
+            <NormOutputArea area={Area.Bottom} ref={bottomRef} />
             <RaceEffectArea ref={effectRef} />
         </Stack >
     )
@@ -206,13 +207,13 @@ const CountdownArea = forwardRef((props: {}, ref: Ref<any>) => {
     let [stateDuration, setDuration] = useState<number>(0)
 
     useImperativeHandle(ref, () => ({
-        start: (duration: number) => { setDuration(duration);}
+        start: (duration: number) => { setDuration(duration); }
     }))
 
     useEffect(() => {
         //定时
         let tempDuration = stateDuration
-        if(tempDuration === 0){
+        if (tempDuration === 0) {
             return;
         }
 

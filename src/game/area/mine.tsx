@@ -179,6 +179,12 @@ export const MineAreaContainer: React.FC<{ redux: PlayerReducer, take: number, h
         if (race === 'pass') {
             //跳过直接摸牌
             return doIgnore(gameCtx, tileIns)
+        } else if (race === 'put') {
+            //出牌
+            return doHu(gameCtx, tileIns, raceIns)
+        } else if (race === 'take') {
+            //摸牌
+            return doHu(gameCtx, tileIns, raceIns)
         } else if (race === 'hu') {
             //胡牌
             return doHu(gameCtx, tileIns, raceIns)
@@ -244,14 +250,14 @@ function doRace(gameCtx: GameEventBus, tileIns: any, raceIns: any, race: string,
         let idx = hands.indexOf(item)
         if (idx !== -1) hands.splice(idx, 1)
     });
-
-    //show effect and output
-    gameCtx.doEffect(Area.Bottom, race)
-    gameCtx.doOutput(Area.Bottom, ...raceReady)
-
     //set value and clear css
     tileIns.updateHands(hands)
     tileIns.resetReady()
     raceIns.updateOptions([])
+
+
+    //show effect and output
+    gameCtx.doEffect(Area.Bottom, race)
+    gameCtx.doOutput(Area.Bottom, ...raceReady)
 }
 

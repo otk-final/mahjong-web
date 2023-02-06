@@ -156,49 +156,53 @@ export class PlayerReducer {
         this.areaRef = areaRef
     }
 
+    getAreaRefCurrent(): any {
+        return this.areaRef.current
+    }
+    getHoldRefCurrent(): any {
+        return this.holdRef.current
+    }
+    bindHoldRef(ref: any) {
+        this.holdRef = ref
+    }
+
+
     hands: Array<number> = new Array<number>()
+    take: number = -1
+    races: Array<Array<number>> = new Array<Array<number>>()
+    
+    display: boolean = false
+    outs: Array<number> = new Array<number>()
+    outLasted:boolean = false
     setHand(tiles: Array<number>) {
         this.hands = tiles
         this.getHoldRefCurrent().updateHands(tiles)
+    }
+    isLastedOuput(): boolean {
+        return this.outLasted
     }
     getHand(): Array<number> {
         return this.hands
     }
     getTake(): number {
-        return -1
+        return this.take
     }
     getRaces(): Array<Array<number>> {
-        return []
+        return this.races
     }
     getDisplay(): boolean {
-        return false
+        return this.display
     }
-
     getOuts(): Array<number> {
-        return []
+        return this.outs
     }
-
-    getAreaRefCurrent(): any {
-        return this.areaRef.current
-    }
-
-    getHoldRefCurrent(): any {
-        return this.holdRef.current
-    }
-
-    bindHoldRef(ref: any) {
-        this.holdRef = ref
-    }
-
     //摸牌
-    doTake(direction: number) {
-
+    doTake(tile: number) {
+        this.take = tile
     }
-
-    doPut() {
-
+    doRace(tiles: Array<number>) {
+        this.races.push(tiles)
     }
-
 }
 
 
