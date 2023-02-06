@@ -206,8 +206,7 @@ const CountdownArea = forwardRef((props: {}, ref: Ref<any>) => {
         if (tempDuration === 0) {
             return;
         }
-
-        const interval = setInterval(() => { setDuration(tempDuration--) }, 1000)
+        const interval = setInterval(() => { setDuration(tempDuration--) }, 900)
         return () => { clearInterval(interval) }
     })
 
@@ -224,16 +223,8 @@ const RemainedArea = forwardRef((props: { remained: number }, ref: Ref<any>) => 
     let [stateRemained, setRemained] = useState(props.remained)
 
     useImperativeHandle(ref, () => ({
-        setRemained: (num: number) => {
+        updateRemained: (num: number) => {
             setRemained(num)
-        },
-        // 剩余牌
-        take: () => {
-            stateRemained--
-            if (stateRemained < 0) {
-                stateRemained = 0
-            }
-            setRemained(stateRemained)
         },
     }))
 

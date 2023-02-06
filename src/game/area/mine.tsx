@@ -14,15 +14,15 @@ import { NotifyBus, NotifyContext } from "../../component/alert";
 import { playProxy } from "../../api/http";
 
 
-export const RaceArea = forwardRef((props: { mineRedux: PlayerReducer, submitCall: any, options: Array<string> }, ref: Ref<any>) => {
+export const RaceArea = forwardRef((props: { mineRedux: PlayerReducer, submitCall: any, options: Array<number> }, ref: Ref<any>) => {
 
-    let [stateOptions, setOptions] = React.useState<Array<string>>(props.options)
-    const submitClick = (race: string) => {
+    let [stateOptions, setOptions] = React.useState<Array<number>>(props.options)
+    const submitClick = (race: number) => {
         return props.submitCall(race)
     }
 
     React.useImperativeHandle(ref, () => ({
-        updateOptions: (actions: Array<string>) => { setOptions(actions) },
+        updateOptions: (actions: Array<number>) => { setOptions(actions) },
         removeOptions: () => { setOptions([]) }
     }))
     props.mineRedux.bindRaceRef(ref)
@@ -33,7 +33,7 @@ export const RaceArea = forwardRef((props: { mineRedux: PlayerReducer, submitCal
                 Array.from(stateOptions).map((raceOps, idx) => (
                     <Grid item key={idx}>
                         <Avatar src={MJRaceFilter(raceOps)}
-                            sx={{ minHeight: raceOps === 'hu' ? '60px' : 'auto', minWidth: raceOps === 'hu' ? '60px' : 'auto' }}
+                            sx={{ minHeight: raceOps === 200 ? '60px' : 'auto', minWidth: raceOps === 200 ? '60px' : 'auto' }}
                             onClick={(e) => submitClick(raceOps)}></Avatar>
                     </Grid>
                 ))
@@ -161,30 +161,33 @@ export const MineAreaContainer: React.FC<{ redux: PlayerReducer, take: number, h
     const gameCtx = useContext<GameEventBus>(GameContext)
     const notifyCtx = useContext<NotifyBus>(NotifyContext)
 
+
+    const ops = [200, 201, 202, 203, 204, 205, 206, 0, 1, 2]
+
     //牌库状态
-    let [mineOptions, setOptions] = React.useState<Array<string>>(['peng', 'gang', 'chi', 'hu', 'pass'])
+    let [mineOptions, setOptions] = React.useState<Array<number>>(ops)
     let tileRef = React.useRef()
     let raceRef = React.useRef()
 
 
-    let submitConfirm = (race: string) => {
+    let submitConfirm = (race: number) => {
 
         let tileCurrent: any = redux.getTileCurrent()
 
-        if (race === 'pass') {
+        if (race === 0) {
             //跳过直接摸牌
             return doIgnore(gameCtx)
-        } else if (race === 'put') {
+        } else if (race === 1) {
             let ready = tileCurrent.getReady()
             if (ready.length !== 1) {
                 return notifyCtx.warn("选择一张牌")
             }
             //出牌
             return doPut(gameCtx, redux, ready)
-        } else if (race === 'take') {
+        } else if (race === 2) {
             //摸牌
             return doTake(gameCtx, redux)
-        } else if (race === 'hu') {
+        } else if (race === 200) {
             //胡牌
             return doHu(gameCtx)
         } else {
@@ -201,7 +204,7 @@ export const MineAreaContainer: React.FC<{ redux: PlayerReducer, take: number, h
     return (
         <Grid container direction={'column'} alignItems={'center'} sx={{ height: '100%' }}>
             <Grid item container xs={4} justifyContent={'center'} >
-                <RaceArea mineRedux={redux} submitCall={(race: string) => { submitConfirm(race) }} options={mineOptions} ref={raceRef} />
+                <RaceArea mineRedux={redux} submitCall={(race: number) => { submitConfirm(race) }} options={mineOptions} ref={raceRef} />
             </Grid>
             <Grid item container xs justifyContent={'center'} alignItems={'center'} >
                 <TileArea mineRedux={redux} take={take} hands={hands} races={races} ref={tileRef} />
@@ -258,6 +261,8 @@ export function triggerTake(gameCtx: GameEventBus, redux: PlayerReducer, directi
         //渲染页面
         redux.doTake(resp.data.tile)
         tileCurrent.updateTake(resp.data.tile)
+        gameCtx.doUpdateRemained(resp.data.remained)
+
         //触发判定
         return triggerRace(gameCtx, redux, { who: gameCtx.mine.idx, tile: resp.data.tile })
     }).catch(err => {
@@ -298,7 +303,7 @@ function withOutput(redux: PlayerReducer, output: Array<number>) {
 }
 
 
-function doRace(gameCtx: GameEventBus, redux: PlayerReducer, race: string, raceReady: Array<number>) {
+function doRace(gameCtx: GameEventBus, redux: PlayerReducer, race: number, raceReady: Array<number>) {
     const params = {
         roomId: gameCtx.roomId,
         round: 0,

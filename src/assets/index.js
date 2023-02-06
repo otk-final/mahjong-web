@@ -41,11 +41,18 @@ import ba from "./mj/白板.png"
 import defaultImg from "./mj/背景.png"
 
 
-import racePeng from './effect/碰.png'
-import raceGang from './effect/杠.png'
-import raceChi from './effect/吃.png'
-import raceHu from './effect/胡.png'
+import raceDDD from './effect/碰.png'
+import raceEEEE from './effect/杠.png'
+import raceABC from './effect/吃.png'
+import raceWin from './effect/胡.png'
+
 import racePass from './effect/过.png'
+import racePut from './effect/出.png'
+import raceTake from './effect/摸.png'
+
+import raceLai from './effect/条.png'
+import raceCao from './effect/万.png'
+import raceGui from './effect/筒.png'
 
 
 import av1 from './avatar/a1.png'
@@ -55,11 +62,17 @@ import av4 from './avatar/a4.png'
 import av5 from './avatar/a5.png'
 
 export const MJRaces = {
-    'peng': racePeng,
-    'gang': raceGang,
-    'chi': raceChi,
-    'hu': raceHu,
-    'pass': racePass,
+    200: raceWin,
+    201: raceDDD,
+    202: raceABC,
+    203: raceEEEE,
+    204: raceLai,
+    205: raceCao,
+    206: raceGui,
+
+    0: racePass,
+    1: racePut,
+    2: raceTake
 }
 
 

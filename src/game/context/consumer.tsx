@@ -29,11 +29,11 @@ export const startGame = (bus: GameEventBus, payload: any) => {
 
     //渲染当前方位
     const turnArea = FindArea(mineIdx, payload.turnIdx)
-    bus.turnRef.current.changeTurn(turnArea)
+    bus.doChangeTurn(turnArea)
     //开启计时器
-    bus.countdwonRef.current.start(30)
+    bus.doCountdownReset(payload.turnInterval)
     //剩余牌库
-    bus.remainedRef.current.setRemained(payload.remained)
+    bus.doUpdateRemained(payload.remained)
 
     //非本回合
     if (mineIdx !== payload.turnIdx) { return }
@@ -52,15 +52,16 @@ export const takePlay = (bus: GameEventBus, payload: any) => {
     if (mineIdx === payload.who) {
         return
     }
-
+    //更新剩余牌数
+    bus.doUpdateRemained(payload.remained)
     const targetArea = FindArea(mineIdx, payload.who)
-    bus.getPlayerReducer(targetArea)?.getTileCurrent().updateTake(payload.tile)
+    bus.getPlayerReducer(targetArea)?.doTake(payload.tile)
 }
 
 export const putPlay = (bus: GameEventBus, payload: any) => {
 
     //清除所有判定效果
-    bus.effectRef.current.remove()
+    bus.doRemoveEffect()
 
     //忽略自己事件
     const mineIdx = bus.mine.idx
@@ -102,20 +103,21 @@ export const turnPlay = (bus: GameEventBus, payload: any) => {
 
     //重新开始计时
     const turnArea = FindArea(bus.mine.idx, payload.who)
-    bus.turnRef.current.changeTurn(turnArea)
-    bus.countdwonRef.current.start(payload.duration)
+    bus.doChangeTurn(turnArea)
+    bus.doCountdownReset(payload.interval)
+
 
     //重置当前判定可选项
     const mineRedux = bus.getPlayerReducer(Area.Bottom)
     mineRedux?.getRaceCurrent().removeOptions()
 
-    if (bus.mine.idx === payload.who) {
-        return
-    }
-    //当前回合，延迟触发摸牌
-    setTimeout(() => {
-        //从前摸牌
-        const mineRedux = bus.getPlayerReducer(Area.Bottom)
-        return triggerTake(bus, mineRedux!, 1)
-    }, 500)
+    // if (bus.mine.idx === payload.who) {
+    //     return
+    // }
+    // //当前回合，延迟触发摸牌
+    // setTimeout(() => {
+    //     //从前摸牌
+    //     const mineRedux = bus.getPlayerReducer(Area.Bottom)
+    //     return triggerTake(bus, mineRedux!, 1)
+    // }, 500)
 }

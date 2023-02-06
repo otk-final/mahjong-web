@@ -70,14 +70,11 @@ export class GameEventBus {
         this.extraRef = ref
     }
 
-    doEffect(area: Area, race: string) {
+    doEffect(area: Area, race: number) {
         //延迟
         this.effectRef.current.append(area, race)
-        setTimeout(() => {
-            this.removeEffect()
-        }, 2000)
     }
-    removeEffect() {
+    doRemoveEffect() {
         this.effectRef.current.remove()
     }
     doOutput(area: Area, ...tiles: number[]) {
@@ -87,6 +84,15 @@ export class GameEventBus {
         this.centerRef.current.raceby(area, tile)
     }
 
+    doUpdateRemained(num: number) {
+        this.remainedRef.current.updateRemained(num)
+    }
+    doChangeTurn(area:Area){
+        this.turnRef.current.changeTurn(area)
+    }
+    doCountdownReset(interval:number){
+        this.countdwonRef.current.start(interval)
+    }
     loadingCtx?: LoadingBus
     notifyCtx?: NotifyBus
     bindLoadingCtx(ctx: LoadingBus) {

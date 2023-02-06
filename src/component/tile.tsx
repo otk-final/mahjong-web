@@ -6,9 +6,9 @@ import { Area } from '../game/context/util';
 export const MjImageHeight = {
     center: '55px',
     centerRotate: '45px',
-    left: '40px',
+    left: '30px',
     leftRotate: '35px',
-    right: '40px',
+    right: '30px',
     rightRotate: '35px',
     top: '55px',
     bottom: '75px'
