@@ -8,7 +8,7 @@ import { MjBottomImage, MjExtra } from '../component/tile';
 import ScoreboardIcon from '@mui/icons-material/Scoreboard';
 import ChatIcon from '@mui/icons-material/Chat';
 import { useParams } from 'react-router-dom';
-import { FilterAuthor, roomProxy } from '../api/http';
+import { FilterAuthor, gameProxy, roomProxy } from '../api/http';
 import { Box } from '@mui/system';
 import { NetConnect } from '../api/websocket';
 import { LoadingArea, LoadingBus, LoadingContext } from '../component/loading';
@@ -26,6 +26,11 @@ export const GameMainRoute: React.FC = () => {
     useEffect(() => {
         //加入房间
         roomProxy(params.playerId).join({ roomId: params.roomId }).then((resp: any) => {
+
+            //长连接
+            const netConn = new NetConnect(ownAuthor)
+            netConn.conn("ws://localhost:7070/ws/" + params.roomId)
+
             //设置基础成员信息
             const own = resp.data.own
             const players = resp.data.players
@@ -35,13 +40,12 @@ export const GameMainRoute: React.FC = () => {
             players.forEach((item: any) => {
                 ctx.setPlayer(FindArea(own.idx, item.idx), item)
             });
-            //长连接
-            const netConn = new NetConnect(ownAuthor)
-            netConn.conn("ws://localhost:7070/ws/" + params.roomId)
+            //基础信息
             ctx.bindConnect(netConn)
-
+            ctx.setBegin(resp.data.begin)
+            
+            
             setGameContext(ctx)
-
             document.title = '玩家：' + own.uname
         }).catch((err: any) => {
             loadingCtx.hide()
@@ -72,7 +76,37 @@ const GameMainArea: React.FC<{ ctx: GameEventBus }> = ({ ctx }) => {
     ctx.bindLoadingCtx(loadingCtx)
     ctx.bindNotifyCtx(notifyCtx)
 
-    
+    useEffect(() => {
+        if (!ctx.isBegin()){
+            return
+        }
+        loadingCtx.show()
+        //加载游戏数据
+        gameProxy(ctx.mine.uid).load({ roomId: ctx.roomId }).then((resp: any) => {
+            //渲染当前方位
+            const turnArea = FindArea(ctx.mine.idx, resp.data.turnIdx)
+            ctx.doChangeTurn(turnArea)
+            //开启计时器
+            ctx.doCountdownReset(resp.data.turnInterval)
+            //剩余牌库
+            ctx.doUpdateRemained(resp.data.remained)
+            
+            //加载牌
+            resp.data.tiles.forEach((item:any)=>{
+                const itemArea = FindArea(ctx.mine.idx, item.idx)
+                const itemRedux = ctx.getPlayerReducer(itemArea)
+
+                itemRedux?.setRaces(item.races)
+                itemRedux?.setTake(item.take)
+                itemRedux?.setOuts(item.outs)
+                itemRedux?.setHand(item.hands)
+            })
+
+            loadingCtx.hide()
+        }).catch(err=>{
+            loadingCtx.hide()
+        })
+    },[])
     return (
         <GameContext.Provider value={ctx}>
             <Grid className='App' container justifyContent={'center'}>

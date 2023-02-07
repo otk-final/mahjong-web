@@ -33,7 +33,7 @@ export const MjBottomImage: React.FC<{ mj: number, callPut?: any, extra?: MjExtr
 
     return (
         <Box onClick={(e) => readyOutClick(e)} className={ready ? 'hasReady' : 'noReady'}>
-            <MjImage mj={mj} direction={'bottom'} height='75px' extra={extra} />
+            <MjImage mj={mj} direction={'bottom'} height={MjImageHeight.bottom} extra={extra} />
         </Box >
     )
 }

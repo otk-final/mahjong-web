@@ -1,5 +1,5 @@
 import { GameEventBus } from ".";
-import { triggerTake } from "../area/mine";
+import { triggerRace, triggerTake } from "../area/mine";
 import { Area, FindArea } from "./util";
 
 //加入房间
@@ -70,6 +70,13 @@ export const putPlay = (bus: GameEventBus, payload: any) => {
     }
     const targetArea = FindArea(mineIdx, payload.who)
     bus.doOutput(targetArea, payload.tile)
+
+    //触发判定
+    setTimeout(() => {
+        //从前摸牌
+        const mineRedux = bus.getPlayerReducer(Area.Bottom)
+        return triggerRace(bus, mineRedux!, { who: payload.who, ackId: payload.ackId, tile: payload.tile })
+    }, 500)
 }
 
 export const racePlay = (bus: GameEventBus, payload: any) => {
@@ -107,17 +114,20 @@ export const turnPlay = (bus: GameEventBus, payload: any) => {
     bus.doCountdownReset(payload.interval)
 
 
+
     //重置当前判定可选项
     const mineRedux = bus.getPlayerReducer(Area.Bottom)
     mineRedux?.getRaceCurrent().removeOptions()
 
-    // if (bus.mine.idx === payload.who) {
-    //     return
-    // }
-    // //当前回合，延迟触发摸牌
-    // setTimeout(() => {
-    //     //从前摸牌
-    //     const mineRedux = bus.getPlayerReducer(Area.Bottom)
-    //     return triggerTake(bus, mineRedux!, 1)
-    // }, 500)
+
+    //非本回合
+    if (bus.mine.idx !== payload.who) { return }
+
+    //自己回合，触发摸牌操作
+    setTimeout(() => {
+        debugger
+        //从前摸牌
+        const mineRedux = bus.getPlayerReducer(Area.Bottom)
+        return triggerTake(bus, mineRedux!, 1)
+    }, 500)
 }

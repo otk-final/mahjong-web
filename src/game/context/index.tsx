@@ -102,19 +102,29 @@ export class GameEventBus {
         this.notifyCtx = ctx
     }
 
+
+    begining: boolean = false
     //开始游戏
-    start() {
+    startGame() {
         gameProxy(this.mine.uid).start({ roomId: this.roomId }).then((resp) => {
             console.info(resp)
+            this.begining = true
         }).catch((err) => {
 
         })
     }
-
     //退出游戏
-    exit() {
+    exitGame() {
         debugger
     }
+    //开启状态变更
+    setBegin(flag:boolean) {
+        this.begining = flag
+    }
+    isBegin(){
+        return this.begining
+    }
+
 
     mjExtras: Array<MjExtra> = []
     setMjExtras(extras: Array<MjExtra>) {
@@ -191,10 +201,18 @@ export class PlayerReducer {
     outs: Array<number> = new Array<number>()
     outLasted: boolean = false
 
-
+    setTake(tile: number) {
+        this.take = tile
+    }
+    setOuts(tiles: Array<number>){
+        this.outs = tiles
+    }
     setHand(tiles: Array<number>) {
         this.hands = tiles
         this.getTileCurrent().updateHands(tiles)
+    }
+    setRaces(tiles: Array<Array<number>>){
+        this.races = tiles
     }
     isLastedOuput(): boolean {
         return this.outLasted

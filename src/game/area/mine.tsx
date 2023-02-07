@@ -27,13 +27,23 @@ export const RaceArea = forwardRef((props: { mineRedux: PlayerReducer, submitCal
     }))
     props.mineRedux.bindRaceRef(ref)
 
+    const sizeFilter = (race: number): string => {
+        if (race === 200) {
+            return '65px'
+        }
+        if (race === 0 || race === 1 || race === 2) {
+            return '50px'
+        }
+        return 'auto'
+    }
+
     return (
         <Grid container justifyContent={'center'} alignItems={'center'} spacing={2}>
             {
                 Array.from(stateOptions).map((raceOps, idx) => (
                     <Grid item key={idx}>
                         <Avatar src={MJRaceFilter(raceOps)}
-                            sx={{ minHeight: raceOps === 200 ? '60px' : 'auto', minWidth: raceOps === 200 ? '60px' : 'auto' }}
+                            sx={{ minHeight: sizeFilter(raceOps), minWidth: sizeFilter(raceOps) }}
                             onClick={(e) => submitClick(raceOps)}></Avatar>
                     </Grid>
                 ))
@@ -162,10 +172,10 @@ export const MineAreaContainer: React.FC<{ redux: PlayerReducer, take: number, h
     const notifyCtx = useContext<NotifyBus>(NotifyContext)
 
 
-    const ops = [200, 201, 202, 203, 204, 205, 206, 0, 1, 2]
+    // const mineOptions = [200, 201, 202, 203, 204, 205, 206, 0, 1, 2]
+    const mineOptions = new Array<number>()
 
     //牌库状态
-    let [mineOptions, setOptions] = React.useState<Array<number>>(ops)
     let tileRef = React.useRef()
     let raceRef = React.useRef()
 
@@ -211,7 +221,7 @@ export const MineAreaContainer: React.FC<{ redux: PlayerReducer, take: number, h
             </Grid>
             <Grid container item xs={2} spacing={2} justifyContent={'center'} alignItems={'center'}>
                 <Grid item>
-                    <Button variant="contained" color="info" size="small" startIcon={<PlayCircleOutlineIcon />} onClick={() => { gameCtx.start() }} >开始游戏</Button>
+                    <Button variant="contained" color="info" size="small" startIcon={<PlayCircleOutlineIcon />} onClick={() => { gameCtx.startGame() }} >开始游戏</Button>
                 </Grid>
                 <Grid item>
                     <Button variant="contained" color="warning" size="small" startIcon={<VisibilityIcon />} >我要明牌</Button>
@@ -223,7 +233,7 @@ export const MineAreaContainer: React.FC<{ redux: PlayerReducer, take: number, h
                     <Button variant="contained" color="primary" size="small" startIcon={<SmartToyIcon />} >挂机托管</Button>
                 </Grid>
                 <Grid item>
-                    <Button variant="contained" startIcon={<ExitToAppIcon />} color="info" size="small" onClick={(e) => { gameCtx.exit() }} >退出游戏</Button>
+                    <Button variant="contained" startIcon={<ExitToAppIcon />} color="info" size="small" onClick={(e) => { gameCtx.exitGame() }} >退出游戏</Button>
                 </Grid>
             </Grid>
         </Grid>
@@ -264,7 +274,7 @@ export function triggerTake(gameCtx: GameEventBus, redux: PlayerReducer, directi
         gameCtx.doUpdateRemained(resp.data.remained)
 
         //触发判定
-        return triggerRace(gameCtx, redux, { who: gameCtx.mine.idx, tile: resp.data.tile })
+        return triggerRace(gameCtx, redux, { who: gameCtx.mine.idx, ackId:0, tile: resp.data.tile })
     }).catch(err => {
         gameCtx.notifyCtx?.error(err)
     })
@@ -272,10 +282,13 @@ export function triggerTake(gameCtx: GameEventBus, redux: PlayerReducer, directi
 
 
 
-export function triggerRace(gameCtx: GameEventBus, redux: PlayerReducer, target: { who: number, tile: number }) {
-    const params = { roomId: gameCtx.roomId, hands: [], who: target.who, tile: target.tile }
+export function triggerRace(gameCtx: GameEventBus, redux: PlayerReducer, target: { who: number, ackId: number, tile: number }) {
+    const params = { roomId: gameCtx.roomId, who: target.who, ackId: target.ackId, tile: target.tile }
     return playProxy(gameCtx.mine.uid).racePre(params).then((resp: any) => {
-        redux.getRaceCurrent().updateOptions([])
+        const options = resp.data.usable.map((item: any) => {
+            return item.raceType
+        })
+        if (options.length > 0) redux.getRaceCurrent().updateOptions(options)
     }).catch(err => {
         gameCtx.notifyCtx?.error(err)
     })
