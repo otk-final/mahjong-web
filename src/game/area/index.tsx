@@ -63,11 +63,9 @@ const JoinContainer = forwardRef((props: { redux: PlayerReducer, direction: Area
             setHands(tiles)
         },
         updateTake(tile: number) {
-            debugger
             setTake(tile)
         },
         appendRace(race: Array<number>){
-            debugger
             races.push(race)
             setRaces(races)
         }

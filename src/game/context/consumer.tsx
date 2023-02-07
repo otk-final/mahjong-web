@@ -1,5 +1,5 @@
 import { GameEventBus } from ".";
-import { triggerRace, triggerTake } from "../area/mine";
+import { triggerRacePre, triggerTake } from "../area/mine";
 import { Area, FindArea } from "./util";
 
 //加入房间
@@ -71,11 +71,14 @@ export const putPlay = (bus: GameEventBus, payload: any) => {
     const targetArea = FindArea(mineIdx, payload.who)
     bus.doOutput(targetArea, payload.tile)
 
+    //待回执标识
+    const ackPut = { who: payload.who, ackId: payload.ackId, tile: payload.tile }
+    bus.setAckParameter(ackPut)
+
     //触发判定
     setTimeout(() => {
-        //从前摸牌
         const mineRedux = bus.getPlayerReducer(Area.Bottom)
-        return triggerRace(bus, mineRedux!, { who: payload.who, ackId: payload.ackId, tile: payload.tile })
+        return triggerRacePre(bus, mineRedux!,ackPut)
     }, 500)
 }
 

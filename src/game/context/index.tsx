@@ -87,10 +87,10 @@ export class GameEventBus {
     doUpdateRemained(num: number) {
         this.remainedRef.current.updateRemained(num)
     }
-    doChangeTurn(area:Area){
+    doChangeTurn(area: Area) {
         this.turnRef.current.changeTurn(area)
     }
-    doCountdownReset(interval:number){
+    doCountdownReset(interval: number) {
         this.countdwonRef.current.start(interval)
     }
     loadingCtx?: LoadingBus
@@ -118,10 +118,10 @@ export class GameEventBus {
         debugger
     }
     //开启状态变更
-    setBegin(flag:boolean) {
+    setBegin(flag: boolean) {
         this.begining = flag
     }
-    isBegin(){
+    isBegin() {
         return this.begining
     }
 
@@ -158,8 +158,23 @@ export class GameEventBus {
         //回合
         conn.subscribe(108, (payload: any) => { turnPlay(this, payload) })
     }
+
+    ackPut?: AckParameter
+    setAckParameter(ack: AckParameter) {
+        this.ackPut = ack
+    }
+    getAckId(): number {
+        return this.ackPut?.ackId || 0
+    }
+    getAckWho(): number {
+        return this.ackPut?.who || this.mine.idx
+    }
+    getAckTile():number{
+        return this.ackPut?.tile || 0
+    }
 }
 
+export interface AckParameter{ ackId: number, who: number, tile: number }
 
 // 玩家
 export class PlayerReducer {
@@ -204,14 +219,14 @@ export class PlayerReducer {
     setTake(tile: number) {
         this.take = tile
     }
-    setOuts(tiles: Array<number>){
+    setOuts(tiles: Array<number>) {
         this.outs = tiles
     }
     setHand(tiles: Array<number>) {
         this.hands = tiles
         this.getTileCurrent().updateHands(tiles)
     }
-    setRaces(tiles: Array<Array<number>>){
+    setRaces(tiles: Array<Array<number>>) {
         this.races = tiles
     }
     isLastedOuput(): boolean {

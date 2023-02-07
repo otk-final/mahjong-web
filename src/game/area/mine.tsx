@@ -1,7 +1,7 @@
 import React, { Ref, forwardRef, useContext, useImperativeHandle, useState } from "react"
 import ReactDom from 'react-dom';
 import { Avatar, Button, Divider, Grid, Stack } from "@mui/material";
-import { GameContext, GameEventBus, PlayerReducer } from "../context";
+import { AckParameter, GameContext, GameEventBus, PlayerReducer } from "../context";
 import { AvatarArea } from "../../component/player";
 import { MjBottomImage, MjImage } from "../../component/tile";
 import { MJRaceFilter } from "../../assets";
@@ -186,7 +186,7 @@ export const MineAreaContainer: React.FC<{ redux: PlayerReducer, take: number, h
 
         if (race === 0) {
             //跳过直接摸牌
-            return doIgnore(gameCtx)
+            return doIgnore(gameCtx, redux)
         } else if (race === 1) {
             let ready = tileCurrent.getReady()
             if (ready.length !== 1) {
@@ -241,10 +241,10 @@ export const MineAreaContainer: React.FC<{ redux: PlayerReducer, take: number, h
 }
 
 
-function doIgnore(gameCtx: GameEventBus) {
-    const params = { roomId: gameCtx.roomId, direction: 1 }
+function doIgnore(gameCtx: GameEventBus, redux: PlayerReducer) {
+    const params = { roomId: gameCtx.roomId, ackId: gameCtx.getAckId() }
     return playProxy(gameCtx.mine.uid).ignore(params).then((resp: any) => {
-
+        redux.getRaceCurrent().updateOptions([])
     }).catch(err => {
         gameCtx.notifyCtx?.error(err)
     })
@@ -273,8 +273,11 @@ export function triggerTake(gameCtx: GameEventBus, redux: PlayerReducer, directi
         tileCurrent.updateTake(resp.data.tile)
         gameCtx.doUpdateRemained(resp.data.remained)
 
+        const mineAck = { who: gameCtx.mine.idx, ackId: 0, tile: resp.data.tile }
+        gameCtx.setAckParameter(mineAck)
+
         //触发判定
-        return triggerRace(gameCtx, redux, { who: gameCtx.mine.idx, ackId:0, tile: resp.data.tile })
+        return triggerRacePre(gameCtx, redux, mineAck)
     }).catch(err => {
         gameCtx.notifyCtx?.error(err)
     })
@@ -282,7 +285,7 @@ export function triggerTake(gameCtx: GameEventBus, redux: PlayerReducer, directi
 
 
 
-export function triggerRace(gameCtx: GameEventBus, redux: PlayerReducer, target: { who: number, ackId: number, tile: number }) {
+export function triggerRacePre(gameCtx: GameEventBus, redux: PlayerReducer, target: AckParameter) {
     const params = { roomId: gameCtx.roomId, who: target.who, ackId: target.ackId, tile: target.tile }
     return playProxy(gameCtx.mine.uid).racePre(params).then((resp: any) => {
         const options = resp.data.usable.map((item: any) => {
@@ -297,8 +300,12 @@ export function triggerRace(gameCtx: GameEventBus, redux: PlayerReducer, target:
 
 function doPut(gameCtx: GameEventBus, redux: PlayerReducer, output: Array<number>) {
     const params = { roomId: gameCtx.roomId, who: gameCtx.mine.idx, round: 0, tile: output[0] }
-    playProxy(gameCtx.mine.uid).put(params).then(resp => {
-        withOutput(redux, output)
+    playProxy(gameCtx.mine.uid).put(params).then((resp: any) => {
+        //渲染页面
+        redux.doPut(resp.data.tile)
+        redux.setHand(resp.data.hands)
+        redux.getRaceCurrent().updateOptions([])
+
         gameCtx.doOutput(Area.Bottom, ...output)
     }).catch(err => {
         gameCtx.notifyCtx?.error(err)
@@ -316,38 +323,33 @@ function withOutput(redux: PlayerReducer, output: Array<number>) {
 }
 
 
-function doRace(gameCtx: GameEventBus, redux: PlayerReducer, race: number, raceReady: Array<number>) {
+function doRace(gameCtx: GameEventBus, redux: PlayerReducer, race: number, readys: Array<number>) {
     const params = {
         roomId: gameCtx.roomId,
         round: 0,
         raceType: race,
         // 当前玩家
         who: gameCtx.mine.idx,
-        tiles: raceReady,
+        tiles: readys,
         //目标玩家
-        target: 0,
-        tile: 1,
+        target: gameCtx.getAckWho(),
+        tile: gameCtx.getAckTile(),
     }
-    const raceCurrent = redux.getRaceCurrent()
-
     playProxy(gameCtx.mine.uid).race(params).then((resp: any) => {
-        //后置事件
+
         const action = resp.data.action
+        redux.getRaceCurrent().updateOptions(action === 'take' ? [] : [0])
+
+        //后置事件
         if (action === 'take') {
             return triggerTake(gameCtx, redux, resp.data.direction)
-        } else if (action === 'put') {
-            raceCurrent.updateOptions(['pass'])
-        } else {
-
         }
-        //show effect and output
-        withOutput(redux, raceReady)
 
-        raceReady.push(params.tile)
-        raceReady.sort((a, b) => a - b)
+        //show effect and output
+        redux.setHand(resp.data.hands)
+        redux.doRace(resp.data.tiles)
 
         gameCtx.doEffect(Area.Bottom, race)
-        redux.doRace(raceReady)
     }).catch(err => {
         gameCtx.notifyCtx?.error(err)
     })

@@ -26,7 +26,6 @@ export const EmptyPlayer: Player = {
 
 
 export const AvatarArea: React.FC<{ user: Player }> = ({ user }) => {
-    console.info('AvatarArea', user)
     return (
         <Stack direction={'row'} spacing={1}>
             <Avatar variant="rounded" src={AvatarRandom()} sx={{ width: 50, height: 50 }} />
