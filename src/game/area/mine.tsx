@@ -285,8 +285,8 @@ export function triggerTake(gameCtx: GameEventBus, redux: PlayerReducer, directi
 
 
 
-export function triggerRacePre(gameCtx: GameEventBus, redux: PlayerReducer, target: AckParameter) {
-    const params = { roomId: gameCtx.roomId, who: target.who, ackId: target.ackId, tile: target.tile }
+export function triggerRacePre(gameCtx: GameEventBus, redux: PlayerReducer, ack: AckParameter) {
+    const params = { roomId: gameCtx.roomId, target: ack.who, ackId: ack.ackId, tile: ack.tile }
     return playProxy(gameCtx.mine.uid).racePre(params).then((resp: any) => {
         const options = resp.data.usable.map((item: any) => {
             return item.raceType
@@ -306,7 +306,7 @@ function doPut(gameCtx: GameEventBus, redux: PlayerReducer, output: Array<number
         redux.setHand(resp.data.hands)
         redux.getRaceCurrent().updateOptions([])
 
-        gameCtx.doOutput(Area.Bottom, ...output)
+        gameCtx.doOutputAndLasted(Area.Bottom, ...output)
     }).catch(err => {
         gameCtx.notifyCtx?.error(err)
     })
@@ -337,6 +337,7 @@ function doRace(gameCtx: GameEventBus, redux: PlayerReducer, race: number, ready
     }
     playProxy(gameCtx.mine.uid).race(params).then((resp: any) => {
 
+        // take or put
         const action = resp.data.action
         redux.getRaceCurrent().updateOptions(action === 'take' ? [] : [0])
 

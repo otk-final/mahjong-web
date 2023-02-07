@@ -80,10 +80,17 @@ export class GameEventBus {
     doOutput(area: Area, ...tiles: number[]) {
         this.centerRef.current.output(area, ...tiles)
     }
+    doOutputAndLasted(area: Area, ...tiles: number[]) {
+        this.centerRef.current.output(area, ...tiles)
+        this.centerRef.current.outLastedChange(area)
+    }
+    doOutLastedChange(area: Area){
+        debugger
+        this.centerRef.current.outLastedChange(area)
+    }
     doRaceby(area: Area, tile: number) {
         this.centerRef.current.raceby(area, tile)
     }
-
     doUpdateRemained(num: number) {
         this.remainedRef.current.updateRemained(num)
     }
@@ -231,6 +238,9 @@ export class PlayerReducer {
     }
     isLastedOuput(): boolean {
         return this.outLasted
+    }
+    setLastedOuput(ok :boolean){
+        this.outLasted = ok
     }
     getHand(): Array<number> {
         return this.hands

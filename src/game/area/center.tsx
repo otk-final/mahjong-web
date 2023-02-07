@@ -19,12 +19,16 @@ const NormOutputArea = forwardRef((props: { area: Area }, ref: Ref<any>) => {
     const gameCtx = useContext<GameEventBus>(GameContext)
     const redux = gameCtx.getPlayerReducer(props.area)
 
-    let [stateLasted, setLasted] = useState<boolean>(redux ? redux!.isLastedOuput() : false)
-    let [stateOutput, setOutput] = useState<Array<number>>(redux ? redux!.getOuts() : [])
+    let [stateLasted, setLasted] = useState<boolean>(() => {
+        return redux ? redux!.isLastedOuput() : false
+    })
+    let [stateOutput, setOutput] = useState<Array<number>>(() => {
+        return redux ? redux!.getOuts() : []
+    })
 
     useImperativeHandle(ref, () => ({
-        updateLasted: (enabel:boolean) => {
-            if (stateLasted === enabel){
+        updateLasted: (enabel: boolean) => {
+            if (stateLasted === enabel) {
                 return
             }
             setLasted(enabel)
@@ -33,7 +37,6 @@ const NormOutputArea = forwardRef((props: { area: Area }, ref: Ref<any>) => {
             let existput = stateOutput.slice()
             existput = existput.concat(...tiles)
             setOutput(existput)
-            setLasted(true)
         },
         remove: (tile: number) => {
             let existput = stateOutput.slice()
@@ -44,7 +47,6 @@ const NormOutputArea = forwardRef((props: { area: Area }, ref: Ref<any>) => {
             }
             existput.splice(idx, 1)
             setOutput(existput)
-            setLasted(false)
         }
     }))
 
@@ -162,18 +164,28 @@ export const CenterAreaContainer = forwardRef((props: {}, ref: Ref<any>) => {
         return bottomRef.current
     }
 
+    const resetLasted = (area: Area) => {
+        //默认重置所有
+        [Area.Left, Area.Bottom, Area.Top, Area.Right].forEach((item: Area) => {
+            findOutputRef(item).updateLasted(area === item)
+        })
+    }
+
     useImperativeHandle(ref, () => ({
         output: (area: Area, ...tiles: number[]) => {
-            //默认重置所有
-            leftRef.current.updateLasted(false)
-            rightRef.current.updateLasted(false)
-            topRef.current.updateLasted(false)
-            bottomRef.current.updateLasted(false)
             //添加
-            findOutputRef(area).append(tiles)
+            const ref = findOutputRef(area)
+            ref.append(tiles)
+        },
+        outLastedChange: (area: Area) => {
+            return resetLasted(area)
         },
         raceby: (area: Area, tile: number) => {
-            findOutputRef(area).remove(tile)
+            //移除
+            const ref = findOutputRef(area)
+            ref.remove(tile)
+
+            ref.setLasted(false)
         }
     }))
 
@@ -242,7 +254,7 @@ const TurnArea = forwardRef((props: { turn: Area }, ref: Ref<any>) => {
     let remainedRef: any = useRef()
 
     useImperativeHandle(ref, () => ({
-        changeTurn: (turn: Area) => {setTurn(turn)}
+        changeTurn: (turn: Area) => { setTurn(turn) }
     }))
 
     const turnColor = (area: Area): string => {

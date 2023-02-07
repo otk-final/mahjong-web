@@ -69,7 +69,7 @@ export const putPlay = (bus: GameEventBus, payload: any) => {
         return
     }
     const targetArea = FindArea(mineIdx, payload.who)
-    bus.doOutput(targetArea, payload.tile)
+    bus.doOutputAndLasted(targetArea, payload.tile)
 
     //待回执标识
     const ackPut = { who: payload.who, ackId: payload.ackId, tile: payload.tile }
@@ -103,6 +103,7 @@ export const racePlay = (bus: GameEventBus, payload: any) => {
 
 export const winPlay = (bus: GameEventBus, payload: any) => {
 
+
 }
 
 export const skipPlay = (bus: GameEventBus, payload: any) => {
@@ -128,7 +129,6 @@ export const turnPlay = (bus: GameEventBus, payload: any) => {
 
     //自己回合，触发摸牌操作
     setTimeout(() => {
-        debugger
         //从前摸牌
         const mineRedux = bus.getPlayerReducer(Area.Bottom)
         return triggerTake(bus, mineRedux!, 1)

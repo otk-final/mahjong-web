@@ -43,8 +43,8 @@ export const GameMainRoute: React.FC = () => {
             //基础信息
             ctx.bindConnect(netConn)
             ctx.setBegin(resp.data.begin)
-            
-            
+
+
             setGameContext(ctx)
             document.title = '玩家：' + own.uname
         }).catch((err: any) => {
@@ -77,7 +77,7 @@ const GameMainArea: React.FC<{ ctx: GameEventBus }> = ({ ctx }) => {
     ctx.bindNotifyCtx(notifyCtx)
 
     useEffect(() => {
-        if (!ctx.isBegin()){
+        if (!ctx.isBegin()) {
             return
         }
         loadingCtx.show()
@@ -90,9 +90,9 @@ const GameMainArea: React.FC<{ ctx: GameEventBus }> = ({ ctx }) => {
             ctx.doCountdownReset(resp.data.turnInterval)
             //剩余牌库
             ctx.doUpdateRemained(resp.data.remained)
-            
+
             //加载牌
-            resp.data.tiles.forEach((item:any)=>{
+            resp.data.tiles.forEach((item: any) => {
                 const itemArea = FindArea(ctx.mine.idx, item.idx)
                 const itemRedux = ctx.getPlayerReducer(itemArea)
 
@@ -100,13 +100,19 @@ const GameMainArea: React.FC<{ ctx: GameEventBus }> = ({ ctx }) => {
                 itemRedux?.setTake(item.take)
                 itemRedux?.setOuts(item.outs)
                 itemRedux?.setHand(item.hands)
+
+                ctx.doOutput(itemArea, ...item.outs)
             })
 
+            //方位
+            const lastedArea = FindArea(ctx.mine.idx, resp.data.lastedIdx)
+            ctx.doOutLastedChange(lastedArea)
+
             loadingCtx.hide()
-        }).catch(err=>{
+        }).catch(err => {
             loadingCtx.hide()
         })
-    },[])
+    }, [])
     return (
         <GameContext.Provider value={ctx}>
             <Grid className='App' container justifyContent={'center'}>
