@@ -61,6 +61,7 @@ export class NotifyBus {
         this.snackbarRef.current.show('info', msg)
     }
     error(msg: string) {
+        debugger
         this.snackbarRef.current.show('error', msg)
     }
     warn(msg: string) {

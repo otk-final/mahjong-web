@@ -2,6 +2,8 @@ import { GameEventBus } from ".";
 import { triggerRacePre, triggerTake } from "../area/mine";
 import { Area, FindArea } from "./util";
 
+const awitTime: number = 300
+
 //加入房间
 export const memberJoin = (bus: GameEventBus, payload: any) => {
     //查询方位
@@ -43,7 +45,7 @@ export const startGame = (bus: GameEventBus, payload: any) => {
         //从前摸牌
         const mineRedux = bus.getPlayerReducer(Area.Bottom)
         return triggerTake(bus, mineRedux!, 1)
-    }, 500)
+    }, awitTime)
 }
 
 export const takePlay = (bus: GameEventBus, payload: any) => {
@@ -78,27 +80,27 @@ export const putPlay = (bus: GameEventBus, payload: any) => {
     //触发判定
     setTimeout(() => {
         const mineRedux = bus.getPlayerReducer(Area.Bottom)
-        return triggerRacePre(bus, mineRedux!,ackPut)
-    }, 500)
+        return triggerRacePre(bus, mineRedux!, ackPut)
+    }, awitTime)
 }
 
 export const racePlay = (bus: GameEventBus, payload: any) => {
-
     //忽略自己事件
     const mineIdx = bus.mine.idx
     if (mineIdx === payload.who) {
         return
     }
 
-    const targetArea = FindArea(mineIdx, payload.who)
-    const targetRedux = bus.getPlayerReducer(targetArea)
+    const whoArea = FindArea(mineIdx, payload.who)
+    const whoRedux = bus.getPlayerReducer(whoArea)
 
     //更新目标牌库
-    targetRedux?.doRace(payload.tiles)
+    whoRedux?.doRace(payload.tiles, payload.tile)
+    bus.doEffect(whoArea, payload.raceType)
 
     //渲染效果
+    const targetArea = FindArea(mineIdx, payload.target)
     bus.doRaceby(targetArea, payload.tile)
-    bus.doEffect(targetArea, payload.raceType)
 }
 
 export const winPlay = (bus: GameEventBus, payload: any) => {
@@ -132,5 +134,5 @@ export const turnPlay = (bus: GameEventBus, payload: any) => {
         //从前摸牌
         const mineRedux = bus.getPlayerReducer(Area.Bottom)
         return triggerTake(bus, mineRedux!, 1)
-    }, 500)
+    }, awitTime)
 }

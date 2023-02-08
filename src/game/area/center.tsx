@@ -107,6 +107,7 @@ const RaceEffectArea = forwardRef((props: {}, ref: Ref<any>) => {
 
     useImperativeHandle(ref, () => ({
         append: (area: Area, race: string) => {
+            debugger
             let sx: any = { position: 'absolute', height: 100, width: 100 }
             if (area === Area.Top) {
                 sx.top = -30
@@ -185,7 +186,7 @@ export const CenterAreaContainer = forwardRef((props: {}, ref: Ref<any>) => {
             const ref = findOutputRef(area)
             ref.remove(tile)
 
-            ref.setLasted(false)
+            ref.updateLasted(false)
         }
     }))
 

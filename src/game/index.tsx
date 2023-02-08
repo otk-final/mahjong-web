@@ -105,8 +105,14 @@ const GameMainArea: React.FC<{ ctx: GameEventBus }> = ({ ctx }) => {
             })
 
             //方位
-            const lastedArea = FindArea(ctx.mine.idx, resp.data.lastedIdx)
-            ctx.doOutLastedChange(lastedArea)
+            const recentArea = FindArea(ctx.mine.idx, resp.data.recentIdx)
+            ctx.doOutLastedChange(recentArea)
+
+            //可用策略
+            const options = resp.data.usable.map((item: any) => {
+                return item.raceType
+            })
+            ctx.getPlayerReducer(Area.Bottom)?.getRaceCurrent().updateOptions(options)
 
             loadingCtx.hide()
         }).catch(err => {

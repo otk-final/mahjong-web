@@ -22,7 +22,7 @@ export class NetConnect {
         let socket = new WebSocket(address, subp)
         socket.onmessage = (event: any) => {
             const serverEvent = JSON.parse(event.data)
-            console.info(serverEvent)
+            console.info(serverEvent.eventName, serverEvent.payload)
             this.consumers[serverEvent.event](serverEvent.payload)
         }
         socket.onopen = (event: any) => {

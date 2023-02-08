@@ -128,6 +128,9 @@ export const TileArea = forwardRef((props: { mineRedux: PlayerReducer, take: num
             stateRaces.push(race)
             setRaces(stateRaces)
         },
+        updateRaces: (races:Array<Array<number>>)=>{
+            setRaces(races)
+        }
     }))
 
     props.mineRedux.bindTileRef(ref)
@@ -250,6 +253,7 @@ function doIgnore(gameCtx: GameEventBus, redux: PlayerReducer) {
     })
 }
 
+
 function doHu(gameCtx: GameEventBus) {
     const params = { roomId: gameCtx.roomId }
     playProxy(gameCtx.mine.uid).win(params).then((resp: any) => {
@@ -272,12 +276,11 @@ export function triggerTake(gameCtx: GameEventBus, redux: PlayerReducer, directi
         redux.doTake(resp.data.tile)
         tileCurrent.updateTake(resp.data.tile)
         gameCtx.doUpdateRemained(resp.data.remained)
-
-        const mineAck = { who: gameCtx.mine.idx, ackId: 0, tile: resp.data.tile }
-        gameCtx.setAckParameter(mineAck)
-
-        //触发判定
-        return triggerRacePre(gameCtx, redux, mineAck)
+        //可用策略
+        const options = resp.data.usable.map((item: any) => {
+            return item.raceType
+        })
+        redux.getRaceCurrent().updateOptions(options)
     }).catch(err => {
         gameCtx.notifyCtx?.error(err)
     })
@@ -288,6 +291,8 @@ export function triggerTake(gameCtx: GameEventBus, redux: PlayerReducer, directi
 export function triggerRacePre(gameCtx: GameEventBus, redux: PlayerReducer, ack: AckParameter) {
     const params = { roomId: gameCtx.roomId, target: ack.who, ackId: ack.ackId, tile: ack.tile }
     return playProxy(gameCtx.mine.uid).racePre(params).then((resp: any) => {
+        
+        //可用策略
         const options = resp.data.usable.map((item: any) => {
             return item.raceType
         })
@@ -312,18 +317,13 @@ function doPut(gameCtx: GameEventBus, redux: PlayerReducer, output: Array<number
     })
 }
 
-//有可能 take hand 同时提交 获取全量, 移除牌
-function withOutput(redux: PlayerReducer, output: Array<number>) {
-    let hands = redux.getHand()
-    output.forEach((item: number) => {
-        let idx = hands.indexOf(item)
-        if (idx !== -1) hands.splice(idx, 1)
-    });
-    redux.setHand(hands)
-}
 
 
 function doRace(gameCtx: GameEventBus, redux: PlayerReducer, race: number, readys: Array<number>) {
+    if (gameCtx.getAckWho() === -1 || gameCtx.getAckTile() === 0) {
+        return gameCtx.notifyCtx?.error('数据错误')
+    }
+
     const params = {
         roomId: gameCtx.roomId,
         round: 0,
@@ -336,20 +336,15 @@ function doRace(gameCtx: GameEventBus, redux: PlayerReducer, race: number, ready
         tile: gameCtx.getAckTile(),
     }
     playProxy(gameCtx.mine.uid).race(params).then((resp: any) => {
+        //可用策略
+        const options = resp.data.usable.map((item: any) => {
+            return item.raceType
+        })
+        redux.getRaceCurrent().updateOptions(options)
 
-        // take or put
-        const action = resp.data.action
-        redux.getRaceCurrent().updateOptions(action === 'take' ? [] : [0])
-
-        //后置事件
-        if (action === 'take') {
-            return triggerTake(gameCtx, redux, resp.data.direction)
-        }
-
-        //show effect and output
+        //渲染效果
         redux.setHand(resp.data.hands)
-        redux.doRace(resp.data.tiles)
-
+        redux.doRace(resp.data.tiles, resp.data.tile)
         gameCtx.doEffect(Area.Bottom, race)
     }).catch(err => {
         gameCtx.notifyCtx?.error(err)

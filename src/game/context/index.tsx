@@ -71,7 +71,6 @@ export class GameEventBus {
     }
 
     doEffect(area: Area, race: number) {
-        //延迟
         this.effectRef.current.append(area, race)
     }
     doRemoveEffect() {
@@ -84,8 +83,7 @@ export class GameEventBus {
         this.centerRef.current.output(area, ...tiles)
         this.centerRef.current.outLastedChange(area)
     }
-    doOutLastedChange(area: Area){
-        debugger
+    doOutLastedChange(area: Area) {
         this.centerRef.current.outLastedChange(area)
     }
     doRaceby(area: Area, tile: number) {
@@ -174,14 +172,14 @@ export class GameEventBus {
         return this.ackPut?.ackId || 0
     }
     getAckWho(): number {
-        return this.ackPut?.who || this.mine.idx
+        return this.ackPut?.who || -1
     }
-    getAckTile():number{
+    getAckTile(): number {
         return this.ackPut?.tile || 0
     }
 }
 
-export interface AckParameter{ ackId: number, who: number, tile: number }
+export interface AckParameter { ackId: number, who: number, tile: number }
 
 // 玩家
 export class PlayerReducer {
@@ -235,11 +233,12 @@ export class PlayerReducer {
     }
     setRaces(tiles: Array<Array<number>>) {
         this.races = tiles
+        this.getTileCurrent().updateRaces(tiles)
     }
     isLastedOuput(): boolean {
         return this.outLasted
     }
-    setLastedOuput(ok :boolean){
+    setLastedOuput(ok: boolean) {
         this.outLasted = ok
     }
     getHand(): Array<number> {
@@ -267,8 +266,12 @@ export class PlayerReducer {
         this.getTileCurrent().updateTake(tile)
     }
     //判定
-    doRace(tiles: Array<number>) {
+    doRace(tiles: Array<number>, tile:number) {
+        
+        //聚合
+        tiles.push(tile)
         this.races.push(tiles)
+
         this.getTileCurrent().appendRace(tiles)
     }
 }

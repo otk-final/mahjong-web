@@ -68,6 +68,9 @@ const JoinContainer = forwardRef((props: { redux: PlayerReducer, direction: Area
         appendRace(race: Array<number>){
             races.push(race)
             setRaces(races)
+        },
+        updateRaces: (races: Array<Array<number>>) => {
+            setRaces(races)
         }
     }))
     reduxOps.bindTileRef(ref)
