@@ -1,5 +1,5 @@
 import React, { useImperativeHandle, useRef, useState, forwardRef, Ref, useContext, useEffect } from "react"
-import { GameContext, GameEventBus, PlayerReducer } from '../context';
+import { GameContext, GameEventBus, PlayerReducer, TileCollect } from '../context';
 import { Box, Divider, Grid, Stack } from "@mui/material";
 import { MjImage, MjImageHeight } from "../../component/tile";
 import { AvatarArea, Player } from "../../component/player";
@@ -52,37 +52,26 @@ export const PlayerContainer = forwardRef((props: { direction: Area }, ref: Ref<
 })
 
 
+
 const JoinContainer = forwardRef((props: { redux: PlayerReducer, direction: Area }, ref: Ref<any>) => {
 
     const reduxOps = props.redux
-    let [hands, setHands] = useState<Array<number>>(reduxOps.getHand())
-    let [races, setRaces] = useState<Array<Array<number>>>(reduxOps.getRaces())
-    let [take, setTake] = useState<number>(reduxOps.getTake())
+    let [stateTile, setTile] = useState<TileCollect>(reduxOps.getTileCollect())
     useImperativeHandle(ref, () => ({
-        updateHands(tiles: Array<number>) {
-            setHands(tiles)
-        },
-        updateTake(tile: number) {
-            setTake(tile)
-        },
-        appendRace(race: Array<number>){
-            races.push(race)
-            setRaces(races)
-        },
-        updateRaces: (races: Array<Array<number>>) => {
-            setRaces(races)
+        updateTileCollect(tile: TileCollect) {
+            setTile({ outs: tile.outs, hands: tile.hands, races: tile.races, take: tile.take })
         }
     }))
     reduxOps.bindTileRef(ref)
 
     if (props.direction === Area.Left) {
-        return <LeftPlayer redux={reduxOps} take={take} hands={hands} races={races} />
+        return <LeftPlayer redux={reduxOps} take={stateTile.take} hands={stateTile.hands} races={stateTile.races} />
     } else if (props.direction === Area.Right) {
-        return <RightPlayer redux={reduxOps} take={take} hands={hands} races={races} />
+        return <RightPlayer redux={reduxOps} take={stateTile.take} hands={stateTile.hands} races={stateTile.races} />
     } else if (props.direction === Area.Top) {
-        return <TopPlayer redux={reduxOps} take={take} hands={hands} races={races} />
+        return <TopPlayer redux={reduxOps} take={stateTile.take} hands={stateTile.hands} races={stateTile.races} />
     }
-    return <MineAreaContainer redux={reduxOps} take={take} hands={hands} races={races} />
+    return <MineAreaContainer redux={reduxOps} take={stateTile.take} hands={stateTile.hands} races={stateTile.races} />
 })
 
 

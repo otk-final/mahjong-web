@@ -19,16 +19,15 @@ export interface MjExtra {
     tile: number
 }
 
-export const MjBottomImage: React.FC<{ mj: number, callPut?: any, extra?: MjExtra }> = ({ mj, callPut, extra }) => {
-    // debugger
+export const MjBottomImage: React.FC<{ mj: number, setReadyCall?: any, extra?: MjExtra }> = ({ mj, setReadyCall, extra }) => {
     const [ready, setReady] = React.useState<boolean>(false)
     const readyOutClick = (e: any) => {
-        if (!callPut) {
+        if (!setReadyCall) {
             return
         }
         setReady(!ready)
         //回调
-        return callPut!(mj, !ready)
+        return setReadyCall!(mj, !ready)
     }
 
     return (

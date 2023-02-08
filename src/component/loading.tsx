@@ -1,6 +1,6 @@
 
 import React, { Ref, forwardRef, useContext, useImperativeHandle, useRef, useState } from 'react';
-import { Backdrop, CircularProgress } from '@mui/material';
+import { Backdrop, Button, CircularProgress } from '@mui/material';
 
 export const LoadingArea: React.FC<{ open: boolean }> = ({ open }) => {
     let loadingyRef = useRef()

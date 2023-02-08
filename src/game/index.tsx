@@ -87,20 +87,15 @@ const GameMainArea: React.FC<{ ctx: GameEventBus }> = ({ ctx }) => {
             const turnArea = FindArea(ctx.mine.idx, resp.data.turnIdx)
             ctx.doChangeTurn(turnArea)
             //开启计时器
-            ctx.doCountdownReset(resp.data.turnInterval)
+            ctx.doCountdownReset(resp.data.interval)
             //剩余牌库
             ctx.doUpdateRemained(resp.data.remained)
 
             //加载牌
-            resp.data.tiles.forEach((item: any) => {
+            resp.data.players.forEach((item: any) => {
                 const itemArea = FindArea(ctx.mine.idx, item.idx)
                 const itemRedux = ctx.getPlayerReducer(itemArea)
-
-                itemRedux?.setRaces(item.races)
-                itemRedux?.setTake(item.take)
-                itemRedux?.setOuts(item.outs)
-                itemRedux?.setHand(item.hands)
-
+                itemRedux?.setTileCollect({ hands: item.hands, races: item.races, take: -1, outs: item.outs })
                 ctx.doOutput(itemArea, ...item.outs)
             })
 
@@ -109,10 +104,10 @@ const GameMainArea: React.FC<{ ctx: GameEventBus }> = ({ ctx }) => {
             ctx.doOutLastedChange(recentArea)
 
             //可用策略
-            const options = resp.data.usable.map((item: any) => {
+            const raceOptions = resp.data.options.map((item: any) => {
                 return item.raceType
             })
-            ctx.getPlayerReducer(Area.Bottom)?.getRaceCurrent().updateOptions(options)
+            ctx.getPlayerReducer(Area.Bottom)?.getRaceCurrent().updateOptions(raceOptions)
 
             loadingCtx.hide()
         }).catch(err => {

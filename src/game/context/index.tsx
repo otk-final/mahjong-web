@@ -71,10 +71,10 @@ export class GameEventBus {
     }
 
     doEffect(area: Area, race: number) {
-        this.effectRef.current.append(area, race)
+        this.effectRef.current.show(area, race)
     }
     doRemoveEffect() {
-        this.effectRef.current.remove()
+        this.effectRef.current.hide()
     }
     doOutput(area: Area, ...tiles: number[]) {
         this.centerRef.current.output(area, ...tiles)
@@ -120,8 +120,9 @@ export class GameEventBus {
     }
     //退出游戏
     exitGame() {
-        debugger
+        this.effectRef.current.show(Area.Left, 201)
     }
+
     //开启状态变更
     setBegin(flag: boolean) {
         this.begining = flag
@@ -177,9 +178,23 @@ export class GameEventBus {
     getAckTile(): number {
         return this.ackPut?.tile || 0
     }
+
+    //挂机
+    doAuto(enable: boolean) {
+        this.loadingCtx?.show()
+    }
 }
 
 export interface AckParameter { ackId: number, who: number, tile: number }
+
+
+export interface TileCollect {
+    outs: Array<number>
+    hands: Array<number>
+    races: Array<Array<number>>
+    take: number
+}
+
 
 // 玩家
 export class PlayerReducer {
@@ -212,67 +227,57 @@ export class PlayerReducer {
         return this.raceRef.current
     }
 
-    //持有数据
-    hands: Array<number> = new Array<number>()
-    take: number = -1
-    races: Array<Array<number>> = new Array<Array<number>>()
+    tileCollect: TileCollect = { hands: [], races: [], take: -1, outs: [] }
+    setTileCollect(init: TileCollect) {
+        //分离 hand take 渲染
+        if (init.take !== -1) {
+            let takeIdx = init.hands.indexOf(init.take)
+            if (takeIdx !== -1) {
+                init.hands.splice(takeIdx, 1)
+            }
+        }
+        init.hands.sort((a, b) => a - b)
+        this.tileCollect = init
+        this.getTileCurrent().updateTileCollect(this.tileCollect)
+    }
 
-    display: boolean = false
-    outs: Array<number> = new Array<number>()
+    getTileCollect(): TileCollect {
+        return this.tileCollect
+    }
     outLasted: boolean = false
-
-    setTake(tile: number) {
-        this.take = tile
-    }
-    setOuts(tiles: Array<number>) {
-        this.outs = tiles
-    }
-    setHand(tiles: Array<number>) {
-        this.hands = tiles
-        this.getTileCurrent().updateHands(tiles)
-    }
-    setRaces(tiles: Array<Array<number>>) {
-        this.races = tiles
-        this.getTileCurrent().updateRaces(tiles)
-    }
     isLastedOuput(): boolean {
         return this.outLasted
     }
     setLastedOuput(ok: boolean) {
         this.outLasted = ok
     }
-    getHand(): Array<number> {
-        return this.hands
-    }
-    getTake(): number {
-        return this.take
-    }
-    getRaces(): Array<Array<number>> {
-        return this.races
-    }
-    getDisplay(): boolean {
-        return this.display
-    }
-    getOuts(): Array<number> {
-        return this.outs
-    }
     //出牌
     doPut(tile: number) {
-        this.outs.push(tile)
+        this.tileCollect.outs.push(tile)
+
+        //聚合 hands 和 take
+        this.tileCollect.take = -1
+        this.getTileCurrent().updateTileCollect(this.tileCollect)
     }
     //摸牌
     doTake(tile: number) {
-        this.take = tile
-        this.getTileCurrent().updateTake(tile)
+        this.tileCollect.take = tile
+        this.getTileCurrent().updateTileCollect(this.tileCollect)
+    }
+    //持牌
+    doHands(tiles: Array<number>) {
+        tiles.sort((a, b) => a - b)
+        this.tileCollect.hands = tiles
+        this.getTileCurrent().updateTileCollect(this.tileCollect)
     }
     //判定
-    doRace(tiles: Array<number>, tile:number) {
-        
-        //聚合
-        tiles.push(tile)
-        this.races.push(tiles)
-
-        this.getTileCurrent().appendRace(tiles)
+    doRace(tiles: Array<number>) {
+        this.tileCollect.races.push(tiles)
+        this.getTileCurrent().updateTileCollect(this.tileCollect)
+    }
+    doRaceMove(tile: number) {
+        const moveIdx = this.tileCollect.outs.lastIndexOf(tile)
+        if (moveIdx !== -1) { this.tileCollect.outs.splice(moveIdx, 1) }
     }
 }
 

@@ -23,7 +23,7 @@ const NormOutputArea = forwardRef((props: { area: Area }, ref: Ref<any>) => {
         return redux ? redux!.isLastedOuput() : false
     })
     let [stateOutput, setOutput] = useState<Array<number>>(() => {
-        return redux ? redux!.getOuts() : []
+        return redux ? redux!.getTileCollect().outs : []
     })
 
     useImperativeHandle(ref, () => ({
@@ -90,11 +90,11 @@ const NormOutputArea = forwardRef((props: { area: Area }, ref: Ref<any>) => {
 })
 
 
-interface effectItem {
+interface RaceEffectItem {
     area: Area,
     sx: any,
     display: boolean,
-    race: string
+    race: number
 }
 
 
@@ -102,12 +102,11 @@ const RaceEffectArea = forwardRef((props: {}, ref: Ref<any>) => {
 
 
     const gameCtx = useContext<GameEventBus>(GameContext)
-    let [stateEffect, setEffect] = useState<Array<effectItem>>([])
+    const [stateEffect, setEffect] = useState<Array<RaceEffectItem>>([])
 
 
     useImperativeHandle(ref, () => ({
-        append: (area: Area, race: string) => {
-            debugger
+        show: (area: Area, race: number) => {
             let sx: any = { position: 'absolute', height: 100, width: 100 }
             if (area === Area.Top) {
                 sx.top = -30
@@ -122,9 +121,9 @@ const RaceEffectArea = forwardRef((props: {}, ref: Ref<any>) => {
                 sx.bottom = -30
             }
             stateEffect.push({ area: area, sx: sx, display: true, race: race })
-            setEffect(stateEffect)
+            setEffect(stateEffect.slice())
         },
-        remove: () => {
+        hide: () => {
             setEffect([])
         }
     }))
@@ -133,7 +132,7 @@ const RaceEffectArea = forwardRef((props: {}, ref: Ref<any>) => {
 
     return (<Grid container sx={{ height: '100%', width: '100%', position: 'relative' }} justifyContent={'center'} alignItems={'center'} >
         {
-            Array.from(stateEffect).map((item: effectItem, idx) => (
+            Array.from(stateEffect).map((item: RaceEffectItem, idx) => (
                 <Zoom in={item.display} style={item.sx} key={idx}>
                     <Avatar src={MJRaceFilter(item.race)}></Avatar>
                 </Zoom>

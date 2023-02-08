@@ -24,16 +24,16 @@ export const startGame = (bus: GameEventBus, payload: any) => {
     const mineIdx = bus.mine.idx
 
     //初始化渲染玩家手牌
-    payload.tiles.forEach((item: any) => {
+    payload.players.forEach((item: any) => {
         const itemArea = FindArea(mineIdx, item.idx)
-        bus.getPlayerReducer(itemArea)?.setHand(item.hands)
+        bus.getPlayerReducer(itemArea)?.setTileCollect({ hands: item.hands, races: item.races, take: -1, outs: item.outs })
     })
 
     //渲染当前方位
     const turnArea = FindArea(mineIdx, payload.turnIdx)
     bus.doChangeTurn(turnArea)
     //开启计时器
-    bus.doCountdownReset(payload.turnInterval)
+    bus.doCountdownReset(payload.interval)
     //剩余牌库
     bus.doUpdateRemained(payload.remained)
 
@@ -54,6 +54,7 @@ export const takePlay = (bus: GameEventBus, payload: any) => {
     if (mineIdx === payload.who) {
         return
     }
+
     //更新剩余牌数
     bus.doUpdateRemained(payload.remained)
     const targetArea = FindArea(mineIdx, payload.who)
@@ -70,38 +71,51 @@ export const putPlay = (bus: GameEventBus, payload: any) => {
     if (mineIdx === payload.who) {
         return
     }
-    const targetArea = FindArea(mineIdx, payload.who)
-    bus.doOutputAndLasted(targetArea, payload.tile)
 
-    //待回执标识
-    const ackPut = { who: payload.who, ackId: payload.ackId, tile: payload.tile }
-    bus.setAckParameter(ackPut)
+    //渲染页面
+    const targetArea = FindArea(mineIdx, payload.who)
+    const targetRedux = bus.getPlayerReducer(targetArea)
+
+    bus.doOutputAndLasted(targetArea, payload.tile)
+    targetRedux?.doPut(payload.tile)
 
     //触发判定
     setTimeout(() => {
         const mineRedux = bus.getPlayerReducer(Area.Bottom)
-        return triggerRacePre(bus, mineRedux!, ackPut)
+        return triggerRacePre(bus, mineRedux!, payload.ackId)
     }, awitTime)
 }
 
+
 export const racePlay = (bus: GameEventBus, payload: any) => {
-    //忽略自己事件
+
     const mineIdx = bus.mine.idx
+    const whoArea = FindArea(mineIdx, payload.who)
+    
+    //重新开始计时
+    bus.doChangeTurn(whoArea)
+    bus.doCountdownReset(payload.interval)
+
+
+    //忽略自己事件
     if (mineIdx === payload.who) {
         return
     }
-
-    const whoArea = FindArea(mineIdx, payload.who)
+    
+    //源
     const whoRedux = bus.getPlayerReducer(whoArea)
+    whoRedux?.doRace(payload.tiles)
 
-    //更新目标牌库
-    whoRedux?.doRace(payload.tiles, payload.tile)
-    bus.doEffect(whoArea, payload.raceType)
-
-    //渲染效果
+    //目标
     const targetArea = FindArea(mineIdx, payload.target)
+    const targetRedux = bus.getPlayerReducer(targetArea)
+    targetRedux?.doRaceMove(payload.tile)
+    
+    //渲染效果
+    bus.doEffect(whoArea, payload.raceType)
     bus.doRaceby(targetArea, payload.tile)
 }
+
 
 export const winPlay = (bus: GameEventBus, payload: any) => {
 
@@ -120,11 +134,9 @@ export const turnPlay = (bus: GameEventBus, payload: any) => {
     bus.doCountdownReset(payload.interval)
 
 
-
     //重置当前判定可选项
     const mineRedux = bus.getPlayerReducer(Area.Bottom)
     mineRedux?.getRaceCurrent().removeOptions()
-
 
     //非本回合
     if (bus.mine.idx !== payload.who) { return }
