@@ -165,23 +165,14 @@ export class GameEventBus {
         conn.subscribe(108, (payload: any) => { turnPlay(this, payload) })
     }
 
-    ackPut?: AckParameter
-    setAckParameter(ack: AckParameter) {
-        this.ackPut = ack
-    }
-    getAckId(): number {
-        return this.ackPut?.ackId || 0
-    }
-    getAckWho(): number {
-        return this.ackPut?.who || -1
-    }
-    getAckTile(): number {
-        return this.ackPut?.tile || 0
-    }
-
     //挂机
-    doAuto(enable: boolean) {
+    doRobot(enable: boolean) {
         this.loadingCtx?.show()
+        gameProxy(this.mine.uid).robot({ roomId: this.roomId, open: enable, level: 1 }).then((resp: any) => {
+            this.notifyCtx?.success('挂机中')
+        }).catch(err => {
+            this.notifyCtx?.error(err)
+        })
     }
 }
 
@@ -271,9 +262,23 @@ export class PlayerReducer {
         this.getTileCurrent().updateTileCollect(this.tileCollect)
     }
     //判定
-    doRace(tiles: Array<number>) {
-        this.tileCollect.races.push(tiles)
+    doRace(race: number, tiles: Array<number>) {
+        //自杠 覆盖
+        if (race === 204) {
+            this.replaceEEEEUpgradeRace(tiles)
+        } else {
+            this.tileCollect.races.push(tiles)
+        }
         this.getTileCurrent().updateTileCollect(this.tileCollect)
+    }
+    replaceEEEEUpgradeRace(tiles: Array<number>) {
+        const races = this.tileCollect.races
+        for (var i = 0; i < races.length; i++) {
+            const item: Array<number> = races[i]
+            if (item.length === 3 && item[0] === tiles[0] && item[1] === tiles[1] && item[2] === tiles[2]) {
+                races[i] = tiles
+            }
+        }
     }
     doRaceMove(tile: number) {
         const moveIdx = this.tileCollect.outs.lastIndexOf(tile)

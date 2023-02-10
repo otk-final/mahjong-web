@@ -43,6 +43,9 @@ import defaultImg from "./mj/背景.png"
 
 import raceDDD from './effect/碰.png'
 import raceEEEE from './effect/杠.png'
+import raceEEEEUpgrade from './effect/杠.png'
+import raceEEEEOwn from './effect/杠.png'
+
 import raceABC from './effect/吃.png'
 import raceWin from './effect/胡.png'
 
@@ -65,10 +68,14 @@ export const MJRaces = {
     200: raceWin,
     201: raceDDD,
     202: raceABC,
+    
     203: raceEEEE,
-    204: raceLai,
-    205: raceCao,
-    206: raceGui,
+    204: raceEEEEUpgrade,
+    205: raceEEEEOwn,
+
+    206: raceLai,
+    207: raceCao,
+    208: raceGui,
 
     0: racePass,
     1: racePut,

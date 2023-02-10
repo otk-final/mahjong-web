@@ -2,6 +2,7 @@ import React, { Ref, forwardRef, useContext, useImperativeHandle, useRef, useSta
 import './App.css';
 import { Box, Divider, FormControlLabel, IconButton, Paper, Radio, RadioGroup, SpeedDial, SpeedDialAction, SpeedDialIcon, Stack, TextField } from '@mui/material';
 import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt';
+import ComputerIcon from '@mui/icons-material/Computer';
 import HistoryIcon from '@mui/icons-material/History';
 import AddIcon from '@mui/icons-material/Add';
 import { useNavigate } from 'react-router-dom';
@@ -89,8 +90,7 @@ const UserDial: React.FC = () => {
 
   const createRoom = (event: any) => {
     var param = {
-      game: { mode: "std", nums: 4, custom: {} },
-      payment: { mode: 1, amount: 3 }
+      mode: "std", nums: 4, custom: {}
     }
     //创建房间
     roomProxy('a').create(param).then((resp: any) => {
@@ -105,10 +105,25 @@ const UserDial: React.FC = () => {
 
   }
 
+  const startComputeBattle = (event: any) => {
+    var param = {
+      mode: "std", nums: 4, custom: {}
+    }
+    //创建房间
+    roomProxy('a').compute(param).then((resp: any) => {
+      notifyCtx.success('创建成功')
+      navigator('/game/' + resp.data.roomId + "/" + resp.data.own.uid)
+    }).catch((err: any) => {
+      notifyCtx.error(err.message)
+    })
+  }
+
+
   return (
     <SpeedDial ariaLabel="SpeedDial basic example" sx={{ position: 'absolute', bottom: 30, right: 30 }} icon={<SpeedDialIcon />} open={true}>
       <SpeedDialAction key={'create'} icon={<AddIcon />} tooltipTitle={'创建房间'} onClick={(e) => { createRoom(e) }} />
       <SpeedDialAction key={'history'} icon={<HistoryIcon />} tooltipTitle={'历史记录'} onClick={(e) => { showHistory(e) }} />
+      <SpeedDialAction key={'robot'} icon={<ComputerIcon />} tooltipTitle={'人机对战'} onClick={(e) => { startComputeBattle(e) }} />
     </SpeedDial>
   )
 }

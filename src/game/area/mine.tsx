@@ -5,7 +5,7 @@ import { GameContext, GameEventBus, PlayerReducer, TileCollect } from "../contex
 import { AvatarArea } from "../../component/player";
 import { MjBottomImage, MjImage } from "../../component/tile";
 import { MJRaceFilter } from "../../assets";
-import { Area } from "../context/util";
+import { Area, FindArea } from "../context/util";
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -51,6 +51,11 @@ export const RaceArea = forwardRef((props: { mineRedux: PlayerReducer, submitCal
         </Grid >)
 })
 
+
+interface CanReadyTile {
+    tile: number,
+    ready: boolean
+}
 
 export const TileArea = forwardRef((props: { mineRedux: PlayerReducer, take: number, hands: Array<number>, races: Array<Array<number>> }, ref: Ref<any>) => {
 
@@ -167,7 +172,7 @@ export const MineAreaContainer: React.FC<{ redux: PlayerReducer, take: number, h
             return doTake(gameCtx, redux)
         } else if (race === 200) {
             //胡牌
-            return doHu(gameCtx)
+            return doHu(gameCtx, redux)
         } else {
             if (ready.length === 0) {
                 return notifyCtx.warn("操作非法")
@@ -196,7 +201,7 @@ export const MineAreaContainer: React.FC<{ redux: PlayerReducer, take: number, h
                     <AvatarArea user={redux.player} />
                 </Grid>
                 <Grid item>
-                    <Button variant="contained" color="primary" size="small" startIcon={<SmartToyIcon />} onClick={(e) => { gameCtx.doAuto(true) }}>挂机托管</Button>
+                    <Button variant="contained" color="primary" size="small" startIcon={<SmartToyIcon />} onClick={(e) => { gameCtx.doRobot(true) }}>挂机托管</Button>
                 </Grid>
                 <Grid item>
                     <Button variant="contained" startIcon={<ExitToAppIcon />} color="info" size="small" onClick={(e) => { gameCtx.exitGame() }} >退出游戏</Button>
@@ -211,7 +216,7 @@ export const MineAreaContainer: React.FC<{ redux: PlayerReducer, take: number, h
 
 
 function doIgnore(gameCtx: GameEventBus, redux: PlayerReducer) {
-    const params = { roomId: gameCtx.roomId, ackId: gameCtx.getAckId() }
+    const params = { roomId: gameCtx.roomId }
     return playProxy(gameCtx.mine.uid).ignore(params).then((resp: any) => {
         redux.getRaceCurrent().updateOptions([])
     }).catch(err => {
@@ -220,12 +225,23 @@ function doIgnore(gameCtx: GameEventBus, redux: PlayerReducer) {
 }
 
 
-function doHu(gameCtx: GameEventBus) {
+function doHu(gameCtx: GameEventBus, redux: PlayerReducer) {
     const params = { roomId: gameCtx.roomId }
     playProxy(gameCtx.mine.uid).win(params).then((resp: any) => {
+        redux.getRaceCurrent().updateOptions([])
 
+        //移除对手牌
+        if (gameCtx.mine.idx !== resp.data.target) {
+
+            const targetArea = FindArea(gameCtx.mine.idx, resp.data.target)
+            gameCtx.doRaceby(targetArea, resp.data.targetTile)
+
+            redux.doTake(resp.data.targetTile)
+        }
+
+        gameCtx.doEffect(Area.Bottom, resp.data.effect)
     }).catch(err => {
-
+        gameCtx.notifyCtx?.error(err)
     })
 }
 
@@ -313,9 +329,15 @@ function doRace(gameCtx: GameEventBus, redux: PlayerReducer, race: number, ready
         redux.setTileCollect({
             hands: resp.data.hands,
             races: resp.data.races,
-            take: -1,
+            take: resp.data.continueTake,
             outs: resp.data.outs
         })
+
+        //移除对手牌
+        if (gameCtx.mine.idx !== resp.data.target) {
+            const targetArea = FindArea(gameCtx.mine.idx, resp.data.target)
+            gameCtx.doRaceby(targetArea, resp.data.targetTile)
+        }
 
         gameCtx.doEffect(Area.Bottom, race)
     }).catch(err => {

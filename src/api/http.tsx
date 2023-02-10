@@ -98,6 +98,9 @@ export const roomProxy = function (autorKey: string) {
         },
         exit: (data: any) => {
             return http('post', '/room/exit', data, header)
+        },
+        compute: (data: any) => {
+            return http('post', '/room/compute', data, header)
         }
     }
 }
@@ -121,6 +124,9 @@ export const gameProxy = function (autorKey: string) {
         },
         load: (data: any) => {
             return http('post', '/game/load', data, header)
+        },
+        robot:(data:any)=>{
+            return http('post', '/game/robot', data, header)
         }
     }
 }
