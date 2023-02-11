@@ -45,8 +45,8 @@ const NormOutputArea = forwardRef((props: { area: Area }, ref: Ref<any>) => {
             if (idx === -1) {
                 return
             }
-            existput.splice(idx, 1)
-            setOutput(existput)
+            existput[idx] = existput[idx] * -1
+            setOutput(existput.slice())
         }
     }))
 
@@ -75,6 +75,7 @@ const NormOutputArea = forwardRef((props: { area: Area }, ref: Ref<any>) => {
         spacingGrid = 0.2
     }
 
+    
 
     return (<Grid container direction={directionGrid} alignItems={'center'} justifyContent={'center'}
         columns={maxOut} spacing={spacingGrid}
@@ -82,7 +83,7 @@ const NormOutputArea = forwardRef((props: { area: Area }, ref: Ref<any>) => {
         {
             Array.from(stateOutput).map((outItem, idx) => (
                 <Grid item key={idx} sx={{ height: MjImageHeight.centerRotate }}>
-                    <MjImage mj={outItem} direction={props.area} height={MjImageHeight.center} lasted={stateLasted && idx === stateOutput.length - 1} />
+                    <MjImage value={outItem} area={props.area} height={MjImageHeight.center} lasted={stateLasted && idx === stateOutput.length - 1} />
                 </Grid>
             ))
         }

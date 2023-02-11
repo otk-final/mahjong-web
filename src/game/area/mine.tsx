@@ -51,12 +51,6 @@ export const RaceArea = forwardRef((props: { mineRedux: PlayerReducer, submitCal
         </Grid >)
 })
 
-
-interface CanReadyTile {
-    tile: number,
-    ready: boolean
-}
-
 export const TileArea = forwardRef((props: { mineRedux: PlayerReducer, take: number, hands: Array<number>, races: Array<Array<number>> }, ref: Ref<any>) => {
 
 
@@ -119,7 +113,7 @@ export const TileArea = forwardRef((props: { mineRedux: PlayerReducer, take: num
                         <Stack direction={'row'} justifyContent={'center'} alignItems={'center'} key={idx}>
                             {
                                 Array.from(raceGroup).map((raceItem, idx) => (
-                                    <MjImage direction={'bottom'} height={'45px'} mj={raceItem} key={idx} extra={gameCtx.getMjExtra(raceItem)} />
+                                    <MjImage area={Area.Bottom} height={'45px'} value={raceItem} key={idx} extra={gameCtx.getMjExtra(raceItem)} />
                                 ))
                             }
                         </Stack>

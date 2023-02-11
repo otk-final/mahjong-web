@@ -92,14 +92,14 @@ const LeftPlayer: React.FC<{ redux: PlayerReducer, take: number, hands: Array<nu
                             {
                                 Array.from(hands).map((handItem, idx) => (
                                     <Box key={idx} sx={{ height: MjImageHeight.leftRotate }} >
-                                        <MjImage mj={handItem} direction={'left'} />
+                                        <MjImage value={handItem} area={Area.Left} />
                                     </Box>
                                 ))
                             }
                         </Stack>
                         {/* take */}
                         <Stack>
-                            {take !== -1 && <MjImage mj={take} direction={'left'} />}
+                            {take !== -1 && <MjImage value={take} area={Area.Left} />}
                         </Stack>
                     </Stack>
                 </Grid>
@@ -112,7 +112,7 @@ const LeftPlayer: React.FC<{ redux: PlayerReducer, take: number, hands: Array<nu
                                     {
                                         Array.from(raceGroup).map((raceItem, idx) => (
                                             <Box key={idx} sx={{ height: MjImageHeight.leftRotate }} >
-                                                <MjImage mj={raceItem} direction={'left'} />
+                                                <MjImage value={raceItem} area={Area.Left} />
                                             </Box>
                                         ))
                                     }
@@ -144,7 +144,7 @@ const RightPlayer: React.FC<{ redux: PlayerReducer, take: number, hands: Array<n
                                     {
                                         Array.from(raceGroup).map((raceItem, idx) => (
                                             <Box key={idx} sx={{ height: MjImageHeight.rightRotate }} >
-                                                <MjImage mj={raceItem} direction={'right'} />
+                                                <MjImage value={raceItem} area={Area.Right} />
                                             </Box>
                                         ))
                                     }
@@ -161,14 +161,14 @@ const RightPlayer: React.FC<{ redux: PlayerReducer, take: number, hands: Array<n
                     >
                         {/* take */}
                         <Stack justifyContent={'center'} alignItems={'center'}>
-                            {take !== -1 && <MjImage mj={take} direction={'right'} />}
+                            {take !== -1 && <MjImage value={take} area={Area.Right} />}
                         </Stack>
                         {/* hands */}
                         <Stack spacing={0.1} >
                             {
                                 Array.from(hands).map((handItem, idx) => (
                                     <Box key={idx} sx={{ height: MjImageHeight.rightRotate }} >
-                                        <MjImage mj={handItem} direction={'right'} />
+                                        <MjImage value={handItem} area={Area.Right} />
                                     </Box>
                                 ))
                             }
@@ -193,13 +193,13 @@ const TopPlayer: React.FC<{ redux: PlayerReducer, take: number, hands: Array<num
                 >
                     {/* take */}
                     <Stack direction={'row'}>
-                        {take !== -1 && <MjImage mj={take} direction={'top'} />}
+                        {take !== -1 && <MjImage value={take} area={Area.Top} />}
                     </Stack>
                     {/* hands */}
                     <Stack direction={'row'} spacing={0.5} >
                         {
                             Array.from(hands).map((handItem, idx) => (
-                                <MjImage mj={handItem} direction={'top'} key={idx} />
+                                <MjImage value={handItem} area={Area.Top} key={idx} />
                             ))
                         }
                     </Stack>
@@ -210,7 +210,7 @@ const TopPlayer: React.FC<{ redux: PlayerReducer, take: number, hands: Array<num
                                 <Stack direction={'row'} key={idx} spacing={0.3}>
                                     {
                                         Array.from(raceGroup).map((raceItem, idx) => (
-                                            <MjImage mj={raceItem} direction={'top'} key={idx} />
+                                            <MjImage value={raceItem} area={Area.Top} key={idx} />
                                         ))
                                     }
                                 </Stack>

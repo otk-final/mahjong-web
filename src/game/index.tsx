@@ -118,7 +118,7 @@ const GameMainArea: React.FC<{ ctx: GameEventBus }> = ({ ctx }) => {
         <GameContext.Provider value={ctx}>
             <Grid className='App' container justifyContent={'center'}>
                 <Grid item container xs={1.5} justifyContent={'flex-start'} alignItems="center">
-                    <RankDrawer />
+                    {/* <RankDrawer /> */}
                 </Grid>
                 <Grid item container xs={9} direction={'column'} sx={{ height: '100vh', border: '1px dotted green', background: '#1f793b', borderRadius: '50px' }}>
                     <Grid item container xs={2} >
@@ -150,7 +150,7 @@ const GameMainArea: React.FC<{ ctx: GameEventBus }> = ({ ctx }) => {
                     </Grid>
                 </Grid>
                 <Grid item container xs={1.5} justifyContent={'flex-end'} alignItems="center">
-                    <ChatDrawer />
+                    {/* <ChatDrawer /> */}
                 </Grid>
             </Grid >
             <NotifyArea />

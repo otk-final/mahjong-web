@@ -16,7 +16,17 @@ export const MjImageHeight = {
 
 export interface MjExtra {
     text: string,
+    color: any,
     tile: number
+}
+
+export interface MJMode {
+    value: number
+    area: Area
+    extra?: MjExtra
+    height?: string
+    lasted?: boolean
+    forbid?: boolean
 }
 
 export const MjBottomImage: React.FC<{ mj: number, setReadyCall?: any, extra?: MjExtra }> = ({ mj, setReadyCall, extra }) => {
@@ -32,45 +42,48 @@ export const MjBottomImage: React.FC<{ mj: number, setReadyCall?: any, extra?: M
 
     return (
         <Box onClick={(e) => readyOutClick(e)} className={ready ? 'hasReady' : 'noReady'}>
-            <MjImage mj={mj} direction={'bottom'} height={MjImageHeight.bottom} extra={extra} />
+            <MjImage value={mj} area={Area.Bottom} height={MjImageHeight.bottom} extra={extra} />
         </Box >
     )
 }
 
 
+export const MjImage: React.FC<MJMode> = ({ value, area, height = '45px', lasted = false, extra }) => {
 
-
-
-export const MjImage: React.FC<{ mj: number, direction: Area | string, height?: string, lasted?: boolean, extra?: MjExtra }> = ({ mj, direction, height = '45px', lasted = false, extra }) => {
-
-    let rotate = '', defaultHeight = '35px'
-    if (direction === 'left') {
+    let rotate = '', dh = '35px'
+    if (area === Area.Left) {
         rotate = 'rotate(90deg)'
-        defaultHeight = MjImageHeight.left
-    } else if (direction === 'top') {
+        dh = MjImageHeight.left
+    } else if (area === Area.Top) {
         rotate = 'rotate(180deg)'
-        defaultHeight = MjImageHeight.top
-    } else if (direction === 'bottom') {
+        dh = MjImageHeight.top
+    } else if (area === Area.Bottom) {
         rotate = 'rotate(0deg)'
-        defaultHeight = MjImageHeight.bottom
-    } else if (direction === 'right') {
+        dh = MjImageHeight.bottom
+    } else if (area === Area.Right) {
         rotate = 'rotate(270deg)'
-        defaultHeight = MjImageHeight.right
+        dh = MjImageHeight.right
     } else {
         rotate = 'rotate(0deg)'
     }
 
     if (height) {
-        defaultHeight = height
+        dh = height
     }
 
     if (extra) {
         return (
-            <Badge badgeContent={extra.text} color={extra.text === '癞' ? 'error' : (extra.text === '鬼' ? 'warning' : 'primary')}>
-                <img src={MJImageFilter(mj)} alt='' style={{ height: defaultHeight, transform: rotate }} />
+            <Badge badgeContent={extra.text} color={extra.color}>
+                <img src={MJImageFilter(value)} alt='' style={{ height: dh, transform: rotate }} />
             </Badge>
         )
     }
 
-    return (<img src={MJImageFilter(mj)} alt='' style={{ height: defaultHeight, transform: rotate, border: lasted ? '3px solid #da5151' : '' }} />)
+    return (<img src={MJImageFilter(value)} alt=''
+        style={{
+            height: dh,
+            transform: rotate,
+            filter: value < 0 ? 'opacity(0.2)' : '',
+            border: lasted ? '3px solid #da5151' : ''
+        }} />)
 }

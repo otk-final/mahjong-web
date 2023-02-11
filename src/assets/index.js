@@ -129,7 +129,7 @@ export const MJImages = {
 
 
 export function MJImageFilter(key) {
-    return MJImages[key]
+    return MJImages[Math.abs(key)]
 }
 
 
