@@ -133,8 +133,9 @@ export class GameEventBus {
 
 
     mjExtras: Array<MjExtra> = []
-    setMjExtras(extras: Array<MjExtra>) {
+    doUpdateMjExtras(extras: Array<MjExtra>) {
         this.mjExtras = extras
+        this.extraRef.current.updateExtras(extras)
     }
 
     getMjExtra(mj: number): MjExtra | undefined {
@@ -279,10 +280,6 @@ export class PlayerReducer {
                 races[i] = tiles
             }
         }
-    }
-    doRaceMove(tile: number) {
-        const moveIdx = this.tileCollect.outs.lastIndexOf(tile)
-        if (moveIdx !== -1) { this.tileCollect.outs.splice(moveIdx, 1) }
     }
 }
 

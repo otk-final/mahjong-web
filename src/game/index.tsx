@@ -1,6 +1,6 @@
 import React, { Ref, useRef, useState, forwardRef, useImperativeHandle, useContext, useEffect } from 'react';
 import './index.css';
-import { Button, Grid, SwipeableDrawer } from "@mui/material";
+import { Button, Grid, SwipeableDrawer, Typography } from "@mui/material";
 import { GameEventBus, GameContext } from './context';
 import { PlayerContainer } from './area';
 import { CenterAreaContainer } from './area/center';
@@ -90,7 +90,7 @@ const GameMainArea: React.FC<{ ctx: GameEventBus }> = ({ ctx }) => {
             ctx.doCountdownReset(resp.data.interval)
             //剩余牌库
             ctx.doUpdateRemained(resp.data.remained)
-
+            ctx.doUpdateMjExtras(resp.data.extras)
             //加载牌
             resp.data.players.forEach((item: any) => {
                 const itemArea = FindArea(ctx.mine.idx, item.idx)
@@ -117,15 +117,12 @@ const GameMainArea: React.FC<{ ctx: GameEventBus }> = ({ ctx }) => {
     return (
         <GameContext.Provider value={ctx}>
             <Grid className='App' container justifyContent={'center'}>
-                <Grid item container xs={1.5} justifyContent={'flex-start'} alignItems="center">
-                    {/* <RankDrawer /> */}
-                </Grid>
                 <Grid item container xs={9} direction={'column'} sx={{ height: '100vh', border: '1px dotted green', background: '#1f793b', borderRadius: '50px' }}>
                     <Grid item container xs={2} >
-                        <Grid item container xs={2} spacing={2} justifyContent={'center'} alignItems={'center'}>
-
+                        <Grid item container xs={2} justifyContent={'center'} alignItems={'center'}>
+                            <Typography variant='h4' color={'red'}>{'荆州 一癞到底'}</Typography>
                         </Grid>
-                        <Grid item xs={8}>
+                        <Grid item container xs={8}>
                             <PlayerContainer ref={toperRef} direction={Area.Top} />
                         </Grid>
                         <Grid item container xs={2} justifyContent={'center'} alignItems={'center'} spacing={2}>
@@ -134,13 +131,13 @@ const GameMainArea: React.FC<{ ctx: GameEventBus }> = ({ ctx }) => {
                     </Grid>
                     <Grid item xs  >
                         <Grid container sx={{ height: '100%' }}>
-                            <Grid item xs={2.5}>
+                            <Grid item xs={2}>
                                 <PlayerContainer ref={lefterRef} direction={Area.Left} />
                             </Grid>
-                            <Grid item xs={7} justifyContent={"center"} alignItems={'center'}>
+                            <Grid item xs={8} justifyContent={"center"} alignItems={'center'}>
                                 <CenterAreaContainer ref={centerRef} />
                             </Grid>
-                            <Grid item xs={2.5}>
+                            <Grid item xs={2}>
                                 <PlayerContainer ref={righterRef} direction={Area.Right} />
                             </Grid>
                         </Grid>
@@ -148,9 +145,6 @@ const GameMainArea: React.FC<{ ctx: GameEventBus }> = ({ ctx }) => {
                     <Grid item xs={3} >
                         <PlayerContainer ref={bottomerRef} direction={Area.Bottom} />
                     </Grid>
-                </Grid>
-                <Grid item container xs={1.5} justifyContent={'flex-end'} alignItems="center">
-                    {/* <ChatDrawer /> */}
                 </Grid>
             </Grid >
             <NotifyArea />
@@ -224,11 +218,11 @@ const ExtraArea = forwardRef((props: { extras: Array<MjExtra> }, ref: Ref<any>) 
     const [stateExtras, setExtras] = useState<Array<MjExtra>>(props.extras)
 
     useImperativeHandle(ref, () => ({
-        renderExtras: (mj: Array<MjExtra>) => { setExtras(mj) }
+        updateExtras: (extras: Array<MjExtra>) => { setExtras(extras) }
     }))
 
     gameCtx.bindExtraRef(ref)
-    return (<Box>
+    return (<Grid container spacing={1}>
         {
             Array.from(stateExtras).map((mjItem, idx) => (
                 <Grid item key={idx}>
@@ -236,5 +230,5 @@ const ExtraArea = forwardRef((props: { extras: Array<MjExtra> }, ref: Ref<any>) 
                 </Grid>
             ))
         }
-    </Box>)
+    </Grid>)
 })

@@ -90,7 +90,7 @@ const UserDial: React.FC = () => {
 
   const createRoom = (event: any) => {
     var param = {
-      mode: "std", nums: 4, custom: {}
+      mode: "lai", nums: 4, custom: {}
     }
     //创建房间
     roomProxy('a').create(param).then((resp: any) => {
@@ -107,7 +107,7 @@ const UserDial: React.FC = () => {
 
   const startComputeBattle = (event: any) => {
     var param = {
-      mode: "std", nums: 4, custom: {}
+      mode: "lai", nums: 4, custom: {}
     }
     //创建房间
     roomProxy('a').compute(param).then((resp: any) => {

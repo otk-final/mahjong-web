@@ -53,9 +53,9 @@ import racePass from './effect/过.png'
 import racePut from './effect/出.png'
 import raceTake from './effect/摸.png'
 
-import raceLai from './effect/条.png'
-import raceCao from './effect/万.png'
-import raceGui from './effect/筒.png'
+import raceLai from './effect/癞.png'
+import raceCao from './effect/朝.png'
+import raceGui from './effect/鬼.png'
 
 
 import av1 from './avatar/a1.png'
@@ -68,7 +68,7 @@ export const MJRaces = {
     200: raceWin,
     201: raceDDD,
     202: raceABC,
-    
+
     203: raceEEEE,
     204: raceEEEEUpgrade,
     205: raceEEEEOwn,
@@ -80,6 +80,12 @@ export const MJRaces = {
     0: racePass,
     1: racePut,
     2: raceTake
+}
+
+export const MJExtarColors = {
+    "鬼": "error",
+    "癞": "primary",
+    "朝": "warning"
 }
 
 
@@ -137,7 +143,9 @@ export function MJRaceFilter(key) {
     return MJRaces[key]
 }
 
-// transform: rotate(90deg);
+export function MJExtarColorFilter(key){
+    return MJExtarColors[key]
+}
 
 
 export const AvatarImages = {

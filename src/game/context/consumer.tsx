@@ -12,7 +12,7 @@ export const memberJoin = (bus: GameEventBus, payload: any) => {
 
     //新玩家加入
     bus.getPlayerRef(newArea)?.current.join(newArea, payload.newPlayer)
-    
+
 }
 
 //退出房间
@@ -30,6 +30,7 @@ export const startGame = (bus: GameEventBus, payload: any) => {
         bus.getPlayerReducer(itemArea)?.setTileCollect({ hands: item.hands, races: item.races, take: -1, outs: item.outs })
     })
 
+
     //渲染当前方位
     const turnArea = FindArea(mineIdx, payload.turnIdx)
     bus.doChangeTurn(turnArea)
@@ -37,6 +38,8 @@ export const startGame = (bus: GameEventBus, payload: any) => {
     bus.doCountdownReset(payload.interval)
     //剩余牌库
     bus.doUpdateRemained(payload.remained)
+    //特殊牌
+    bus.doUpdateMjExtras(payload.extras)
 
     //非本回合
     if (mineIdx !== payload.turnIdx) { return }
@@ -109,8 +112,6 @@ export const racePlay = (bus: GameEventBus, payload: any) => {
 
     //目标
     const targetArea = FindArea(mineIdx, payload.target)
-    const targetRedux = bus.getPlayerReducer(targetArea)
-    targetRedux?.doRaceMove(payload.tile)
 
     //渲染效果
     bus.doEffect(whoArea, payload.raceType)
@@ -127,7 +128,7 @@ export const winPlay = (bus: GameEventBus, payload: any) => {
     if (mineIdx === payload.who) {
         return
     }
-    
+
     //源
     const whoRedux = bus.getPlayerReducer(whoArea)
     whoRedux?.setTileCollect({ hands: payload.tiles.hands, races: payload.tiles.races, take: -1, outs: payload.tiles.outs })

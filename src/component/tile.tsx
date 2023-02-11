@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Badge, Box } from "@mui/material"
-import { MJImageFilter } from '../assets';
+import { MJExtarColorFilter, MJExtarColors, MJImageFilter } from '../assets';
 import { Area } from '../game/context/util';
 
 export const MjImageHeight = {
@@ -15,8 +15,7 @@ export const MjImageHeight = {
 }
 
 export interface MjExtra {
-    text: string,
-    color: any,
+    name: string,
     tile: number
 }
 
@@ -72,8 +71,10 @@ export const MjImage: React.FC<MJMode> = ({ value, area, height = '45px', lasted
     }
 
     if (extra) {
+        const badgeColor: any = MJExtarColorFilter(extra.name)
+
         return (
-            <Badge badgeContent={extra.text} color={extra.color}>
+            <Badge badgeContent={extra.name} color={badgeColor} sx={{ fontSize: '20' }}>
                 <img src={MJImageFilter(value)} alt='' style={{ height: dh, transform: rotate }} />
             </Badge>
         )
