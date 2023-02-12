@@ -1,4 +1,4 @@
-import React, { useImperativeHandle, useRef, useState, forwardRef, Ref, useContext, useEffect } from "react"
+import React, { useImperativeHandle, useRef, useState, forwardRef, Ref, useContext } from "react"
 import { GameContext, GameEventBus, PlayerReducer, TileCollect } from '../context';
 import { Box, Divider, Grid, Stack } from "@mui/material";
 import { MjImage, MjImageHeight } from "../../component/tile";
@@ -8,7 +8,7 @@ import { Area } from "../context/util";
 import AddIcon from '@mui/icons-material/Add';
 
 const EmptyContainer: React.FC<{ direction: Area }> = ({ direction }) => {
-    return (<Stack sx={{ height: '100%' }} justifyContent={'center'} alignItems={'center'}>
+    return (<Stack sx={{ height: '100%', width: '100%' }} justifyContent={'center'} alignItems={'center'}>
         <AddIcon color="disabled" sx={{ fontSize: 80 }}></AddIcon>
     </Stack>)
 }

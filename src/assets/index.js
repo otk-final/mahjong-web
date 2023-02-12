@@ -64,6 +64,13 @@ import av3 from './avatar/a3.png'
 import av4 from './avatar/a4.png'
 import av5 from './avatar/a5.png'
 
+
+import stdPloy from './ploy/基础麻将.png'
+import laiYou from './ploy/一脚癞油.png'
+import laiUnique from './ploy/一癞到底.png'
+import laiGang from './ploy/红中癞子杠.png'
+import laiHuang from './ploy/癞幌.png'
+
 export const MJRaces = {
     200: raceWin,
     201: raceDDD,
@@ -143,7 +150,7 @@ export function MJRaceFilter(key) {
     return MJRaces[key]
 }
 
-export function MJExtarColorFilter(key){
+export function MJExtarColorFilter(key) {
     return MJExtarColors[key]
 }
 
@@ -158,4 +165,17 @@ export const AvatarImages = {
 
 export function AvatarRandom() {
     return AvatarImages[Math.round(Math.random() * 4)]
+}
+
+
+const gamePloy = {
+    'std': stdPloy,
+    'lai-huang': laiHuang,
+    'lai-you': laiYou,
+    'lai-unique': laiUnique,
+    'lai-gang': laiGang,
+}
+
+export function GamePloyFilter(key) {
+    return gamePloy[key]
 }

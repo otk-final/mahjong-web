@@ -1,6 +1,6 @@
 import React, { Ref, useRef, useState, forwardRef, useImperativeHandle, useContext, useEffect } from 'react';
 import './index.css';
-import { Button, Grid, SwipeableDrawer, Typography } from "@mui/material";
+import { Button, Grid, SwipeableDrawer } from "@mui/material";
 import { GameEventBus, GameContext } from './context';
 import { PlayerContainer } from './area';
 import { CenterAreaContainer } from './area/center';
@@ -14,6 +14,7 @@ import { NetConnect } from '../api/websocket';
 import { LoadingArea, LoadingBus, LoadingContext } from '../component/loading';
 import { Area, FindArea } from './context/util';
 import { NotifyArea, NotifyBus, NotifyContext } from '../component/alert';
+import { GamePloyFilter } from '../assets';
 
 export const GameMainRoute: React.FC = () => {
     const params: any = useParams()
@@ -22,6 +23,7 @@ export const GameMainRoute: React.FC = () => {
     const loadingCtx = useContext<LoadingBus>(LoadingContext)
     // 模拟数据
     const ownAuthor = FilterAuthor(params.playerId)
+
 
     useEffect(() => {
         //加入房间
@@ -33,10 +35,12 @@ export const GameMainRoute: React.FC = () => {
 
             //设置基础成员信息
             const own = resp.data.own
+            const roomId = resp.data.roomId
             const players = resp.data.players
+            const ployId = resp.data.config.mode
 
             //初始化
-            const ctx = new GameEventBus(params.roomId, 0, own)
+            const ctx = new GameEventBus(roomId, ployId, own)
             players.forEach((item: any) => {
                 ctx.setPlayer(FindArea(own.idx, item.idx), item)
             });
@@ -120,7 +124,7 @@ const GameMainArea: React.FC<{ ctx: GameEventBus }> = ({ ctx }) => {
                 <Grid item container xs={9} direction={'column'} sx={{ height: '100vh', border: '1px dotted green', background: '#1f793b', borderRadius: '50px' }}>
                     <Grid item container xs={2} >
                         <Grid item container xs={2} justifyContent={'center'} alignItems={'center'}>
-                            <Typography variant='h4' color={'red'}>{'荆州 一癞到底'}</Typography>
+                            <img src={GamePloyFilter(ctx.getGamePolyId())} alt='' style={{ height: '50px' }} />
                         </Grid>
                         <Grid item container xs={8}>
                             <PlayerContainer ref={toperRef} direction={Area.Top} />
@@ -222,7 +226,7 @@ const ExtraArea = forwardRef((props: { extras: Array<MjExtra> }, ref: Ref<any>) 
     }))
 
     gameCtx.bindExtraRef(ref)
-    return (<Grid container spacing={1}>
+    return (<Grid container spacing={1} justifyContent={'center'} alignItems={'center'} >
         {
             Array.from(stateExtras).map((mjItem, idx) => (
                 <Grid item key={idx}>

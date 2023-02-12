@@ -1,19 +1,17 @@
-import React, { Ref, forwardRef, useContext, useImperativeHandle, useRef, useState } from 'react';
+import React, { useContext, useState } from 'react';
 import './App.css';
-import { Box, Divider, FormControlLabel, IconButton, Paper, Radio, RadioGroup, SpeedDial, SpeedDialAction, SpeedDialIcon, Stack, TextField } from '@mui/material';
+import { Box, Divider, Grid, IconButton, Paper, SpeedDial, SpeedDialAction, SpeedDialIcon, Stack, TextField } from '@mui/material';
 import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt';
-import ComputerIcon from '@mui/icons-material/Computer';
-import HistoryIcon from '@mui/icons-material/History';
-import AddIcon from '@mui/icons-material/Add';
 import { useNavigate } from 'react-router-dom';
 import { roomProxy } from './api/http';
-import { NotifyArea, NotifyBus, NotifyContext } from './component/alert';
+import { NotifyArea } from './component/alert';
+import { GamePloy, GamePloyCard } from './component/ploy';
+
 
 function App() {
 
   const [roomId, setRoomId] = useState<string>('100')
   const navigator = useNavigate()
-  const mockRef = useRef()
 
   //跳转
   const submitJoin = function (event: any) {
@@ -21,14 +19,35 @@ function App() {
       return
     }
     //模拟用户
-    const mc: any = mockRef.current
-    const playId: string = mc.getCheck()
-    navigator('/game/' + roomId + "/" + playId)
+    navigator('/game/' + roomId + "/a")
   }
 
   const valueChange = function (event: any) {
     setRoomId(event.target.value)
   }
+
+  const ploys: Array<GamePloy> = [{
+    key: 'std',
+    name: '基础',
+    info: ''
+  }, {
+    key: 'lai-you',
+    name: '一脚癞油',
+    info: ''
+  }, {
+    key: 'lai-huang',
+    name: '癞幌',
+    info: ''
+  }, {
+    key: 'lai-gang',
+    name: '红中癞子杠',
+    info: ''
+  }, {
+    key: 'lai-unique',
+    name: '一癞到底',
+    info: ''
+  }]
+
   return (
     <Box sx={{ height: '100vh', bgcolor: 'aliceblue' }} justifyContent={'center'} >
       <Stack sx={{ height: '100%' }} justifyContent="center" alignItems="center" spacing={2}>
@@ -46,87 +65,19 @@ function App() {
             <ArrowRightAltIcon />
           </IconButton>
         </Paper>
-        <UserPlayer defaultPlayerId={'a'} ref={mockRef} />
+        <Grid container justifyContent="center" alignItems="center" spacing={2}>
+          {
+            Array.from(ploys).map((item: GamePloy, idx) => (
+              <Grid item key={idx}>
+                <GamePloyCard ploy={item} />
+              </Grid>
+            ))
+          }
+        </Grid>
       </Stack>
-      <UserDial />
       <NotifyArea />
     </Box>
   );
 }
-
-const UserPlayer = forwardRef((props: { defaultPlayerId: string }, ref: Ref<any>) => {
-  const [value, setValue] = React.useState<string>(props.defaultPlayerId);
-
-  const handleChange = (event: any) => {
-    setValue(event.target.value);
-  };
-
-  useImperativeHandle(ref, () => ({
-    getCheck: (): string => {
-      return value
-    }
-  }))
-
-  return (
-    <RadioGroup
-      value={value}
-      row
-      onChange={handleChange}
-    >
-      <FormControlLabel value="a" control={<Radio />} label="玩家A" />
-      <FormControlLabel value="b" control={<Radio />} label="玩家B" />
-      <FormControlLabel value="c" control={<Radio />} label="玩家C" />
-      <FormControlLabel value="d" control={<Radio />} label="玩家D" />
-    </RadioGroup>
-
-  );
-})
-
-
-const UserDial: React.FC = () => {
-  const notifyCtx = useContext<NotifyBus>(NotifyContext)
-  const navigator = useNavigate()
-
-
-  const createRoom = (event: any) => {
-    var param = {
-      mode: "lai", nums: 4, custom: {}
-    }
-    //创建房间
-    roomProxy('a').create(param).then((resp: any) => {
-      notifyCtx.success('创建成功')
-      navigator('/game/' + resp.data.roomId + "/" + resp.data.own.uid)
-    }).catch((err: any) => {
-      notifyCtx.error(err.message)
-    })
-  }
-
-  const showHistory = (event: any) => {
-
-  }
-
-  const startComputeBattle = (event: any) => {
-    var param = {
-      mode: "lai", nums: 4, custom: {}
-    }
-    //创建房间
-    roomProxy('a').compute(param).then((resp: any) => {
-      notifyCtx.success('创建成功')
-      navigator('/game/' + resp.data.roomId + "/" + resp.data.own.uid)
-    }).catch((err: any) => {
-      notifyCtx.error(err.message)
-    })
-  }
-
-
-  return (
-    <SpeedDial ariaLabel="SpeedDial basic example" sx={{ position: 'absolute', bottom: 30, right: 30 }} icon={<SpeedDialIcon />} open={true}>
-      <SpeedDialAction key={'create'} icon={<AddIcon />} tooltipTitle={'创建房间'} onClick={(e) => { createRoom(e) }} />
-      <SpeedDialAction key={'history'} icon={<HistoryIcon />} tooltipTitle={'历史记录'} onClick={(e) => { showHistory(e) }} />
-      <SpeedDialAction key={'robot'} icon={<ComputerIcon />} tooltipTitle={'人机对战'} onClick={(e) => { startComputeBattle(e) }} />
-    </SpeedDial>
-  )
-}
-
 
 export default App;
