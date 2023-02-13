@@ -20,8 +20,13 @@ export const memberExit = (bus: GameEventBus, payload: any) => {
 
 }
 
+//游戏结束
+export const gameQuit = (bus: GameEventBus, payload: any) => {
+    bus.notifyCtx?.info(payload.reason)
+}
+
 //游戏开始
-export const startGame = (bus: GameEventBus, payload: any) => {
+export const gameBegin = (bus: GameEventBus, payload: any) => {
     const mineIdx = bus.mine.idx
 
     //初始化渲染玩家手牌

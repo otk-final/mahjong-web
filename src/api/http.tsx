@@ -1,5 +1,4 @@
 import axios from 'axios'
-import { NetAuthor } from './websocket'
 
 let serverUrl = "http://localhost:7070"
 
@@ -15,8 +14,15 @@ let defaultAxios = axios.create({
 })
 
 
-let http = function (method: string, path: string, params: any, headers?: any) {
+let http = function (method: string, path: string, params: any) {
     return new Promise((resolve, reject) => {
+
+        const vs = getVisitor()
+        let headers = {}
+        if (vs) {
+            headers = {userId: vs.uid,token: vs.token}
+        }
+
         //get or ?
         var req: any = {
             url: path,
@@ -31,13 +37,10 @@ let http = function (method: string, path: string, params: any, headers?: any) {
                 resolve(res.data)
             }
         }).catch(err => {
-            reject(err)
+            reject(err.message)
         })
     })
 }
-
-
-
 
 let roomApi = {
     create: (data: any) => {
@@ -48,36 +51,23 @@ let roomApi = {
     },
     exit: (data: any) => {
         return http('post', '/room/exit', data)
+    },
+    visitor: (data: any) => {
+        return http('post', '/room/visitor', data)
+    },
+    compute: (data: any) => {
+        return http('post', '/room/compute', data)
     }
 }
 
-const memberHeader: any = {
-    'a': {
-        userId: 'a',
-        userName: encodeURIComponent('张三'),
-        token: GUID()
-    },
-    'b': {
-        userId: 'b',
-        userName: encodeURIComponent('李四'),
-        token: GUID()
-    },
-    'c': {
-        userId: 'c',
-        userName: encodeURIComponent('王五'),
-        token: GUID()
-    },
-    'd': {
-        userId: 'd',
-        userName: encodeURIComponent('赵六'),
-        token: GUID()
-    }
+export const getVisitor = function (): any | undefined {
+    const jsonText =  localStorage.getItem('visitor')
+    return JSON.parse(jsonText!)
 }
 
-export const FilterAuthor = function (uid: string): NetAuthor {
-    return memberHeader[uid]
+export const storeVisitor = function (visitor: any) {
+    localStorage.setItem('visitor', JSON.stringify(visitor))
 }
-
 
 function GUID() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -85,24 +75,6 @@ function GUID() {
             v = c === 'x' ? r : (r && 0x3 | 0x8);
         return v.toString(16);
     });
-}
-
-export const roomProxy = function (autorKey: string) {
-    const header = memberHeader[autorKey]
-    return {
-        create: (data: any) => {
-            return http('post', '/room/create', data, header)
-        },
-        join: (data: any) => {
-            return http('post', '/room/join', data, header)
-        },
-        exit: (data: any) => {
-            return http('post', '/room/exit', data, header)
-        },
-        compute: (data: any) => {
-            return http('post', '/room/compute', data, header)
-        }
-    }
 }
 
 
@@ -113,48 +85,11 @@ let gameApi = {
     },
     load: (data: any) => {
         return http('post', '/game/load', data)
+    },
+    robot: (data: any) => {
+        return http('post', '/game/robot', data)
     }
 }
-
-export const gameProxy = function (autorKey: string) {
-    const header = memberHeader[autorKey]
-    return {
-        start: (data: any) => {
-            return http('post', '/game/start', data, header)
-        },
-        load: (data: any) => {
-            return http('post', '/game/load', data, header)
-        },
-        robot:(data:any)=>{
-            return http('post', '/game/robot', data, header)
-        }
-    }
-}
-
-export const playProxy = function (autorKey: string) {
-    const header = memberHeader[autorKey]
-    return {
-        take: (data: any) => {
-            return http('post', '/play/take', data, header)
-        },
-        put: (data: any) => {
-            return http('post', '/play/put', data, header)
-        },
-        race: (data: any) => {
-            return http('post', '/play/race', data, header)
-        },
-        racePre: (data: any) => {
-            return http('post', '/play/race-pre', data, header)
-        },
-        win: (data: any) => {
-            return http('post', '/play/win', data, header)
-        },
-        ignore: (data: any) => {
-            return http('post', '/play/ignore', data, header)
-        }
-    }
-}
-
 
 let playApi = {
     take: (data: any) => {
@@ -174,6 +109,9 @@ let playApi = {
     },
     skip: (data: any) => {
         return http('post', '/play/skip', data)
+    },
+    ignore: (data: any) => {
+        return http('post', '/play/ignore', data)
     }
 }
 

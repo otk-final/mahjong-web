@@ -1,6 +1,6 @@
 import React, { Ref, useRef, useState, forwardRef, useImperativeHandle, useContext, useEffect } from 'react';
 import './index.css';
-import { Button, Grid, SwipeableDrawer } from "@mui/material";
+import { Button, Grid, Stack, SwipeableDrawer, Typography } from "@mui/material";
 import { GameEventBus, GameContext } from './context';
 import { PlayerContainer } from './area';
 import { CenterAreaContainer } from './area/center';
@@ -8,7 +8,7 @@ import { MjBottomImage, MjExtra } from '../component/tile';
 import ScoreboardIcon from '@mui/icons-material/Scoreboard';
 import ChatIcon from '@mui/icons-material/Chat';
 import { useParams } from 'react-router-dom';
-import { FilterAuthor, gameProxy, roomProxy } from '../api/http';
+import { gameApi, getVisitor, roomApi } from '../api/http';
 import { Box } from '@mui/system';
 import { NetConnect } from '../api/websocket';
 import { LoadingArea, LoadingBus, LoadingContext } from '../component/loading';
@@ -21,16 +21,21 @@ export const GameMainRoute: React.FC = () => {
     let [stateContext, setGameContext] = useState<GameEventBus>()
     //loading
     const loadingCtx = useContext<LoadingBus>(LoadingContext)
-    // 模拟数据
-    const ownAuthor = FilterAuthor(params.playerId)
-
+    const notifyCtx = useContext<NotifyBus>(NotifyContext)
 
     useEffect(() => {
+
+        const vs = getVisitor()
+        if (!vs){
+            return notifyCtx.warn("用户信息不存在")
+        }
+        loadingCtx.show()
+
         //加入房间
-        roomProxy(params.playerId).join({ roomId: params.roomId }).then((resp: any) => {
+        roomApi.join({ roomId: params.roomId }).then((resp: any) => {
 
             //长连接
-            const netConn = new NetConnect(ownAuthor)
+            const netConn = new NetConnect(vs)
             netConn.conn("ws://localhost:7070/ws/" + params.roomId)
 
             //设置基础成员信息
@@ -48,11 +53,11 @@ export const GameMainRoute: React.FC = () => {
             ctx.bindConnect(netConn)
             ctx.setBegin(resp.data.begin)
 
-
             setGameContext(ctx)
             document.title = '玩家：' + own.uname
         }).catch((err: any) => {
             loadingCtx.hide()
+            notifyCtx.error(err)
         })
     }, [])
 
@@ -86,7 +91,7 @@ const GameMainArea: React.FC<{ ctx: GameEventBus }> = ({ ctx }) => {
         }
         loadingCtx.show()
         //加载游戏数据
-        gameProxy(ctx.mine.uid).load({ roomId: ctx.roomId }).then((resp: any) => {
+        gameApi.load({ roomId: ctx.roomId }).then((resp: any) => {
             //渲染当前方位
             const turnArea = FindArea(ctx.mine.idx, resp.data.turnIdx)
             ctx.doChangeTurn(turnArea)
@@ -124,7 +129,12 @@ const GameMainArea: React.FC<{ ctx: GameEventBus }> = ({ ctx }) => {
                 <Grid item container xs={9} direction={'column'} sx={{ height: '100vh', border: '1px dotted green', background: '#1f793b', borderRadius: '50px' }}>
                     <Grid item container xs={2} >
                         <Grid item container xs={2} justifyContent={'center'} alignItems={'center'}>
-                            <img src={GamePloyFilter(ctx.getGamePolyId())} alt='' style={{ height: '50px' }} />
+                            <Stack>
+                                <img src={GamePloyFilter(ctx.getGamePolyId())} alt='' style={{ height: '50px' }} />
+                                <Typography variant="h6" color="text.secondary">
+                                    房间号：{ctx.roomId}
+                                </Typography>
+                            </Stack>
                         </Grid>
                         <Grid item container xs={8}>
                             <PlayerContainer ref={toperRef} direction={Area.Top} />

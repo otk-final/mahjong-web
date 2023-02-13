@@ -1,22 +1,18 @@
-export interface NetAuthor {
-    userId: string,
-    userName: string,
-    token: string
-}
+
 
 export class NetConnect {
 
     socketAddress!: string
-    author: NetAuthor
+    visitor!: any
     socket: any
 
-    constructor(author: NetAuthor) {
-        this.author = author
+    constructor(visitor: any) {
+        this.visitor = visitor
     }
 
 
     conn(address: string) {
-        const subp = [this.author.userId, this.author.userName, this.author.token]
+        const subp = [this.visitor.uid, this.visitor.token]
 
         //建立连接
         let socket = new WebSocket(address, subp)

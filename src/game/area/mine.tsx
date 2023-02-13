@@ -8,11 +8,9 @@ import { MJRaceFilter } from "../../assets";
 import { Area, FindArea } from "../context/util";
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import SmartToyIcon from '@mui/icons-material/SmartToy';
 import { NotifyBus, NotifyContext } from "../../component/alert";
-import { playProxy } from "../../api/http";
-
+import { gameApi, playApi } from "../../api/http";
+import { useNavigate } from 'react-router-dom';
 
 export const RaceArea = forwardRef((props: { mineRedux: PlayerReducer, submitCall: any, options: Array<number> }, ref: Ref<any>) => {
 
@@ -176,6 +174,19 @@ export const MineAreaContainer: React.FC<{ redux: PlayerReducer, take: number, h
         }
     }
 
+    const navigate = useNavigate()
+    const startGame = () => {
+        gameApi.start({ roomId: gameCtx.roomId }).then((resp) => {
+            console.info(resp)
+        }).catch((err) => {
+            notifyCtx.error(err)
+        })
+    }
+
+    const exitGame = () => {
+        navigate(-1)
+    }
+
     return (
         <Grid container direction={'column'} alignItems={'center'} sx={{ height: '100%' }}>
             <Grid item container xs={4} justifyContent={'center'} >
@@ -186,19 +197,13 @@ export const MineAreaContainer: React.FC<{ redux: PlayerReducer, take: number, h
             </Grid>
             <Grid container item xs={2} spacing={2} justifyContent={'center'} alignItems={'center'}>
                 <Grid item>
-                    <Button variant="contained" color="info" size="small" startIcon={<PlayCircleOutlineIcon />} onClick={() => { gameCtx.startGame() }} >开始游戏</Button>
-                </Grid>
-                <Grid item>
-                    <Button variant="contained" color="warning" size="small" startIcon={<VisibilityIcon />} >我要明牌</Button>
+                    <Button variant="contained" color="info" size="small" startIcon={<PlayCircleOutlineIcon />} onClick={() => { startGame() }} >开始游戏</Button>
                 </Grid>
                 <Grid item container xs={5} justifyContent={'center'} alignItems={'center'}>
                     <AvatarArea user={redux.player} />
                 </Grid>
                 <Grid item>
-                    <Button variant="contained" color="primary" size="small" startIcon={<SmartToyIcon />} onClick={(e) => { gameCtx.doRobot(true) }}>挂机托管</Button>
-                </Grid>
-                <Grid item>
-                    <Button variant="contained" startIcon={<ExitToAppIcon />} color="info" size="small" onClick={(e) => { gameCtx.exitGame() }} >退出游戏</Button>
+                    <Button variant="contained" startIcon={<ExitToAppIcon />} color="error" size="small" onClick={() => { exitGame() }} >退出游戏</Button>
                 </Grid>
             </Grid>
         </Grid>
@@ -211,7 +216,7 @@ export const MineAreaContainer: React.FC<{ redux: PlayerReducer, take: number, h
 
 function doIgnore(gameCtx: GameEventBus, redux: PlayerReducer) {
     const params = { roomId: gameCtx.roomId }
-    return playProxy(gameCtx.mine.uid).ignore(params).then((resp: any) => {
+    return playApi.ignore(params).then((resp: any) => {
         redux.getRaceCurrent().updateOptions([])
     }).catch(err => {
         gameCtx.notifyCtx?.error(err)
@@ -221,7 +226,7 @@ function doIgnore(gameCtx: GameEventBus, redux: PlayerReducer) {
 
 function doHu(gameCtx: GameEventBus, redux: PlayerReducer) {
     const params = { roomId: gameCtx.roomId }
-    playProxy(gameCtx.mine.uid).win(params).then((resp: any) => {
+    playApi.win(params).then((resp: any) => {
         redux.getRaceCurrent().updateOptions([])
 
         //移除对手牌
@@ -246,7 +251,7 @@ function doTake(gameCtx: GameEventBus, redux: PlayerReducer) {
 
 export function triggerTake(gameCtx: GameEventBus, redux: PlayerReducer, direction: number) {
     const params = { roomId: gameCtx.roomId, direction: direction }
-    playProxy(gameCtx.mine.uid).take(params).then((resp: any) => {
+    playApi.take(params).then((resp: any) => {
         //渲染页面
         redux.setTileCollect({
             hands: resp.data.hands,
@@ -270,7 +275,7 @@ export function triggerTake(gameCtx: GameEventBus, redux: PlayerReducer, directi
 export function triggerRacePre(gameCtx: GameEventBus, redux: PlayerReducer, ackId: number) {
 
     const params = { roomId: gameCtx.roomId, ackId: ackId }
-    return playProxy(gameCtx.mine.uid).racePre(params).then((resp: any) => {
+    return playApi.racePre(params).then((resp: any) => {
 
         //可用策略
         const options = resp.data.options.map((item: any) => {
@@ -285,7 +290,7 @@ export function triggerRacePre(gameCtx: GameEventBus, redux: PlayerReducer, ackI
 
 function doPut(gameCtx: GameEventBus, redux: PlayerReducer, output: Array<number>) {
     const params = { roomId: gameCtx.roomId, who: gameCtx.mine.idx, round: 0, tile: output[0] }
-    playProxy(gameCtx.mine.uid).put(params).then((resp: any) => {
+    playApi.put(params).then((resp: any) => {
 
         //渲染页面
         redux.setTileCollect({
@@ -312,7 +317,7 @@ function doRace(gameCtx: GameEventBus, redux: PlayerReducer, race: number, ready
         raceType: race,
         tiles: readys,
     }
-    playProxy(gameCtx.mine.uid).race(params).then((resp: any) => {
+    playApi.race(params).then((resp: any) => {
         //可用策略
         const options = resp.data.options.map((item: any) => {
             return item.raceType

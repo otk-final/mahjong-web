@@ -17,7 +17,7 @@ root.render(
       <BrowserRouter>
         <Routes>
           <Route path='*' element={<App />} />
-          <Route path='/game/:roomId/:playerId' element={<GameMainRoute />} />
+          <Route path='/game/:roomId' element={<GameMainRoute />} />
         </Routes>
       </BrowserRouter>
     </NotifyContext.Provider>

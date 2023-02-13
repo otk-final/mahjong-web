@@ -170,8 +170,8 @@ export function AvatarRandom() {
 
 const gamePloy = {
     'std': stdPloy,
-    'lai-huang': laiHuang,
-    'lai-you': laiYou,
+    'lai-multiple': laiHuang,
+    'lai-not': laiYou,
     'lai-unique': laiUnique,
     'lai-gang': laiGang,
 }

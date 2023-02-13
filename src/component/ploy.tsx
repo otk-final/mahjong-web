@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Button, Card, CardActions, CardContent, CardMedia, Typography } from "@mui/material";
 import { GamePloyFilter } from '../assets';
-import { roomProxy } from '../api/http';
+import { roomApi } from '../api/http';
 import { NotifyBus, NotifyContext } from './alert';
 import { useNavigate } from 'react-router-dom';
 
@@ -24,14 +24,12 @@ export const GamePloyCard: React.FC<{ ploy: GamePloy }> = ({ ploy }) => {
             mode: gamePloyKey, nums: 4, custom: {}
         }
 
-        
-
         //创建房间
-        roomProxy('a').create(param).then((resp: any) => {
+        roomApi.create(param).then((resp: any) => {
             notifyCtx.success('创建成功')
-            navigator('/game/' + resp.data.roomId + "/" + resp.data.own.uid)
+            navigator('/game/' + resp.data.roomId)
         }).catch((err: any) => {
-            notifyCtx.error(err.message)
+            notifyCtx.error(err)
         })
     }
 
@@ -41,11 +39,11 @@ export const GamePloyCard: React.FC<{ ploy: GamePloy }> = ({ ploy }) => {
             mode: gamePloyKey, nums: 4, custom: {}
         }
         //创建房间
-        roomProxy('a').compute(param).then((resp: any) => {
+        roomApi.compute(param).then((resp: any) => {
             notifyCtx.success('创建成功')
-            navigator('/game/' + resp.data.roomId + "/" + resp.data.own.uid)
+            navigator('/game/' + resp.data.roomId)
         }).catch((err: any) => {
-            notifyCtx.error(err.message)
+            notifyCtx.error(err)
         })
     }
 

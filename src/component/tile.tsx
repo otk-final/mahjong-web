@@ -1,17 +1,17 @@
 import * as React from 'react';
 import { Badge, Box } from "@mui/material"
-import { MJExtarColorFilter, MJExtarColors, MJImageFilter } from '../assets';
+import { MJExtarColorFilter, MJImageFilter } from '../assets';
 import { Area } from '../game/context/util';
 
 export const MjImageHeight = {
-    center: '55px',
+    center: '45px',
     centerRotate: '45px',
-    left: '30px',
-    leftRotate: '35px',
-    right: '30px',
-    rightRotate: '35px',
-    top: '55px',
-    bottom: '75px'
+    left: '20px',
+    leftRotate: '25px',
+    right: '20px',
+    rightRotate: '25px',
+    top: '45px',
+    bottom: '50px'
 }
 
 export interface MjExtra {
@@ -47,7 +47,7 @@ export const MjBottomImage: React.FC<{ mj: number, setReadyCall?: any, extra?: M
 }
 
 
-export const MjImage: React.FC<MJMode> = ({ value, area, height = '45px', lasted = false, extra }) => {
+export const MjImage: React.FC<MJMode> = ({ value, area, height = '35px', lasted = false, extra }) => {
 
     let rotate = '', dh = '35px'
     if (area === Area.Left) {

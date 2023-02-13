@@ -3,10 +3,11 @@ import { EmptyPlayer, Player } from '../../component/player';
 import { MjExtra } from '../../component/tile';
 import { Area } from './util';
 import { NetConnect } from '../../api/websocket';
-import { memberExit, memberJoin, putPlay, racePlay, skipPlay, startGame, takePlay, turnPlay, winPlay } from './consumer';
-import { gameProxy } from '../../api/http';
+import { gameBegin, gameQuit, memberExit, memberJoin, putPlay, racePlay, skipPlay, takePlay, turnPlay, winPlay } from './consumer';
+import { gameApi } from '../../api/http';
 import { LoadingBus } from '../../component/loading';
 import { NotifyBus } from '../../component/alert';
+
 
 
 // 游戏
@@ -111,22 +112,7 @@ export class GameEventBus {
         this.notifyCtx = ctx
     }
 
-
     begining: boolean = false
-    //开始游戏
-    startGame() {
-        gameProxy(this.mine.uid).start({ roomId: this.roomId }).then((resp) => {
-            console.info(resp)
-            this.begining = true
-        }).catch((err) => {
-
-        })
-    }
-    //退出游戏
-    exitGame() {
-        this.effectRef.current.show(Area.Left, 201)
-    }
-
     //开启状态变更
     setBegin(flag: boolean) {
         this.begining = flag
@@ -155,7 +141,7 @@ export class GameEventBus {
         //玩家退出
         conn.subscribe(101, (payload: any) => { memberExit(this, payload) })
         //游戏开始
-        conn.subscribe(102, (payload: any) => { startGame(this, payload) })
+        conn.subscribe(102, (payload: any) => { gameBegin(this, payload) })
         //摸牌
         conn.subscribe(103, (payload: any) => { takePlay(this, payload) })
         //出牌
@@ -168,21 +154,20 @@ export class GameEventBus {
         conn.subscribe(107, (payload: any) => { skipPlay(this, payload) })
         //回合
         conn.subscribe(108, (payload: any) => { turnPlay(this, payload) })
+        //结束
+        conn.subscribe(109, (payload: any) => { gameQuit(this, payload) })
     }
 
     //挂机
     doRobot(enable: boolean) {
         this.loadingCtx?.show()
-        gameProxy(this.mine.uid).robot({ roomId: this.roomId, open: enable, level: 1 }).then((resp: any) => {
+        gameApi.robot({ roomId: this.roomId, open: enable, level: 1 }).then((resp: any) => {
             this.notifyCtx?.success('挂机中')
         }).catch(err => {
             this.notifyCtx?.error(err)
         })
     }
 }
-
-export interface AckParameter { ackId: number, who: number, tile: number }
-
 
 export interface TileCollect {
     outs: Array<number>
