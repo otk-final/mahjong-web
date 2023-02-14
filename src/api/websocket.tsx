@@ -1,21 +1,24 @@
 
 
+const wsAddr = "ws://localhost:7070/ws/"
+
 export class NetConnect {
 
-    socketAddress!: string
     visitor!: any
     socket: any
+    roomId:string
 
-    constructor(visitor: any) {
+    constructor(roomId:string, visitor: any) {
+        this.roomId = roomId
         this.visitor = visitor
     }
 
 
-    conn(address: string) {
+    conn() {
         const subp = [this.visitor.uid, this.visitor.token]
 
         //建立连接
-        let socket = new WebSocket(address, subp)
+        let socket = new WebSocket(wsAddr + this.roomId, subp)
         socket.onmessage = (event: any) => {
             const serverEvent = JSON.parse(event.data)
             console.info(serverEvent.eventName, serverEvent.payload)
@@ -34,7 +37,6 @@ export class NetConnect {
             if (this.callClose) this.callClose(event)
         }
 
-        this.socketAddress = address
         this.socket = socket
     }
 
@@ -80,7 +82,7 @@ export class NetConnect {
         if (this.retryTimer) clearInterval(this.retryTimer)
         const that = this
         this.retryTimer = setTimeout(() => {
-            that.conn(that.socketAddress)
+            that.conn()
         }, 3000)
     }
 

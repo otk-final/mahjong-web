@@ -35,8 +35,8 @@ export const GameMainRoute: React.FC = () => {
         roomApi.join({ roomId: params.roomId }).then((resp: any) => {
 
             //长连接
-            const netConn = new NetConnect(vs)
-            netConn.conn("ws://localhost:7070/ws/" + params.roomId)
+            const netConn = new NetConnect(params.roomId,vs)
+            netConn.conn()
 
             //设置基础成员信息
             const own = resp.data.own

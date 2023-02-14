@@ -86,7 +86,7 @@ export const putPlay = (bus: GameEventBus, payload: any) => {
     const targetRedux = bus.getPlayerReducer(targetArea)
 
     bus.doOutputAndLasted(targetArea, payload.tile)
-    targetRedux?.doPut(payload.tile)
+    targetRedux?.doPut(payload.tile,payload.hands)
 
     //触发判定
     setTimeout(() => {
@@ -113,7 +113,7 @@ export const racePlay = (bus: GameEventBus, payload: any) => {
 
     //源
     const whoRedux = bus.getPlayerReducer(whoArea)
-    whoRedux?.doRace(payload.raceType, payload.tiles)
+    whoRedux?.doRace(payload.raceType, payload.tiles,payload.hands)
 
     //目标
     const targetArea = FindArea(mineIdx, payload.target)

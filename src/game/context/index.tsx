@@ -233,11 +233,12 @@ export class PlayerReducer {
         this.outLasted = ok
     }
     //出牌
-    doPut(tile: number) {
+    doPut(tile: number,hands:Array<number>) {
         this.tileCollect.outs.push(tile)
-
-        //聚合 hands 和 take
+        
+        this.tileCollect.hands = hands
         this.tileCollect.take = -1
+        
         this.getTileCurrent().updateTileCollect(this.tileCollect)
     }
     //摸牌
@@ -245,6 +246,7 @@ export class PlayerReducer {
         this.tileCollect.take = tile
         this.getTileCurrent().updateTileCollect(this.tileCollect)
     }
+    
     //持牌
     doHands(tiles: Array<number>) {
         tiles.sort((a, b) => a - b)
@@ -252,13 +254,14 @@ export class PlayerReducer {
         this.getTileCurrent().updateTileCollect(this.tileCollect)
     }
     //判定
-    doRace(race: number, tiles: Array<number>) {
+    doRace(race: number, tiles: Array<number>, hands: Array<number>) {
         //自杠 覆盖
         if (race === 204) {
             this.replaceEEEEUpgradeRace(tiles)
         } else {
             this.tileCollect.races.push(tiles)
         }
+        this.tileCollect.hands = hands
         this.getTileCurrent().updateTileCollect(this.tileCollect)
     }
     replaceEEEEUpgradeRace(tiles: Array<number>) {
