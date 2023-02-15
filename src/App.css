@@ -1,5 +1,7 @@
 .App {
-  text-align: center;
+  background-image: url('./assets/effect/背景.jpg');
+  background-size:cover;
+  background-repeat: round;
 }
 
 .App-logo {

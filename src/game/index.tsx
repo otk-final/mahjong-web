@@ -125,7 +125,7 @@ const GameMainArea: React.FC<{ ctx: GameEventBus }> = ({ ctx }) => {
     }, [])
     return (
         <GameContext.Provider value={ctx}>
-            <Grid className='App' container justifyContent={'center'}>
+            <Grid container justifyContent={'center'}>
                 <Grid item container xs={9} direction={'column'} sx={{ height: '100vh', border: '1px dotted green', background: '#1f793b', borderRadius: '50px' }}>
                     <Grid item container xs={2} >
                         <Grid item container xs={2} justifyContent={'center'} alignItems={'center'}>

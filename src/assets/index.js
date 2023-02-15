@@ -50,12 +50,11 @@ import raceABC from './effect/吃.png'
 import raceWin from './effect/胡.png'
 
 import racePass from './effect/过.png'
-import racePut from './effect/出.png'
-import raceTake from './effect/摸.png'
+import racePut from './effect/出.jpg'
 
-import raceLai from './effect/癞.png'
-import raceCao from './effect/朝.png'
-import raceGui from './effect/鬼.png'
+import raceLai from './effect/癞.jpg'
+import raceCao from './effect/朝.jpg'
+import raceGui from './effect/鬼.jpg'
 
 
 import av1 from './avatar/a1.png'
@@ -70,6 +69,11 @@ import laiYou from './ploy/一脚癞油.png'
 import laiUnique from './ploy/一癞到底.png'
 import laiGang from './ploy/红中癞子杠.png'
 import laiHuang from './ploy/癞幌.png'
+
+
+import tableBackgroud from './effect/背景.jpg'
+
+export default tableBackgroud
 
 export const MJRaces = {
     200: raceWin,
@@ -86,7 +90,6 @@ export const MJRaces = {
 
     0: racePass,
     1: racePut,
-    2: raceTake
 }
 
 export const MJExtarColors = {

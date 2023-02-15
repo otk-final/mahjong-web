@@ -138,7 +138,8 @@ export const MineAreaContainer: React.FC<{ redux: PlayerReducer, take: number, h
     const notifyCtx = useContext<NotifyBus>(NotifyContext)
 
 
-    // const mineOptions = [200, 201, 202, 203, 204, 205, 206, 0, 1, 2]
+    // const mineOptions = [200, 201, 202, 203, 204, 205, 206, 207, 208, 0, 1]
+
     const mineOptions = new Array<number>()
 
     //牌库状态
@@ -182,7 +183,7 @@ export const MineAreaContainer: React.FC<{ redux: PlayerReducer, take: number, h
             return notifyCtx.warn("当前游戏已开始")
         }
         gameApi.start({ roomId: gameCtx.roomId }).then((resp) => {
-            console.info(resp)
+            notifyCtx.success("游戏已开始")
         }).catch((err) => {
             notifyCtx.error(err)
         })
@@ -209,7 +210,7 @@ export const MineAreaContainer: React.FC<{ redux: PlayerReducer, take: number, h
                 <Grid item>
                     {/* 庄家开始游戏 */}
                     {gameCtx.mine.idx === 0 && <Button variant="contained" color="info" size="small" startIcon={<PlayCircleOutlineIcon />} onClick={() => { startGame() }} >开始游戏</Button>}
-                    {gameCtx.mine.idx !== 0 && <Button variant="contained" color="info" size="small"  disabled startIcon={<PlayCircleOutlineIcon />}  > {gameCtx.begining ? '游戏已开始' : '待庄家开始游戏'}</Button>}
+                    {gameCtx.mine.idx !== 0 && <Button variant="contained" color="info" size="small" disabled startIcon={<PlayCircleOutlineIcon />}  > {gameCtx.begining ? '游戏已开始' : '待庄家开始游戏'}</Button>}
                 </Grid>
                 <Grid item container xs={5} justifyContent={'center'} alignItems={'center'}>
                     <AvatarArea user={redux.player} />

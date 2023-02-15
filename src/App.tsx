@@ -63,34 +63,36 @@ function App() {
   }]
 
   return (
-    <Box sx={{ height: '100vh', bgcolor: 'aliceblue' }} justifyContent={'center'} >
-      <Stack sx={{ height: '100%' }} justifyContent="center" alignItems="center" spacing={2}>
-        <Paper elevation={1} sx={{ p: '2px 4px', display: 'flex', alignItems: 'center' }}>
-          <TextField label="请输入游戏房间号"
-            variant="standard"
-            color="primary"
-            sx={{ width: '700px' }}
-            value={stateRoomId}
-            onChange={roomIdChange}
-            autoFocus
-            focused />
-          <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
-          <IconButton color="primary" sx={{ p: '10px' }} aria-label="directions" onClick={(e) => joinRoom(e)}>
-            <ArrowRightAltIcon />
-          </IconButton>
-        </Paper>
-        <Grid container justifyContent="center" alignItems="center" spacing={2}>
-          {
-            Array.from(ploys).map((item: GamePloy, idx) => (
-              <Grid item key={idx}>
-                <GamePloyCard ploy={item} />
-              </Grid>
-            ))
-          }
-        </Grid>
-      </Stack>
-      <NotifyArea />
-    </Box>
+    <div>
+      <Box sx={{ height: '100vh', bgcolor: 'aliceblue' }} justifyContent={'center'} className='App'>
+        <Stack sx={{ height: '100%' }} justifyContent="center" alignItems="center" spacing={2}>
+          <Paper elevation={1} sx={{ p: '2px 4px', display: 'flex', alignItems: 'center' }}>
+            <TextField label="请输入游戏房间号"
+              variant="standard"
+              color="primary"
+              sx={{ width: '700px' }}
+              value={stateRoomId}
+              onChange={roomIdChange}
+              autoFocus
+              focused />
+            <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
+            <IconButton color="primary" sx={{ p: '10px' }} aria-label="directions" onClick={(e) => joinRoom(e)}>
+              <ArrowRightAltIcon />
+            </IconButton>
+          </Paper>
+          <Grid container justifyContent="center" alignItems="center" spacing={2}>
+            {
+              Array.from(ploys).map((item: GamePloy, idx) => (
+                <Grid item key={idx}>
+                  <GamePloyCard ploy={item} />
+                </Grid>
+              ))
+            }
+          </Grid>
+        </Stack>
+        <NotifyArea />
+      </Box>
+    </div>
   );
 }
 
