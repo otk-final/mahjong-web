@@ -9,7 +9,7 @@ import { Area, FindArea } from "../context/util";
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 import { NotifyBus, NotifyContext } from "../../component/alert";
-import { gameApi, playApi } from "../../api/http";
+import { gameApi, playApi, roomApi } from "../../api/http";
 import { useNavigate } from 'react-router-dom';
 
 export const RaceArea = forwardRef((props: { mineRedux: PlayerReducer, submitCall: any, options: Array<number> }, ref: Ref<any>) => {
@@ -53,8 +53,8 @@ export const TileArea = forwardRef((props: { mineRedux: PlayerReducer, take: num
 
 
     const gameCtx = useContext<GameEventBus>(GameContext)
-    let [stateReady, setReady] = React.useState<Array<number>>([])
-    let [stateTile, setTile] = useState<TileCollect>(props.mineRedux.getTileCollect())
+    let [stateReady, setReady] = useState<Array<number>>([])
+    let [stateTileCollect, setTileCollect] = useState<TileCollect>(props.mineRedux.getTileCollect())
 
     // 选择
     let selectReady = (mj: number, ok: boolean) => {
@@ -91,8 +91,8 @@ export const TileArea = forwardRef((props: { mineRedux: PlayerReducer, take: num
             return stateReady.slice()
         },
         updateTileCollect(tile: TileCollect) {
-            setTile(tile)
-            removeReadyCss()
+            setTileCollect(tile)
+            return removeReadyCss()
         }
     }))
 
@@ -107,7 +107,7 @@ export const TileArea = forwardRef((props: { mineRedux: PlayerReducer, take: num
         >
             <Stack direction={'row'} justifyContent={'center'} alignItems={'center'} spacing={1}>
                 {
-                    Array.from(stateTile.races).map((raceGroup, idx) => (
+                    Array.from(stateTileCollect.races).map((raceGroup, idx) => (
                         <Stack direction={'row'} justifyContent={'center'} alignItems={'center'} key={idx}>
                             {
                                 Array.from(raceGroup).map((raceItem, idx) => (
@@ -120,13 +120,13 @@ export const TileArea = forwardRef((props: { mineRedux: PlayerReducer, take: num
             </Stack>
             <Stack direction={'row'} justifyContent={'center'} alignItems={'center'} spacing={0.5} ref={handRef}>
                 {
-                    Array.from(stateTile.hands).map((handItem, idx) => (
-                        <MjBottomImage mj={handItem} key={idx} setReadyCall={selectReady} extra={gameCtx.getMjExtra(handItem)} />
+                    Array.from(stateTileCollect.hands).map((handItem, idx) => (
+                        <MjBottomImage mj={handItem} key={idx} readyClick={selectReady} extra={gameCtx.getMjExtra(handItem)} />
                     ))
                 }
             </Stack>
             <Stack direction={'row'} justifyContent={'center'} alignItems={'center'}>
-                {stateTile.take !== -1 && <MjBottomImage mj={stateTile.take} setReadyCall={selectReady} extra={gameCtx.getMjExtra(stateTile.take)} />}
+                {stateTileCollect.take !== -1 && <MjBottomImage mj={stateTileCollect.take} readyClick={selectReady} extra={gameCtx.getMjExtra(stateTileCollect.take)} />}
             </Stack>
         </Stack>
     )
@@ -175,7 +175,12 @@ export const MineAreaContainer: React.FC<{ redux: PlayerReducer, take: number, h
     }
 
     const navigate = useNavigate()
+
+    //开始
     const startGame = () => {
+        if (gameCtx.begining) {
+            return notifyCtx.warn("当前游戏已开始")
+        }
         gameApi.start({ roomId: gameCtx.roomId }).then((resp) => {
             console.info(resp)
         }).catch((err) => {
@@ -183,8 +188,13 @@ export const MineAreaContainer: React.FC<{ redux: PlayerReducer, take: number, h
         })
     }
 
+    //退出
     const exitGame = () => {
-        navigate(-1)
+        roomApi.exit({ roomId: gameCtx.roomId }).then((resp) => {
+            navigate(-1)
+        }).catch(err => {
+            notifyCtx.error(err)
+        })
     }
 
     return (
@@ -197,7 +207,9 @@ export const MineAreaContainer: React.FC<{ redux: PlayerReducer, take: number, h
             </Grid>
             <Grid container item xs={2} spacing={2} justifyContent={'center'} alignItems={'center'}>
                 <Grid item>
-                    <Button variant="contained" color="info" size="small" startIcon={<PlayCircleOutlineIcon />} onClick={() => { startGame() }} >开始游戏</Button>
+                    {/* 庄家开始游戏 */}
+                    {gameCtx.mine.idx === 0 && <Button variant="contained" color="info" size="small" startIcon={<PlayCircleOutlineIcon />} onClick={() => { startGame() }} >开始游戏</Button>}
+                    {gameCtx.mine.idx !== 0 && <Button variant="contained" color="info" size="small"  disabled startIcon={<PlayCircleOutlineIcon />}  > {gameCtx.begining ? '游戏已开始' : '待庄家开始游戏'}</Button>}
                 </Grid>
                 <Grid item container xs={5} justifyContent={'center'} alignItems={'center'}>
                     <AvatarArea user={redux.player} />

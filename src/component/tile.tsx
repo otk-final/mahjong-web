@@ -28,19 +28,19 @@ export interface MJMode {
     forbid?: boolean
 }
 
-export const MjBottomImage: React.FC<{ mj: number, setReadyCall?: any, extra?: MjExtra }> = ({ mj, setReadyCall, extra }) => {
-    const [ready, setReady] = React.useState<boolean>(false)
+export const MjBottomImage: React.FC<{ mj: number, readyClick?: any, extra?: MjExtra }> = ({ mj, readyClick, extra }) => {
+    const [stateReady, setReady] = React.useState<boolean>(false)
     const readyOutClick = (e: any) => {
-        if (!setReadyCall) {
+        if (!readyClick) {
             return
         }
-        setReady(!ready)
-        //回调
-        return setReadyCall!(mj, !ready)
+        const hasReady = !stateReady
+        setReady(hasReady)
+        return readyClick(mj, hasReady)
     }
 
     return (
-        <Box onClick={(e) => readyOutClick(e)} className={ready ? 'hasReady' : 'noReady'}>
+        <Box onClick={(e) => readyOutClick(e)} className={stateReady ? 'hasReady' : 'noReady'}>
             <MjImage value={mj} area={Area.Bottom} height={MjImageHeight.bottom} extra={extra} />
         </Box >
     )
