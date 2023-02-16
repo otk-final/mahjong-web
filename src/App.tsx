@@ -1,12 +1,13 @@
 import React, { useContext, useEffect, useState } from 'react';
 import './App.css';
-import { Box, Divider, Grid, IconButton, Paper, Stack, TextField } from '@mui/material';
+import { Box, Divider, Grid, IconButton, Link, Paper, Stack, TextField, Typography } from '@mui/material';
 import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt';
 import { useNavigate } from 'react-router-dom';
 import { getVisitor, roomApi, storeVisitor } from './api/http';
 import { NotifyArea, NotifyBus, NotifyContext } from './component/alert';
 import { GamePloy, GamePloyCard } from './component/ploy';
 
+const sourceCode = "https://github.com/otk-final/mahjong"
 
 function App() {
 
@@ -64,7 +65,7 @@ function App() {
 
   return (
     <div>
-      <Box sx={{ height: '100vh', bgcolor: 'aliceblue' }} justifyContent={'center'} className='App'>
+      <Box sx={{ height: '100vh', bgcolor: 'aliceblue' }} justifyContent={'center'}>
         <Stack sx={{ height: '100%' }} justifyContent="center" alignItems="center" spacing={2}>
           <Paper elevation={1} sx={{ p: '2px 4px', display: 'flex', alignItems: 'center' }}>
             <TextField label="请输入游戏房间号"
@@ -89,8 +90,12 @@ function App() {
               ))
             }
           </Grid>
+          <Stack>
+            <Typography variant={"subtitle2"}>源码：<Link href={sourceCode} underline={'none'}>{sourceCode}</Link></Typography>
+          </Stack>
         </Stack>
         <NotifyArea />
+        
       </Box>
     </div>
   );
