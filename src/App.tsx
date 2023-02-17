@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { getVisitor, roomApi, storeVisitor } from './api/http';
 import { NotifyArea, NotifyBus, NotifyContext } from './component/alert';
 import { GamePloy, GamePloyCard } from './component/ploy';
+import GitHubIcon from '@mui/icons-material/GitHub';
 
 const sourceCode = "https://github.com/otk-final/mahjong"
 
@@ -91,11 +92,18 @@ function App() {
             }
           </Grid>
           <Stack>
-            <Typography variant={"subtitle2"}>源码：<Link href={sourceCode} underline={'none'}>{sourceCode}</Link></Typography>
+            <Grid container spacing={1}>
+              <Grid item>
+                <GitHubIcon fontSize="small" />
+              </Grid>
+              <Grid item>
+                <Link href={sourceCode} underline={'none'} fontSize="small">{sourceCode}</Link>
+              </Grid>
+            </Grid>
           </Stack>
         </Stack>
         <NotifyArea />
-        
+
       </Box>
     </div>
   );
