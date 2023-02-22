@@ -1,46 +1,37 @@
-# Getting Started with Create React App
+---
+typora-root-url: https://github.com/otk-final/mahjong-web/images
+---
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# 麻将-web版
 
-## Available Scripts
+> 无需任何授权登陆
+>
+> [^注意]: 不支持浏览器窗口多开
 
-In the project directory, you can run:
+------
 
-### `npm start`
+#### 服务端源码：`https://github.com/otk-final/mahjong`
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+![WechatIMG207](/WechatIMG207.png)
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+### 游戏界面
 
-### `npm test`
+##### ![WechatIMG209](/WechatIMG209.png)
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+![WechatIMG210](/WechatIMG210.png)
 
-### `npm run build`
+![WechatIMG211](/WechatIMG211.png)
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+![WechatIMG212](/WechatIMG212.png)
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### 游戏策略
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+#### 好友对战
 
-### `npm run eject`
+> ##### 创建房间后，其他人根据房间号从主页面进入，4个玩家到齐后由房主开启游戏
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+![WechatIMG213](/WechatIMG213.png)
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+#### 人机对战
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+![WechatIMG208](/WechatIMG208.png)
